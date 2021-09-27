@@ -1,0 +1,30 @@
+image: haskell:8
+
+variables:
+  STACK_ROOT: "${CI_PROJECT_DIR}/.stack"
+  STACK_OPTS: "--system-ghc" # My Makefile uses this to pass options to stack
+
+cache:
+  paths:
+    - .stack
+    - .stack-work
+    - target
+
+before_script:
+  - apt-get update
+  - apt-get install make xz-utils
+
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - make setup
+    - make build
+
+unit-test:
+  stage: test
+  script:
+    - make test-unit
