@@ -1,0 +1,181 @@
+
+==================== Raw Cmm ====================
+
+[]
+
+
+==================== Raw Cmm ====================
+
+[section ""cstring" . $trModule1_rHj_bytes" {
+     $trModule1_rHj_bytes:
+         I8[] "main"
+ }]
+
+
+==================== Raw Cmm ====================
+
+[section ""data" . $trModule2_rHp_closure" {
+     $trModule2_rHp_closure:
+         const TrNameS_con_info;
+         const $trModule1_rHj_bytes;
+ }]
+
+
+==================== Raw Cmm ====================
+
+[section ""cstring" . $trModule3_rHq_bytes" {
+     $trModule3_rHq_bytes:
+         I8[] "Main"
+ }]
+
+
+==================== Raw Cmm ====================
+
+[section ""data" . $trModule4_rHr_closure" {
+     $trModule4_rHr_closure:
+         const TrNameS_con_info;
+         const $trModule3_rHq_bytes;
+ }]
+
+
+==================== Raw Cmm ====================
+
+[section ""data" . $trModule_closure" {
+     $trModule_closure:
+         const Module_con_info;
+         const $trModule2_rHp_closure+1;
+         const $trModule4_rHr_closure+1;
+         const 3;
+ }]
+
+
+==================== Raw Cmm ====================
+
+[main_entry() { //  [R1]
+         { [(cIp,
+             main_info:
+                 const 0;
+                 const 21 :: W32;
+                 const $fMonadIO_closure-main_info;)]
+         }
+     {offset
+       cIp:
+           _rg9::P64 = R1;
+           if ((Sp + 8) - 40 < SpLim) (likely: False) goto cIq; else goto cIr;
+       cIq:
+           R1 = _rg9::P64;
+           call (stg_gc_enter_1)(R1) args: 8, res: 0, upd: 8;
+       cIr:
+           (_cIm::I64) = call "ccall" arg hints:  [PtrHint,
+                                                   PtrHint]  result hints:  [PtrHint] newCAF(BaseReg, _rg9::P64);
+           if (_cIm::I64 == 0) goto cIo; else goto cIn;
+       cIo:
+           call (I64[_rg9::P64])() args: 8, res: 0, upd: 8;
+       cIn:
+           I64[Sp - 16] = stg_bh_upd_frame_info;
+           I64[Sp - 8] = _cIm::I64;
+           R2 = $fMonadIO_closure;
+           I64[Sp - 32] = stg_ap_p_info;
+           P64[Sp - 24] = ()_closure+1;
+           Sp = Sp - 32;
+           call return_info(R2) args: 40, res: 0, upd: 24;
+     }
+ },
+ section ""data" . main_closure" {
+     main_closure:
+         const main_info;
+         const 0;
+         const 0;
+         const 0;
+ }]
+
+
+==================== Raw Cmm ====================
+
+[section ""data" . _uIG_srt" {
+     _uIG_srt:
+         const stg_SRT_2_info;
+         const runMainIO_closure;
+         const main_closure;
+         const 0;
+ },
+ main_entry() { //  [R1]
+         { [(cID,
+             main_info:
+                 const 0;
+                 const 21 :: W32;
+                 const _uIG_srt-main_info;)]
+         }
+     {offset
+       cID:
+           _01D::P64 = R1;
+           if ((Sp + 8) - 24 < SpLim) (likely: False) goto cIE; else goto cIF;
+       cIE:
+           R1 = _01D::P64;
+           call (stg_gc_enter_1)(R1) args: 8, res: 0, upd: 8;
+       cIF:
+           (_cIA::I64) = call "ccall" arg hints:  [PtrHint,
+                                                   PtrHint]  result hints:  [PtrHint] newCAF(BaseReg, _01D::P64);
+           if (_cIA::I64 == 0) goto cIC; else goto cIB;
+       cIC:
+           call (I64[_01D::P64])() args: 8, res: 0, upd: 8;
+       cIB:
+           I64[Sp - 16] = stg_bh_upd_frame_info;
+           I64[Sp - 8] = _cIA::I64;
+           R2 = main_closure;
+           R1 = runMainIO_closure;
+           Sp = Sp - 16;
+           call stg_ap_p_fast(R2, R1) args: 24, res: 0, upd: 24;
+     }
+ },
+ section ""data" . main_closure" {
+     main_closure:
+         const main_info;
+         const 0;
+         const 0;
+         const 0;
+ }]
+
+
+==================== Raw Cmm ====================
+
+[addOne_entry() { //  [R2]
+         { [(cIS,
+             addOne_info:
+                 const 4294967301;
+                 const 0;
+                 const 14 :: W32;
+                 const $fNumInteger_closure-addOne_info;)]
+         }
+     {offset
+       cIS:
+           _sI7::P64 = R2;
+           if ((Sp + 8) - 32 < SpLim) (likely: False) goto cIT; else goto cIU;
+       cIU:
+           Hp = Hp + 16;
+           if (Hp > HpLim) (likely: False) goto cIW; else goto cIV;
+       cIW:
+           HpAlloc = 16;
+           goto cIT;
+       cIT:
+           R2 = _sI7::P64;
+           R1 = addOne_closure;
+           call (stg_gc_fun)(R2, R1) args: 8, res: 0, upd: 8;
+       cIV:
+           I64[Hp - 8] = S#_con_info;
+           I64[Hp] = 1;
+           _cIR::P64 = Hp - 7;
+           R2 = $fNumInteger_closure;
+           I64[Sp - 24] = stg_ap_pp_info;
+           P64[Sp - 16] = _sI7::P64;
+           P64[Sp - 8] = _cIR::P64;
+           Sp = Sp - 24;
+           call +_info(R2) args: 32, res: 0, upd: 8;
+     }
+ },
+ section ""data" . addOne_closure" {
+     addOne_closure:
+         const addOne_info;
+         const 0;
+ }]
+

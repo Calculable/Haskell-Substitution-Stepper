@@ -1,0 +1,30 @@
+
+==================== Desugar (before optimization) ====================
+
+Result size of Desugar (before optimization)
+  = {terms: 25, types: 18, coercions: 0, joins: 0/0}
+
+Rec {
+-- RHS size: {terms: 1, types: 0, coercions: 0, joins: 0/0}
+$dNum_aG6 = $dNum_aG2
+
+-- RHS size: {terms: 1, types: 0, coercions: 0, joins: 0/0}
+$dNum_aG2 = $fNumInteger
+
+-- RHS size: {terms: 1, types: 0, coercions: 0, joins: 0/0}
+$dMonad_aGd = $fMonadIO
+
+-- RHS size: {terms: 5, types: 0, coercions: 0, joins: 0/0}
+$trModule = Module (TrNameS "main"#) (TrNameS "Main"#)
+
+-- RHS size: {terms: 5, types: 2, coercions: 0, joins: 0/0}
+addOne = \ x_ayz -> + $dNum_aG2 x_ayz 1
+
+-- RHS size: {terms: 3, types: 2, coercions: 0, joins: 0/0}
+main = return $dMonad_aGd ()
+
+-- RHS size: {terms: 2, types: 1, coercions: 0, joins: 0/0}
+main = runMainIO main
+end Rec }
+
+

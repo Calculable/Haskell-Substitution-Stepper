@@ -1,0 +1,277 @@
+
+==================== Typechecker ====================
+
+{Bag(Located (HsBind Var)):
+ [({ <no location info> }
+   (VarBind
+    (NoExtField)
+    {Var: $trModule}
+    ({ <no location info> }
+     (HsApp
+      (NoExtField)
+      ({ <no location info> }
+       (HsApp
+        (NoExtField)
+        ({ <no location info> }
+         (HsConLikeOut
+          (NoExtField)
+          ({abstract:ConLike})))
+        ({ <no location info> }
+         (HsPar
+          (NoExtField)
+          ({ <no location info> }
+           (HsApp
+            (NoExtField)
+            ({ <no location info> }
+             (HsConLikeOut
+              (NoExtField)
+              ({abstract:ConLike})))
+            ({ <no location info> }
+             (HsLit
+              (NoExtField)
+              (HsStringPrim
+               (NoSourceText)
+               "main")))))))))
+      ({ <no location info> }
+       (HsPar
+        (NoExtField)
+        ({ <no location info> }
+         (HsApp
+          (NoExtField)
+          ({ <no location info> }
+           (HsConLikeOut
+            (NoExtField)
+            ({abstract:ConLike})))
+          ({ <no location info> }
+           (HsLit
+            (NoExtField)
+            (HsStringPrim
+             (NoSourceText)
+             "Main")))))))))
+    (False)))
+ ,({ Main.hs:7:1-16 }
+   (AbsBinds
+    (NoExtField)
+    []
+    []
+    [(ABE
+      (NoExtField)
+      {Var: addOne}
+      {Var: addOne_aFY}
+      (WpHole)
+      (SpecPrags
+       []))]
+    [({abstract:TcEvBinds})]
+    {Bag(Located (HsBind Var)):
+     [({ Main.hs:7:1-16 }
+       (FunBind
+        {NameSet:
+         []}
+        ({ Main.hs:7:1-6 }
+         {Var: addOne_aFY})
+        (MG
+         (MatchGroupTc
+          [(TyConApp
+            ({abstract:TyCon})
+            [])]
+          (TyConApp
+           ({abstract:TyCon})
+           []))
+         ({ Main.hs:7:1-16 }
+          [({ Main.hs:7:1-16 }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ Main.hs:7:1-6 }
+               {Name: addOne_aFY})
+              (Prefix)
+              (NoSrcStrict))
+             [({ Main.hs:7:8 }
+               (VarPat
+                (NoExtField)
+                ({ Main.hs:7:8 }
+                 {Var: x_ayz})))]
+             (GRHSs
+              (NoExtField)
+              [({ Main.hs:7:10-16 }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ Main.hs:7:12-16 }
+                  (OpApp
+                   {Fixity: infixl 6}
+                   ({ Main.hs:7:12 }
+                    (HsVar
+                     (NoExtField)
+                     ({ <no location info> }
+                      {Var: x_ayz})))
+                   ({ Main.hs:7:14 }
+                    (HsWrap
+                     (NoExtField)
+                     (WpCompose
+                      (WpEvApp
+                       (EvExpr
+                        (Var
+                         {Var: $dNum_aG2})))
+                      (WpTyApp
+                       (TyConApp
+                        ({abstract:TyCon})
+                        [])))
+                     (HsVar
+                      (NoExtField)
+                      ({ <no location info> }
+                       {Var: +}))))
+                   ({ Main.hs:7:16 }
+                    (HsOverLit
+                     (NoExtField)
+                     (OverLit
+                      (OverLitTc
+                       (False)
+                       (TyConApp
+                        ({abstract:TyCon})
+                        []))
+                      (HsIntegral
+                       (IL
+                        (SourceText
+                         "1")
+                        (False)
+                        (1)))
+                      (HsApp
+                       (NoExtField)
+                       ({ <no location info> }
+                        (HsWrap
+                         (NoExtField)
+                         (WpCompose
+                          (WpEvApp
+                           (EvExpr
+                            (Var
+                             {Var: $dNum_aG6})))
+                          (WpTyApp
+                           (TyConApp
+                            ({abstract:TyCon})
+                            [])))
+                         (HsVar
+                          (NoExtField)
+                          ({ <no location info> }
+                           {Var: fromInteger}))))
+                       ({ <no location info> }
+                        (HsLit
+                         (NoExtField)
+                         (HsInteger
+                          (SourceText
+                           "1")
+                          (1)
+                          (TyConApp
+                           ({abstract:TyCon})
+                           []))))))))))))]
+              ({ <no location info> }
+               (EmptyLocalBinds
+                (NoExtField))))))])
+         (FromSource))
+        (WpHole)
+        []))]}
+    (True)))
+ ,({ Main.hs:4:1-16 }
+   (AbsBinds
+    (NoExtField)
+    []
+    []
+    [(ABE
+      (NoExtField)
+      {Var: main}
+      {Var: main_aG7}
+      (WpHole)
+      (SpecPrags
+       []))]
+    [({abstract:TcEvBinds})]
+    {Bag(Located (HsBind Var)):
+     [({ Main.hs:4:1-16 }
+       (FunBind
+        {NameSet:
+         []}
+        ({ Main.hs:4:1-4 }
+         {Var: main_aG7})
+        (MG
+         (MatchGroupTc
+          []
+          (TyConApp
+           ({abstract:TyCon})
+           [(TyConApp
+             ({abstract:TyCon})
+             [])]))
+         ({ Main.hs:4:1-16 }
+          [({ Main.hs:4:1-16 }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ Main.hs:4:1-4 }
+               {Name: main_aG7})
+              (Prefix)
+              (NoSrcStrict))
+             []
+             (GRHSs
+              (NoExtField)
+              [({ Main.hs:4:6-16 }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ Main.hs:4:8-16 }
+                  (HsApp
+                   (NoExtField)
+                   ({ Main.hs:4:8-13 }
+                    (HsWrap
+                     (NoExtField)
+                     (WpCompose
+                      (WpTyApp
+                       (TyConApp
+                        ({abstract:TyCon})
+                        []))
+                      (WpCompose
+                       (WpEvApp
+                        (EvExpr
+                         (Var
+                          {Var: $dMonad_aGd})))
+                       (WpTyApp
+                        (TyConApp
+                         ({abstract:TyCon})
+                         []))))
+                     (HsVar
+                      (NoExtField)
+                      ({ <no location info> }
+                       {Var: return}))))
+                   ({ Main.hs:4:15-16 }
+                    (HsConLikeOut
+                     (NoExtField)
+                     ({abstract:ConLike})))))))]
+              ({ <no location info> }
+               (EmptyLocalBinds
+                (NoExtField))))))])
+         (FromSource))
+        (WpHole)
+        []))]}
+    (True)))
+ ,({ <no location info> }
+   (VarBind
+    (NoExtField)
+    {Var: main}
+    ({ <no location info> }
+     (HsApp
+      (NoExtField)
+      ({ <no location info> }
+       (HsWrap
+        (NoExtField)
+        (WpTyApp
+         (TyConApp
+          ({abstract:TyCon})
+          []))
+        (HsVar
+         (NoExtField)
+         ({ <no location info> }
+          {Var: runMainIO}))))
+      ({ Main.hs:4:1 }
+       (HsVar
+        (NoExtField)
+        ({ <no location info> }
+         {Var: main})))))
+    (False)))]}
+

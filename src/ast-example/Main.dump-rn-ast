@@ -1,0 +1,194 @@
+
+==================== Renamer ====================
+
+
+(Just
+ ((,,,)
+  (HsGroup
+   (NoExtField)
+   (XValBindsLR
+    (NValBinds
+     [((,)
+       (NonRecursive)
+       {Bag(Located (HsBind Name)):
+        [({ Main.hs:7:1-16 }
+          (FunBind
+           {NameSet:
+            []}
+           ({ Main.hs:7:1-6 }
+            {Name: addOne})
+           (MG
+            (NoExtField)
+            ({ Main.hs:7:1-16 }
+             [({ Main.hs:7:1-16 }
+               (Match
+                (NoExtField)
+                (FunRhs
+                 ({ Main.hs:7:1-6 }
+                  {Name: addOne})
+                 (Prefix)
+                 (NoSrcStrict))
+                [({ Main.hs:7:8 }
+                  (VarPat
+                   (NoExtField)
+                   ({ Main.hs:7:8 }
+                    {Name: x_ayz})))]
+                (GRHSs
+                 (NoExtField)
+                 [({ Main.hs:7:10-16 }
+                   (GRHS
+                    (NoExtField)
+                    []
+                    ({ Main.hs:7:12-16 }
+                     (OpApp
+                      {Fixity: infixl 6}
+                      ({ Main.hs:7:12 }
+                       (HsVar
+                        (NoExtField)
+                        ({ Main.hs:7:12 }
+                         {Name: x_ayz})))
+                      ({ Main.hs:7:14 }
+                       (HsVar
+                        (NoExtField)
+                        ({ Main.hs:7:14 }
+                         {Name: +})))
+                      ({ Main.hs:7:16 }
+                       (HsOverLit
+                        (NoExtField)
+                        (OverLit
+                         (False)
+                         (HsIntegral
+                          (IL
+                           (SourceText
+                            "1")
+                           (False)
+                           (1)))
+                         (HsVar
+                          (NoExtField)
+                          ({ <no location info> }
+                           {Name: fromInteger})))))))))]
+                 ({ <no location info> }
+                  (EmptyLocalBinds
+                   (NoExtField))))))])
+            (FromSource))
+           (WpHole)
+           []))]})
+     ,((,)
+       (NonRecursive)
+       {Bag(Located (HsBind Name)):
+        [({ Main.hs:4:1-16 }
+          (FunBind
+           {NameSet:
+            []}
+           ({ Main.hs:4:1-4 }
+            {Name: main})
+           (MG
+            (NoExtField)
+            ({ Main.hs:4:1-16 }
+             [({ Main.hs:4:1-16 }
+               (Match
+                (NoExtField)
+                (FunRhs
+                 ({ Main.hs:4:1-4 }
+                  {Name: main})
+                 (Prefix)
+                 (NoSrcStrict))
+                []
+                (GRHSs
+                 (NoExtField)
+                 [({ Main.hs:4:6-16 }
+                   (GRHS
+                    (NoExtField)
+                    []
+                    ({ Main.hs:4:8-16 }
+                     (HsApp
+                      (NoExtField)
+                      ({ Main.hs:4:8-13 }
+                       (HsVar
+                        (NoExtField)
+                        ({ Main.hs:4:8-13 }
+                         {Name: return})))
+                      ({ Main.hs:4:15-16 }
+                       (HsVar
+                        (NoExtField)
+                        ({ Main.hs:4:15-16 }
+                         {Name: ()})))))))]
+                 ({ <no location info> }
+                  (EmptyLocalBinds
+                   (NoExtField))))))])
+            (FromSource))
+           (WpHole)
+           []))]})]
+     [({ Main.hs:6:1-28 }
+       (TypeSig
+        (NoExtField)
+        [({ Main.hs:6:1-6 }
+          {Name: addOne})]
+        (HsWC
+         []
+         (HsIB
+          []
+          ({ Main.hs:6:11-28 }
+           (HsFunTy
+            (NoExtField)
+            ({ Main.hs:6:11-17 }
+             (HsTyVar
+              (NoExtField)
+              (NotPromoted)
+              ({ Main.hs:6:11-17 }
+               {Name: Integer})))
+            ({ Main.hs:6:22-28 }
+             (HsTyVar
+              (NoExtField)
+              (NotPromoted)
+              ({ Main.hs:6:22-28 }
+               {Name: Integer})))))))))
+     ,({ Main.hs:3:1-13 }
+       (TypeSig
+        (NoExtField)
+        [({ Main.hs:3:1-4 }
+          {Name: main})]
+        (HsWC
+         []
+         (HsIB
+          []
+          ({ Main.hs:3:9-13 }
+           (HsAppTy
+            (NoExtField)
+            ({ Main.hs:3:9-10 }
+             (HsTyVar
+              (NoExtField)
+              (NotPromoted)
+              ({ Main.hs:3:9-10 }
+               {Name: IO})))
+            ({ Main.hs:3:12-13 }
+             (HsTupleTy
+              (NoExtField)
+              (HsBoxedOrConstraintTuple)
+              []))))))))]))
+   []
+   []
+   []
+   []
+   []
+   []
+   []
+   []
+   []
+   [])
+  [({ Main.hs:1:8-11 }
+    (ImportDecl
+     (NoExtField)
+     (NoSourceText)
+     ({ Main.hs:1:8-11 }
+      {ModuleName: Prelude})
+     (Nothing)
+     (False)
+     (False)
+     (NotQualified)
+     (True)
+     (Nothing)
+     (Nothing)))]
+  (Nothing)
+  (Nothing)))
+

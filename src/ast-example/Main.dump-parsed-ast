@@ -1,0 +1,188 @@
+
+==================== Parser AST ====================
+
+
+({ Main.hs:1:1 }
+ (HsModule
+  (Just
+   ({ Main.hs:1:8-11 }
+    {ModuleName: Main}))
+  (Nothing)
+  []
+  [({ Main.hs:3:1-13 }
+    (SigD
+     (NoExtField)
+     (TypeSig
+      (NoExtField)
+      [({ Main.hs:3:1-4 }
+        (Unqual
+         {OccName: main}))]
+      (HsWC
+       (NoExtField)
+       (HsIB
+        (NoExtField)
+        ({ Main.hs:3:9-13 }
+         (HsAppTy
+          (NoExtField)
+          ({ Main.hs:3:9-10 }
+           (HsTyVar
+            (NoExtField)
+            (NotPromoted)
+            ({ Main.hs:3:9-10 }
+             (Unqual
+              {OccName: IO}))))
+          ({ Main.hs:3:12-13 }
+           (HsTupleTy
+            (NoExtField)
+            (HsBoxedOrConstraintTuple)
+            [])))))))))
+  ,({ Main.hs:4:1-16 }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ Main.hs:4:1-4 }
+       (Unqual
+        {OccName: main}))
+      (MG
+       (NoExtField)
+       ({ Main.hs:4:1-16 }
+        [({ Main.hs:4:1-16 }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ Main.hs:4:1-4 }
+             (Unqual
+              {OccName: main}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ Main.hs:4:6-16 }
+              (GRHS
+               (NoExtField)
+               []
+               ({ Main.hs:4:8-16 }
+                (HsApp
+                 (NoExtField)
+                 ({ Main.hs:4:8-13 }
+                  (HsVar
+                   (NoExtField)
+                   ({ Main.hs:4:8-13 }
+                    (Unqual
+                     {OccName: return}))))
+                 ({ Main.hs:4:15-16 }
+                  (HsVar
+                   (NoExtField)
+                   ({ Main.hs:4:15-16 }
+                    (Exact
+                     {Name: ()}))))))))]
+            ({ <no location info> }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      (WpHole)
+      [])))
+  ,({ Main.hs:6:1-28 }
+    (SigD
+     (NoExtField)
+     (TypeSig
+      (NoExtField)
+      [({ Main.hs:6:1-6 }
+        (Unqual
+         {OccName: addOne}))]
+      (HsWC
+       (NoExtField)
+       (HsIB
+        (NoExtField)
+        ({ Main.hs:6:11-28 }
+         (HsFunTy
+          (NoExtField)
+          ({ Main.hs:6:11-17 }
+           (HsTyVar
+            (NoExtField)
+            (NotPromoted)
+            ({ Main.hs:6:11-17 }
+             (Unqual
+              {OccName: Integer}))))
+          ({ Main.hs:6:22-28 }
+           (HsTyVar
+            (NoExtField)
+            (NotPromoted)
+            ({ Main.hs:6:22-28 }
+             (Unqual
+              {OccName: Integer})))))))))))
+  ,({ Main.hs:7:1-16 }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ Main.hs:7:1-6 }
+       (Unqual
+        {OccName: addOne}))
+      (MG
+       (NoExtField)
+       ({ Main.hs:7:1-16 }
+        [({ Main.hs:7:1-16 }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ Main.hs:7:1-6 }
+             (Unqual
+              {OccName: addOne}))
+            (Prefix)
+            (NoSrcStrict))
+           [({ Main.hs:7:8 }
+             (VarPat
+              (NoExtField)
+              ({ Main.hs:7:8 }
+               (Unqual
+                {OccName: x}))))]
+           (GRHSs
+            (NoExtField)
+            [({ Main.hs:7:10-16 }
+              (GRHS
+               (NoExtField)
+               []
+               ({ Main.hs:7:12-16 }
+                (OpApp
+                 (NoExtField)
+                 ({ Main.hs:7:12 }
+                  (HsVar
+                   (NoExtField)
+                   ({ Main.hs:7:12 }
+                    (Unqual
+                     {OccName: x}))))
+                 ({ Main.hs:7:14 }
+                  (HsVar
+                   (NoExtField)
+                   ({ Main.hs:7:14 }
+                    (Unqual
+                     {OccName: +}))))
+                 ({ Main.hs:7:16 }
+                  (HsOverLit
+                   (NoExtField)
+                   (OverLit
+                    (NoExtField)
+                    (HsIntegral
+                     (IL
+                      (SourceText
+                       "1")
+                      (False)
+                      (1)))
+                    (HsLit
+                     (NoExtField)
+                     (HsString
+                      (SourceText
+                       "noExpr")
+                      {FastString: "noExpr"})))))))))]
+            ({ <no location info> }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      (WpHole)
+      [])))]
+  (Nothing)
+  (Nothing)))
+
