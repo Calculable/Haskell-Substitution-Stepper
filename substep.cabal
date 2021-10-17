@@ -34,11 +34,15 @@ library
   build-depends:
       apply-refact
     , base >=4.7 && <5
-    , ghc-lib
+    , bytestring
+    , containers
+    , directory
+    , exceptions
+    , filepath
     , ghc-lib-parser
-    , ghc-lib-parser-ex
     , hlint
     , mtl
+    , text
   default-language: Haskell2010
 
 executable substep-exe
@@ -51,12 +55,16 @@ executable substep-exe
   build-depends:
       apply-refact
     , base >=4.7 && <5
-    , ghc-lib
+    , bytestring
+    , containers
+    , directory
+    , exceptions
+    , filepath
     , ghc-lib-parser
-    , ghc-lib-parser-ex
     , hlint
     , mtl
     , substep
+    , text
   default-language: Haskell2010
 
 test-suite substep-test
@@ -70,10 +78,14 @@ test-suite substep-test
   build-depends:
       apply-refact
     , base >=4.7 && <5
-    , ghc-lib
+    , bytestring
+    , containers
+    , directory
+    , exceptions
+    , filepath
     , ghc-lib-parser
-    , ghc-lib-parser-ex
     , hlint
     , mtl
     , substep
+    , text
   default-language: Haskell2010
