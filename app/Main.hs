@@ -21,7 +21,9 @@ main :: IO ()
 main = do
   source <- readFile "src/Source.hs"
   let parsed = parse source
-  putStrLn $ printParsed parsed
+      printableAst = printableParsed parsed
+  writeFile "ast.txt" printableAst
+  putStrLn printableAst
 
 -- parse a string of haskell source code using the 'parseModule' parser from ghc-lib-parser
 parse :: String -> ParseResult (Located GHC.Hs.HsModule)
@@ -29,8 +31,8 @@ parse source = runParser baseDynFlags source parseModule
 
 -- showAstData: https://hackage.haskell.org/package/ghc-lib-parser-9.0.1.20210324/docs/GHC-Hs-Dump.html
 -- showSDocDebug, showSDocDump: https://hackage.haskell.org/package/ghc-lib-parser-9.0.1.20210324/docs/GHC-Utils-Outputable.html#g:3
-printParsed :: Data.Data.Data a => ParseResult a -> String
-printParsed parsed = case parsed of
+printableParsed :: Data.Data.Data a => ParseResult a -> String
+printableParsed parsed = case parsed of
   POk s a -> showSDocDump baseDynFlags $ showAstData BlankSrcSpan a
   PFailed s -> undefined
 
