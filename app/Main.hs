@@ -17,6 +17,8 @@ import GHC.Settings.Config
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable
 
+import StepperProofOfConcept
+
 main :: IO ()
 main = do
   source <- readFile "src/Source.hs"
@@ -24,6 +26,7 @@ main = do
       printableAst = printableParsed parsed
   writeFile "ast.txt" printableAst
   putStrLn printableAst
+  printExampleStepping
 
 -- parse a string of haskell source code using the 'parseModule' parser from ghc-lib-parser
 parse :: String -> ParseResult (Located GHC.Hs.HsModule)

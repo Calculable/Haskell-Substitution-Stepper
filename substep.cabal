@@ -27,6 +27,7 @@ library
   exposed-modules:
       Lib
       Source
+      StepperProofOfConcept
   other-modules:
       Paths_substep
   hs-source-dirs:
