@@ -30,7 +30,9 @@ dependencies:
 - text
 - filepath
 - directory
+- ghc-lib
 - ghc-lib-parser
+- ghc-paths
 
 library:
   source-dirs: src
