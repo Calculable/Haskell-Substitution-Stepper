@@ -1,7 +1,9 @@
 module Main where
+
+import Control.Monad.Trans
 import GHC
 import GHC.Paths
-import Control.Monad.Trans
+import StepperProofOfConcept
 import Utils
 
 main :: IO ()
@@ -27,3 +29,4 @@ main = runGhc (Just libdir) $ do
 
   liftIO $ writeFile "parserAST.txt" (dumpAST parserAST)
   liftIO $ writeFile "tcAST.txt" (dumpAST tcAST)
+  liftIO printExampleStepping
