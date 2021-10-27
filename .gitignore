@@ -1,2 +1,4 @@
 .stack-work/
 *~
+parserAST.txt
+tcAST.txt

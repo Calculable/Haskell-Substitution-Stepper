@@ -25,10 +25,12 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      DynFlags
+      Parser
       Source
       StepperProofOfConcept
       TypedStepperProofOfConcept
+      Utils
   other-modules:
       Paths_substep
   hs-source-dirs:
@@ -41,7 +43,9 @@ library
     , directory
     , exceptions
     , filepath
+    , ghc-lib
     , ghc-lib-parser
+    , ghc-paths
     , hlint
     , mtl
     , text
@@ -62,7 +66,9 @@ executable substep-exe
     , directory
     , exceptions
     , filepath
+    , ghc-lib
     , ghc-lib-parser
+    , ghc-paths
     , hlint
     , mtl
     , substep
@@ -85,7 +91,9 @@ test-suite substep-test
     , directory
     , exceptions
     , filepath
+    , ghc-lib
     , ghc-lib-parser
+    , ghc-paths
     , hlint
     , mtl
     , substep
