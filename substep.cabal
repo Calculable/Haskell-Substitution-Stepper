@@ -28,6 +28,7 @@ library
       Lib
       Source
       StepperProofOfConcept
+      TypedStepperProofOfConcept
   other-modules:
       Paths_substep
   hs-source-dirs:

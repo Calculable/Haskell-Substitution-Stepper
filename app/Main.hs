@@ -17,7 +17,7 @@ import GHC.Settings.Config
 import GHC.Types.SrcLoc
 import GHC.Utils.Outputable
 
-import StepperProofOfConcept
+import TypedStepperProofOfConcept
 
 main :: IO ()
 main = do
