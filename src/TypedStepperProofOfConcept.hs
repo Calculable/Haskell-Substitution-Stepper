@@ -31,10 +31,11 @@ instance Num Expression where
     (-) leftExpression rightExpression = minus leftExpression rightExpression
     signum (IntegerValue x) = (DoubleValue (signum (fromInteger x)))
     signum (DoubleValue x) = (DoubleValue (signum x))
-    signum _ = InvalidExpression "Signum not supported for this type"
+    signum _ = InvalidExpression "signum not supported for this type"
     fromInteger x = (IntegerValue x)
     abs (IntegerValue x) = (IntegerValue (abs x))
     abs (DoubleValue x) = (DoubleValue (abs x))
+    abs _ = InvalidExpression "abs not supported for this type"
 
 instance Fractional Expression where
     (/) leftExpression rightExpression = divide leftExpression rightExpression
@@ -56,7 +57,7 @@ instance Ord Expression where
     (>) leftExpression rightExpression =  compare leftExpression rightExpression == GT
 
 instance Show Expression where
-  show (StringValue x) = "Another Expression"
+  show (StringValue x) = x
   show (IntegerValue x) = show x
   show (DoubleValue x) = show x
   show (BoolValue x) = show x
@@ -181,27 +182,25 @@ printBindings ((reference, expression):xs) = do
     printBindings xs
 
 
-canBeSimplified :: Expression -> Bool
-canBeSimplified (ListValue list) = (any canBeSimplified) list
-canBeSimplified (TupleValue tuple) = (canBeSimplified (fst tuple)) || (canBeSimplified (snd tuple))
-canBeSimplified (OperatorApplication _ _ _) = True --later we have to consider partial application here!
-canBeSimplified (BindingReference _) = True
-canBeSimplified _ = False
+canBeReduced :: Expression -> Bool
+canBeReduced (OperatorApplication _ _ _) = True --later we have to consider partial application here!
+canBeReduced (BindingReference _) = True
+canBeReduced _ = False --Notice: Tuples, List etc return false, this allows us to have expressions like [1/2, 1/0]
 
 applyStep :: [Binding] -> Expression -> (ReductionStepDescription, Expression)
 applyStep bindings (BindingReference reference) = (("Replace '" ++ reference ++ "' with definition"),(findBinding reference bindings)) {-replace binding reference with actual expression (Delta Reduction)-}
-applyStep bindings (OperatorApplication leftExpression operator rightExpression)    | canBeSimplified leftExpression = do
+applyStep bindings (OperatorApplication leftExpression operator rightExpression)    | canBeReduced leftExpression = do
                                                                                         let (reductionStep, reducedLeftExpression) = (applyStep bindings leftExpression )
                                                                                         ({-"Reduce Left-Hand-Side-Expression of Opperator-Application: " ++ -}reductionStep, (OperatorApplication reducedLeftExpression operator rightExpression))
-                                                                                    | canBeSimplified rightExpression = do
+                                                                                    | canBeReduced rightExpression = do
                                                                                         let (reductionStep, reducedRightExpression) = (applyStep bindings rightExpression )
                                                                                         ({-"Reduce Right-Hand-Side-Expression of Opperator-Application: " ++ -}reductionStep, (OperatorApplication leftExpression operator reducedRightExpression))
                                                                                     | otherwise = (("Apply Operator " ++ operator),(applyOperator bindings operator leftExpression rightExpression))
-applyStep _ x | canBeSimplified x = ("no reduction rule implemented for this expression", x)
+applyStep _ x | canBeReduced x = ("no reduction rule implemented for this expression", x)
               | otherwise = ("is already reduced", x)
 
 printStepByStepReduction :: [Binding] -> Expression -> IO ()
-printStepByStepReduction bindings expression    | canBeSimplified expression = do
+printStepByStepReduction bindings expression    | canBeReduced expression = do
                                                     print expression
                                                     let (reductionStepDescription, reducedExpression) = (applyStep bindings expression)
                                                     putStrLn ("{" ++ reductionStepDescription ++ "}")
@@ -216,8 +215,10 @@ exampleBindings = [
      ("z", OperatorApplication ( (BindingReference "x")) "+" ( (BindingReference "y"))) {-Represents the expression "x + y"-}
      ]
 
-exampleExpression = OperatorApplication (BindingReference "z") "==" (BindingReference "w")
+--exampleExpression = OperatorApplication (BindingReference "z") "==" (BindingReference "w")
 
+
+exampleExpression = OperatorApplication (TupleValue ((IntegerValue 1), ( (OperatorApplication ( (IntegerValue 1)) "+" ( (IntegerValue 2)))))) "==" (TupleValue ((IntegerValue 1), ( (OperatorApplication ( (IntegerValue 2)) "+" ( (IntegerValue 1))))))
 
 printExampleStepping :: IO ()
 printExampleStepping = do
@@ -230,6 +231,3 @@ printExampleStepping = do
 
     putStrLn "\nReduction"
     printStepByStepReduction exampleBindings exampleExpression
-
-    putStrLn "\nSolve"
-    print (solve exampleBindings exampleExpression)
