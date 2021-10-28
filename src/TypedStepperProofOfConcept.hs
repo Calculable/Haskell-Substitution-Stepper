@@ -9,6 +9,7 @@ import Data.Bool
 type Operator = String
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (String, Expression)
+type FunctionArgument a = ((Expression -> a), Expression)
 
 data Expression
     = StringValue String
@@ -160,6 +161,11 @@ applyOperator bindings operator leftExpression rightExpression  | (operator == "
 
 
 
+
+
+
+
+
 findBinding :: String -> [Binding] -> Expression
 findBinding key bindings = (tryFindBinding key bindings) ?? (InvalidExpression "Binding not Found")
 
@@ -203,7 +209,7 @@ printStepByStepReduction :: [Binding] -> Expression -> IO ()
 printStepByStepReduction bindings expression    | canBeReduced expression = do
                                                     print expression
                                                     let (reductionStepDescription, reducedExpression) = (applyStep bindings expression)
-                                                    putStrLn ("{" ++ reductionStepDescription ++ "}")
+                                                    putStrLn ("{-" ++ reductionStepDescription ++ "-}")
                                                     printStepByStepReduction bindings reducedExpression
                                                 | otherwise = print expression
 
@@ -231,3 +237,26 @@ printExampleStepping = do
 
     putStrLn "\nReduction"
     printStepByStepReduction exampleBindings exampleExpression
+
+    putStrLn "\nExample: Function Application"
+    --print (applyTwoArguments (^) (id, (IntegerValue 2)) (expressionToInteger, (IntegerValue 3)))
+    print (applyOneArgument (not) (expressionToBool, (BoolValue True)))
+
+{-(^) :: (Num a, Integral b) => a -> b -> a-}
+
+{-Function Application Demo-}
+expressionToBool :: Expression -> Bool
+expressionToBool (BoolValue x) = x
+
+expressionToInteger :: Expression -> Integer
+expressionToInteger (IntegerValue x) = x
+{-ToDo: Add More-}
+
+applyOneArgument :: (a -> b) -> FunctionArgument a -> b
+applyOneArgument function (unwrap, expression) = (function (unwrap expression))
+
+applyTwoArguments :: (a -> b -> c) -> FunctionArgument a -> FunctionArgument b -> c
+applyTwoArguments  function firstArgument secondArgument = applyOneArgument (applyOneArgument function firstArgument) secondArgument
+
+applyThreeArguments :: (a -> b -> c -> d) -> FunctionArgument a -> FunctionArgument b -> FunctionArgument c -> d
+applyThreeArguments function firstArgument secondArgument thirdArgument = applyOneArgument (applyTwoArguments function firstArgument secondArgument) thirdArgument
