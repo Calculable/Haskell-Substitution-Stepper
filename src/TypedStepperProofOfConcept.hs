@@ -72,13 +72,13 @@ instance Show Expression where
 
 
 -- toDo: Make more generic
-expressionOr :: Expression -> Expression -> Expression
-expressionOr (BoolValue x) (BoolValue y) = (BoolValue (x || y))
-expressionOr _ _ = InvalidExpression "|| not supported fot this type"
+--expressionOr :: Expression -> Expression -> Expression
+--expressionOr (BoolValue x) (BoolValue y) = (BoolValue (x || y))
+--expressionOr _ _ = InvalidExpression "|| not supported fot this type"
 
-expressionAnd :: Expression -> Expression -> Expression
-expressionAnd (BoolValue x) (BoolValue y) = (BoolValue (x && y))
-expressionAnd _ _ = InvalidExpression "&& not supported fot this type"
+--expressionAnd :: Expression -> Expression -> Expression
+--expressionAnd (BoolValue x) (BoolValue y) = (BoolValue (x && y))
+--expressionAnd _ _ = InvalidExpression "&& not supported fot this type"
 
 -- i found no way no make this operator definitions less redundant - if someone has a better idea i would be
 -- very interested to hear it :)
@@ -137,7 +137,6 @@ divide (IntegerValue x) (DoubleValue y) = DoubleValue ((Prelude./) (fromInteger 
 divide (DoubleValue x) (IntegerValue y) = DoubleValue ((Prelude./) x (fromInteger y))
 divide _ _ = InvalidExpression "/ not supported by this type"
 
-
 solve :: [Binding] -> Expression -> Expression
 solve bindings (ListValue x) = (ListValue (map (solve bindings) x))
 solve bindings (TupleValue (x, y)) = (TupleValue ((solve bindings x),(solve bindings x)))
@@ -155,16 +154,9 @@ applyOperator bindings operator leftExpression rightExpression  | (operator == "
                                                                 | (operator == ">") = (BoolValue ((>) (solve bindings leftExpression) (solve bindings rightExpression)))
                                                                 | (operator == ">=") = (BoolValue ((>=) (solve bindings leftExpression) (solve bindings rightExpression)))
                                                                 | (operator == "==") = (BoolValue ((>=) (solve bindings leftExpression) (solve bindings rightExpression)))
-                                                                | (operator == "||") =  (expressionOr (solve bindings leftExpression) (solve bindings rightExpression))
-                                                                | (operator == "&&") = (expressionAnd (solve bindings leftExpression) (solve bindings rightExpression))
+                                                                | (operator == "||") =  (BoolValue (applyTwoArguments (||) (expressionToBool, (solve bindings leftExpression)) (expressionToBool, (solve bindings rightExpression))))
+                                                                | (operator == "&&") =  (BoolValue (applyTwoArguments (&&) (expressionToBool, (solve bindings leftExpression)) (expressionToBool, (solve bindings rightExpression))))
                                                                 | otherwise = InvalidExpression "Unknown Operator"
-
-
-
-
-
-
-
 
 findBinding :: String -> [Binding] -> Expression
 findBinding key bindings = (tryFindBinding key bindings) ?? (InvalidExpression "Binding not Found")
@@ -221,10 +213,10 @@ exampleBindings = [
      ("z", OperatorApplication ( (BindingReference "x")) "+" ( (BindingReference "y"))) {-Represents the expression "x + y"-}
      ]
 
---exampleExpression = OperatorApplication (BindingReference "z") "==" (BindingReference "w")
+exampleExpression1 = OperatorApplication (BindingReference "z") "==" (BindingReference "w")
+exampleExpression2 = OperatorApplication (TupleValue ((IntegerValue 1), ( (OperatorApplication ( (IntegerValue 1)) "+" ( (IntegerValue 2)))))) "==" (TupleValue ((IntegerValue 1), ( (OperatorApplication ( (IntegerValue 2)) "+" ( (IntegerValue 1))))))
+exampleExpression3 = OperatorApplication (BoolValue True) "&&" (BoolValue False)
 
-
-exampleExpression = OperatorApplication (TupleValue ((IntegerValue 1), ( (OperatorApplication ( (IntegerValue 1)) "+" ( (IntegerValue 2)))))) "==" (TupleValue ((IntegerValue 1), ( (OperatorApplication ( (IntegerValue 2)) "+" ( (IntegerValue 1))))))
 
 printExampleStepping :: IO ()
 printExampleStepping = do
@@ -232,17 +224,24 @@ printExampleStepping = do
     putStrLn "\nBindings"
     printBindings exampleBindings
 
-    putStrLn "\nExpression to Step"
-    print exampleExpression
+    putStrLn "\n\nExample-Expression 1"
+    print exampleExpression1
 
-    putStrLn "\nReduction"
-    printStepByStepReduction exampleBindings exampleExpression
+    putStrLn "\nReduction 1"
+    printStepByStepReduction exampleBindings exampleExpression1
 
-    putStrLn "\nExample: Function Application"
-    --print (applyTwoArguments (^) (id, (IntegerValue 2)) (expressionToInteger, (IntegerValue 3)))
-    print (applyOneArgument (not) (expressionToBool, (BoolValue True)))
+    putStrLn "\n\nExample-Expression 2"
+    print exampleExpression2
 
-{-(^) :: (Num a, Integral b) => a -> b -> a-}
+    putStrLn "\nReduction 2"
+    printStepByStepReduction exampleBindings exampleExpression2
+
+    putStrLn "\n\nExample-Expression 3"
+    print exampleExpression3
+
+    putStrLn "\nReduction 3"
+    printStepByStepReduction exampleBindings exampleExpression3
+
 
 {-Function Application Demo-}
 expressionToBool :: Expression -> Bool
