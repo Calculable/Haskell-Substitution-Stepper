@@ -28,7 +28,8 @@ library
       DynFlags
       Parser
       Source
-      StepperProofOfConcept
+      TypedStepperProofOfConcept
+      TypedStepperProofOfConceptExamples
       Utils
   other-modules:
       Paths_substep

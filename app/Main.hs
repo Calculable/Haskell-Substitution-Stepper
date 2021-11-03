@@ -1,9 +1,10 @@
 module Main where
 
+
 import Control.Monad.Trans
 import GHC
 import GHC.Paths
-import StepperProofOfConcept
+import TypedStepperProofOfConceptExamples
 import Utils
 
 main :: IO ()
