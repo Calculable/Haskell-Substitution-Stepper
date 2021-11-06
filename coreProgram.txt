@@ -3,61 +3,8 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 80 10}]
  $trModule = Module (TrNameS "main"#) (TrNameS "Source"#),
- $krep_a5tv [InlPrag=NOUSERINLINE[~]] :: KindRep
- [LclId,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=True,
-          WorkFree=False, Expandable=True, Guidance=IF_ARGS [] 30 0}]
- $krep_a5tv = $WKindRepVar (I# 0#),
- $tcVielleicht :: TyCon
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 60 10}]
- $tcVielleicht
-   = TyCon
-       2069277684373575692##
-       17637460851759254526##
-       $trModule
-       (TrNameS "Vielleicht"#)
-       0#
-       krep$*Arr*,
- $krep_a5tw [InlPrag=NOUSERINLINE[~]] :: KindRep
- [LclId,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 20 10}]
- $krep_a5tw
-   = KindRepTyConApp
-       $tcVielleicht (: @KindRep $krep_a5tv ([] @KindRep)),
- $tc'Nichts :: TyCon
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 50 10}]
- $tc'Nichts
-   = TyCon
-       11135416026498710726##
-       9508151142957415457##
-       $trModule
-       (TrNameS "'Nichts"#)
-       1#
-       $krep_a5tw,
- $krep_a5tu [InlPrag=NOUSERINLINE[~]] :: KindRep
- [LclId,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 10 10}]
- $krep_a5tu = KindRepFun $krep_a5tv $krep_a5tw,
- $tc'Etwas :: TyCon
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 50 10}]
- $tc'Etwas
-   = TyCon
-       1422496407364222356##
-       6131522796076434394##
-       $trModule
-       (TrNameS "'Etwas"#)
-       1#
-       $krep_a5tu,
- addiere :: Int -> Int -> Int
+ add :: Int -> Int -> Int
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [0 0] 40 0}]
- addiere = \ (x :: Int) (y :: Int) -> + @Int $fNumInt x y]
+ add = \ (x :: Int) (y :: Int) -> + @Int $fNumInt x y]

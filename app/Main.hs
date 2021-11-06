@@ -1,15 +1,13 @@
 module Main where
 
 
-import Control.Monad.Trans
+import Control.Monad.Trans ( MonadIO(liftIO) )
 import GHC
-import GHC.Paths
-import TypedStepperProofOfConceptExamples
-import Utils
+import GHC.Paths ( libdir )
+import TypedStepperProofOfConceptExamples ( printExampleStepping )
+import Utils ( dumpAST, showOutputable )
 import GHC.Driver.Types (ModGuts(mg_binds, mg_rdr_env, mg_tcs, mg_fam_insts))
-import GHC (coreModule)
-import GHC.Plugins (ModGuts(mg_insts, mg_patsyns))
-import Utils (showOutputable)
+import GHC.Plugins (ModGuts(mg_insts, mg_patsyns), CoreProgram, CoreBind)
 
 main :: IO ()
 main = runGhc (Just libdir) $ do
@@ -32,7 +30,7 @@ main = runGhc (Just libdir) $ do
 
   let parserAST = pm_parsed_source psmod
       tcAST = tm_typechecked_source tcmod
-      
+
       coreModule = dm_core_module dsmod
       coreAst = mg_binds coreModule
       -- coreReaderEnv = mg_rdr_env coreModule
@@ -52,3 +50,10 @@ main = runGhc (Just libdir) $ do
   -- liftIO $ writeFile "corePatternSyns.txt" (dumpAST corePatternSyns)
 
   liftIO printExampleStepping
+  liftIO $ insp coreAst
+
+insp :: CoreProgram -> IO ()
+insp prog = let
+  (main:add) = prog
+  addAst = dumpAST add
+  in putStrLn addAst
