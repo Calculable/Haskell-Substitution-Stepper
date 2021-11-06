@@ -43,7 +43,7 @@ import GHC.Types.Literal
 import GHC.Types.Var (Var (varName, varType))
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import TypedStepperProofOfConceptExamples (printExampleStepping)
-import Utils ( showOutputable, printAst )
+import Utils (printAst, showOutputable)
 
 main :: IO ((), StepState)
 main = runGhc (Just libdir) $ do
