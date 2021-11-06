@@ -114,9 +114,10 @@ step (App exp arg) = do
   incDepth
   step exp
   step arg
-step (Lam x exp) = do
+step (Lam b exp) = do
   printDepth
   lPutStr "Lam "
+  lOutput' b
   lOutput $ pprParendExpr exp
   incDepth
   step exp
@@ -131,6 +132,8 @@ step (Case exp b t alts) = do
   printDepth
   lPutStr "Case "
   lOutput $ pprParendExpr exp
+  lOutput' b
+  lOutput' $ ppr t
   lOutput $ map pprCoreAlt alts
   incDepth
   step exp
@@ -159,6 +162,9 @@ step (Coercion coer) = do
 -- lifted version of common functions used in the stepper
 lOutput :: (MonadState StepState m, MonadIO m, Outputable a) => a -> m ()
 lOutput = liftIO . putStrLn . showOutputable
+
+lOutput' :: (MonadState StepState m, MonadIO m, Outputable a) => a -> m ()
+lOutput' = liftIO . putStr . showOutputable
 
 lPrint :: (MonadState StepState m, MonadIO m, Show a) => a -> m ()
 lPrint = liftIO . print
