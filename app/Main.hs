@@ -43,7 +43,7 @@ import GHC.Types.Literal
 import GHC.Types.Var (Var (varName, varType))
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import TypedStepperProofOfConceptExamples (printExampleStepping)
-import Utils (dumpAst, showOutputable)
+import Utils ( showOutputable, printAst )
 
 main :: IO ((), StepState)
 main = runGhc (Just libdir) $ do
@@ -75,15 +75,15 @@ main = runGhc (Just libdir) $ do
   -- coreFamInsts = mg_fam_insts coreModule
   -- corePatternSyns = mg_patsyns coreModule
 
-  liftIO $ writeFile "parserAst.txt" (dumpAst parserAst)
-  liftIO $ writeFile "tcAst.txt" (dumpAst tcAst)
-  liftIO $ writeFile "coreAST.txt" (dumpAst coreAst)
+  liftIO $ writeFile "parserAst.txt" (printAst parserAst)
+  liftIO $ writeFile "tcAst.txt" (printAst tcAst)
+  liftIO $ writeFile "coreAST.txt" (printAst coreAst)
   liftIO $ writeFile "coreProgram.txt" (showOutputable coreAst)
-  -- liftIO $ writeFile "coreReaderEnv.txt" (dumpAst coreReaderEnv)
-  -- liftIO $ writeFile "coreTyCons.txt" (dumpAst coreTyCons)
-  -- liftIO $ writeFile "coreClassInsts.txt" (dumpAst coreClassInsts)
+  -- liftIO $ writeFile "coreReaderEnv.txt" (printAst coreReaderEnv)
+  -- liftIO $ writeFile "coreTyCons.txt" (printAst coreTyCons)
+  -- liftIO $ writeFile "coreClassInsts.txt" (printAst coreClassInsts)
   -- liftIO $ writeFile "coreFamInsts.txt" (showOutputable coreFamInsts)
-  -- liftIO $ writeFile "corePatternSyns.txt" (dumpAst corePatternSyns)
+  -- liftIO $ writeFile "corePatternSyns.txt" (printAst corePatternSyns)
 
   liftIO printExampleStepping
 
