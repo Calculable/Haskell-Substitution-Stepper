@@ -2,7 +2,7 @@ module Main where
 
 
 import Control.Monad.Trans ( MonadIO(liftIO) )
-import GHC
+import GHC hiding (pprParendExpr)
 import GHC.Paths ( libdir )
 import TypedStepperProofOfConceptExamples ( printExampleStepping )
 import Utils ( dumpAST, showOutputable )
@@ -11,6 +11,9 @@ import GHC.Plugins (ModGuts(mg_insts, mg_patsyns), CoreProgram, CoreBind, Var)
 import GHC.Core
 import GHC.Types.Var
 import GHC.Types.Literal
+import GHC.Core.Ppr
+import GHC.Utils.Outputable (OutputableBndr)
+import qualified GHC.Core.Ppr
 
 main :: IO ()
 main = runGhc (Just libdir) $ do
@@ -63,32 +66,42 @@ extract prog = let
   in case add of
     NonRec j exp -> exp
 
-step :: Expr a -> IO ()
-step (Var id) = print ("Var", showOutputable $ varName id, varUnique id)
+step :: OutputableBndr b => Expr b -> IO ()
+step (Var id) = print ("Var", showOutputable $ varName id, showOutputable $ varType id)
 step (Lit lit) = case lit of
-  LitChar c -> print ("Char", c)
-  LitNumber t v -> print ("Number", v)
-  LitString bs -> print ("String", bs)
-  LitFloat f -> print ("Float", f)
-  LitDouble d -> print ("Double", d)
+  LitChar c -> print ("Char ", c)
+  LitNumber t v -> print ("Number ", v)
+  LitString bs -> print ("String ", bs)
+  LitFloat f -> print ("Float ", f)
+  LitDouble d -> print ("Double ", d)
 step (App exp arg) = do
-  print "App"
+  putStr "App "
+  putStrLn . showOutputable $ pprParendExpr exp
   step exp
   step arg
 step (Lam x exp) = do
-  print "Lam"
+  putStr "Lam "
+  putStrLn . showOutputable $ pprParendExpr exp
   step exp
 step (Let bind exp) = do
-  print "Let"
+  putStr "Let "
+  putStrLn . showOutputable $ pprParendExpr exp
   step exp
 step (Case exp b t alts) = do
-   print "Case"
+   putStr "Case "
+   putStrLn . showOutputable $ pprParendExpr exp
+   putStrLn . showOutputable $ map pprCoreAlt alts
    step exp
 step (Cast exp coer) = do
-   print "Cast"
+   putStr "Cast "
+   putStrLn . showOutputable $ pprParendExpr exp
+   putStrLn . showOutputable $ pprOptCo coer
    step exp
 step (Tick tid exp) = do
-  print "Tick"
+  putStr "Tick "
+  putStrLn . showOutputable $ pprParendExpr exp
   step exp
-step (Type t) = print "Type"
-step (Coercion coer) = print "Coer"
+step (Type t) = putStr "Type "
+step (Coercion coer) = do
+  putStr "Coer "
+  putStrLn . showOutputable $ pprOptCo coer
