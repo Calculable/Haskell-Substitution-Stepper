@@ -7,7 +7,10 @@ import GHC.Paths ( libdir )
 import TypedStepperProofOfConceptExamples ( printExampleStepping )
 import Utils ( dumpAST, showOutputable )
 import GHC.Driver.Types (ModGuts(mg_binds, mg_rdr_env, mg_tcs, mg_fam_insts))
-import GHC.Plugins (ModGuts(mg_insts, mg_patsyns), CoreProgram, CoreBind)
+import GHC.Plugins (ModGuts(mg_insts, mg_patsyns), CoreProgram, CoreBind, Var)
+import GHC.Core
+import GHC.Types.Var
+import GHC.Types.Literal
 
 main :: IO ()
 main = runGhc (Just libdir) $ do
@@ -50,10 +53,42 @@ main = runGhc (Just libdir) $ do
   -- liftIO $ writeFile "corePatternSyns.txt" (dumpAST corePatternSyns)
 
   liftIO printExampleStepping
-  liftIO $ insp coreAst
 
-insp :: CoreProgram -> IO ()
-insp prog = let
-  (main:add) = prog
-  addAst = dumpAST add
-  in putStrLn addAst
+  liftIO $ putStrLn "\nExample Stepping of Source:"
+  liftIO $ step $ extract coreAst
+
+extract :: [Bind a] -> Expr a
+extract prog = let
+  (main:add:rest) = prog
+  in case add of
+    NonRec j exp -> exp
+
+step :: Expr a -> IO ()
+step (Var id) = print ("Var", showOutputable $ varName id, varUnique id)
+step (Lit lit) = case lit of
+  LitChar c -> print ("Char", c)
+  LitNumber t v -> print ("Number", v)
+  LitString bs -> print ("String", bs)
+  LitFloat f -> print ("Float", f)
+  LitDouble d -> print ("Double", d)
+step (App exp arg) = do
+  print "App"
+  step exp
+  step arg
+step (Lam x exp) = do
+  print "Lam"
+  step exp
+step (Let bind exp) = do
+  print "Let"
+  step exp
+step (Case exp b t alts) = do
+   print "Case"
+   step exp
+step (Cast exp coer) = do
+   print "Cast"
+   step exp
+step (Tick tid exp) = do
+  print "Tick"
+  step exp
+step (Type t) = print "Type"
+step (Coercion coer) = print "Coer"
