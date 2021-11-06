@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 
 module Main where
 
@@ -9,7 +8,6 @@ import Control.Monad.State.Strict
     StateT (runStateT),
     modify,
   )
-import Control.Monad.Trans (MonadIO (liftIO))
 import GHC
   ( DesugaredModule (dm_core_module),
     DynFlags (hscTarget),
@@ -37,10 +35,8 @@ import GHC.Core.Ppr
     pprOptCo,
     pprParendExpr,
   )
-import qualified GHC.Core.Ppr
-import GHC.Driver.Types (ModGuts (mg_binds, mg_fam_insts, mg_rdr_env, mg_tcs))
+import GHC.Driver.Types (ModGuts (mg_binds))
 import GHC.Paths (libdir)
-import GHC.Plugins (CoreBind, CoreProgram, ModGuts (mg_insts, mg_patsyns), Outputable, Var)
 import GHC.Types.Literal
   ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
   )
