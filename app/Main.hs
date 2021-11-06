@@ -32,14 +32,14 @@ main = runGhc (Just libdir) $ do
 
   let parserAST = pm_parsed_source psmod
       tcAST = tm_typechecked_source tcmod
+      
       coreModule = dm_core_module dsmod
-
       coreAst = mg_binds coreModule
-      coreReaderEnv = mg_rdr_env coreModule
-      coreTyCons = mg_tcs coreModule
-      coreClassInsts = mg_insts coreModule
-      coreFamInsts = mg_fam_insts coreModule
-      corePatternSyns = mg_patsyns coreModule
+      -- coreReaderEnv = mg_rdr_env coreModule
+      -- coreTyCons = mg_tcs coreModule
+      -- coreClassInsts = mg_insts coreModule
+      -- coreFamInsts = mg_fam_insts coreModule
+      -- corePatternSyns = mg_patsyns coreModule
 
   liftIO $ writeFile "parserAST.txt" (dumpAST parserAST)
   liftIO $ writeFile "tcAST.txt" (dumpAST tcAST)
