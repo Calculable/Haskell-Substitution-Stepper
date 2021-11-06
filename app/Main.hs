@@ -6,6 +6,10 @@ import GHC
 import GHC.Paths
 import TypedStepperProofOfConceptExamples
 import Utils
+import GHC.Driver.Types (ModGuts(mg_binds, mg_rdr_env, mg_tcs, mg_fam_insts))
+import GHC (coreModule)
+import GHC.Plugins (ModGuts(mg_insts, mg_patsyns))
+import Utils (showOutputable)
 
 main :: IO ()
 main = runGhc (Just libdir) $ do
@@ -24,10 +28,27 @@ main = runGhc (Just libdir) $ do
 
   psmod <- parseModule modSum
   tcmod <- typecheckModule psmod
+  dsmod <- desugarModule tcmod
 
   let parserAST = pm_parsed_source psmod
       tcAST = tm_typechecked_source tcmod
+      coreModule = dm_core_module dsmod
+
+      coreAst = mg_binds coreModule
+      coreReaderEnv = mg_rdr_env coreModule
+      coreTyCons = mg_tcs coreModule
+      coreClassInsts = mg_insts coreModule
+      coreFamInsts = mg_fam_insts coreModule
+      corePatternSyns = mg_patsyns coreModule
 
   liftIO $ writeFile "parserAST.txt" (dumpAST parserAST)
   liftIO $ writeFile "tcAST.txt" (dumpAST tcAST)
+  liftIO $ writeFile "coreAST.txt" (dumpAST coreAst)
+  liftIO $ writeFile "coreProgram.txt" (showOutputable coreAst)
+  -- liftIO $ writeFile "coreReaderEnv.txt" (dumpAST coreReaderEnv)
+  -- liftIO $ writeFile "coreTyCons.txt" (dumpAST coreTyCons)
+  -- liftIO $ writeFile "coreClassInsts.txt" (dumpAST coreClassInsts)
+  -- liftIO $ writeFile "coreFamInsts.txt" (showOutputable coreFamInsts)
+  -- liftIO $ writeFile "corePatternSyns.txt" (dumpAST corePatternSyns)
+
   liftIO printExampleStepping

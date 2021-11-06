@@ -1,0 +1,185 @@
+
+[(NonRec
+  {Var: $trModule}
+  (App
+   (App
+    (Var
+     {Var: Module})
+    (App
+     (Var
+      {Var: TrNameS})
+     (Lit
+      (LitString
+       "main"))))
+   (App
+    (Var
+     {Var: TrNameS})
+    (Lit
+     (LitString
+      "Source")))))
+,(NonRec
+  {Var: $krep_a5tv}
+  (App
+   (Var
+    {Var: $WKindRepVar})
+   (App
+    (Var
+     {Var: I#})
+    (Lit
+     (LitNumber
+      (LitNumInt)
+      (0))))))
+,(NonRec
+  {Var: $tcVielleicht}
+  (App
+   (App
+    (App
+     (App
+      (App
+       (App
+        (Var
+         {Var: TyCon})
+        (Lit
+         (LitNumber
+          (LitNumWord)
+          (2069277684373575692))))
+       (Lit
+        (LitNumber
+         (LitNumWord)
+         (17637460851759254526))))
+      (Var
+       {Var: $trModule}))
+     (App
+      (Var
+       {Var: TrNameS})
+      (Lit
+       (LitString
+        "Vielleicht"))))
+    (Lit
+     (LitNumber
+      (LitNumInt)
+      (0))))
+   (Var
+    {Var: krep$*Arr*})))
+,(NonRec
+  {Var: $krep_a5tw}
+  (App
+   (App
+    (Var
+     {Var: KindRepTyConApp})
+    (Var
+     {Var: $tcVielleicht}))
+   (App
+    (App
+     (App
+      (Var
+       {Var: :})
+      (Type
+       (TyConApp
+        ({abstract:TyCon})
+        [])))
+     (Var
+      {Var: $krep_a5tv}))
+    (App
+     (Var
+      {Var: []})
+     (Type
+      (TyConApp
+       ({abstract:TyCon})
+       []))))))
+,(NonRec
+  {Var: $tc'Nichts}
+  (App
+   (App
+    (App
+     (App
+      (App
+       (App
+        (Var
+         {Var: TyCon})
+        (Lit
+         (LitNumber
+          (LitNumWord)
+          (11135416026498710726))))
+       (Lit
+        (LitNumber
+         (LitNumWord)
+         (9508151142957415457))))
+      (Var
+       {Var: $trModule}))
+     (App
+      (Var
+       {Var: TrNameS})
+      (Lit
+       (LitString
+        "'Nichts"))))
+    (Lit
+     (LitNumber
+      (LitNumInt)
+      (1))))
+   (Var
+    {Var: $krep_a5tw})))
+,(NonRec
+  {Var: $krep_a5tu}
+  (App
+   (App
+    (Var
+     {Var: KindRepFun})
+    (Var
+     {Var: $krep_a5tv}))
+   (Var
+    {Var: $krep_a5tw})))
+,(NonRec
+  {Var: $tc'Etwas}
+  (App
+   (App
+    (App
+     (App
+      (App
+       (App
+        (Var
+         {Var: TyCon})
+        (Lit
+         (LitNumber
+          (LitNumWord)
+          (1422496407364222356))))
+       (Lit
+        (LitNumber
+         (LitNumWord)
+         (6131522796076434394))))
+      (Var
+       {Var: $trModule}))
+     (App
+      (Var
+       {Var: TrNameS})
+      (Lit
+       (LitString
+        "'Etwas"))))
+    (Lit
+     (LitNumber
+      (LitNumInt)
+      (1))))
+   (Var
+    {Var: $krep_a5tu})))
+,(NonRec
+  {Var: addiere}
+  (Lam
+   {Var: x}
+   (Lam
+    {Var: y}
+    (App
+     (App
+      (App
+       (App
+        (Var
+         {Var: +})
+        (Type
+         (TyConApp
+          ({abstract:TyCon})
+          [])))
+       (Var
+        {Var: $fNumInt}))
+      (Var
+       {Var: x}))
+     (Var
+      {Var: y})))))]
