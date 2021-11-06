@@ -1,21 +1,55 @@
+{-# LANGUAGE FlexibleContexts #-}
+{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
+
 module Main where
 
-
-import Control.Monad.Trans ( MonadIO(liftIO) )
-import GHC hiding (pprParendExpr)
-import GHC.Paths ( libdir )
-import TypedStepperProofOfConceptExamples ( printExampleStepping )
-import Utils ( dumpAST, showOutputable )
-import GHC.Driver.Types (ModGuts(mg_binds, mg_rdr_env, mg_tcs, mg_fam_insts))
-import GHC.Plugins (ModGuts(mg_insts, mg_patsyns), CoreProgram, CoreBind, Var)
-import GHC.Core
-import GHC.Types.Var
-import GHC.Types.Literal
+import Control.Monad.State.Strict
+  ( MonadIO (..),
+    MonadState (get),
+    StateT (runStateT),
+    modify,
+  )
+import Control.Monad.Trans (MonadIO (liftIO))
+import GHC
+  ( DesugaredModule (dm_core_module),
+    DynFlags (hscTarget),
+    HscTarget (HscNothing),
+    LoadHowMuch (LoadAllTargets),
+    ParsedModule (pm_parsed_source),
+    SuccessFlag (Failed, Succeeded),
+    TypecheckedModule (tm_typechecked_source),
+    addTarget,
+    desugarModule,
+    getModSummary,
+    getSessionDynFlags,
+    guessTarget,
+    load,
+    mkModuleName,
+    parseModule,
+    runGhc,
+    setSessionDynFlags,
+    typecheckModule,
+  )
+import GHC.Core (Bind (NonRec), Expr (..))
 import GHC.Core.Ppr
-import GHC.Utils.Outputable (OutputableBndr)
+  ( pprCoreAlt,
+    pprCoreBinding,
+    pprOptCo,
+    pprParendExpr,
+  )
 import qualified GHC.Core.Ppr
+import GHC.Driver.Types (ModGuts (mg_binds, mg_fam_insts, mg_rdr_env, mg_tcs))
+import GHC.Paths (libdir)
+import GHC.Plugins (CoreBind, CoreProgram, ModGuts (mg_insts, mg_patsyns), Outputable, Var)
+import GHC.Types.Literal
+  ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
+  )
+import GHC.Types.Var (Var (varName, varType))
+import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
+import TypedStepperProofOfConceptExamples (printExampleStepping)
+import Utils (dumpAST, showOutputable)
 
-main :: IO ()
+main :: IO ((), StepState)
 main = runGhc (Just libdir) $ do
   dFlags <- getSessionDynFlags
   setSessionDynFlags dFlags {hscTarget = HscNothing}
@@ -39,11 +73,11 @@ main = runGhc (Just libdir) $ do
 
       coreModule = dm_core_module dsmod
       coreAst = mg_binds coreModule
-      -- coreReaderEnv = mg_rdr_env coreModule
-      -- coreTyCons = mg_tcs coreModule
-      -- coreClassInsts = mg_insts coreModule
-      -- coreFamInsts = mg_fam_insts coreModule
-      -- corePatternSyns = mg_patsyns coreModule
+  -- coreReaderEnv = mg_rdr_env coreModule
+  -- coreTyCons = mg_tcs coreModule
+  -- coreClassInsts = mg_insts coreModule
+  -- coreFamInsts = mg_fam_insts coreModule
+  -- corePatternSyns = mg_patsyns coreModule
 
   liftIO $ writeFile "parserAST.txt" (dumpAST parserAST)
   liftIO $ writeFile "tcAST.txt" (dumpAST tcAST)
@@ -57,52 +91,95 @@ main = runGhc (Just libdir) $ do
 
   liftIO printExampleStepping
 
-  liftIO $ putStrLn "\nExample Stepping of Source:"
-  liftIO $ step $ extract coreAst
+  liftIO $ putStrLn "\nExample Stepping of Source.hs:"
+  let addAst = extract coreAst
+  runStateT (step addAst) initStepState
 
 extract :: [Bind a] -> Expr a
-extract prog = let
-  (main:add:rest) = prog
-  in case add of
-    NonRec j exp -> exp
+extract prog =
+  let (main : add : rest) = prog
+   in case add of
+        NonRec j exp -> exp
 
-step :: OutputableBndr b => Expr b -> IO ()
-step (Var id) = print ("Var", showOutputable $ varName id, showOutputable $ varType id)
+step :: (OutputableBndr b, MonadState StepState m, MonadIO m) => Expr b -> m ()
+step (Var id) = do
+  printDepth
+  lPrint ("Var", showOutputable $ varName id, showOutputable $ varType id)
 step (Lit lit) = case lit of
-  LitChar c -> print ("Char ", c)
-  LitNumber t v -> print ("Number ", v)
-  LitString bs -> print ("String ", bs)
-  LitFloat f -> print ("Float ", f)
-  LitDouble d -> print ("Double ", d)
+  LitChar c -> lPrint ("Char ", c)
+  LitNumber t v -> lPrint ("Number ", v)
+  LitString bs -> lPrint ("String ", bs)
+  LitFloat f -> lPrint ("Float ", f)
+  LitDouble d -> lPrint ("Double ", d)
 step (App exp arg) = do
-  putStr "App "
-  putStrLn . showOutputable $ pprParendExpr exp
+  printDepth
+  lPutStr "App "
+  lOutput $ pprParendExpr exp
+  incDepth
   step exp
   step arg
 step (Lam x exp) = do
-  putStr "Lam "
-  putStrLn . showOutputable $ pprParendExpr exp
+  printDepth
+  lPutStr "Lam "
+  lOutput $ pprParendExpr exp
+  incDepth
   step exp
 step (Let bind exp) = do
-  putStr "Let "
-  putStrLn . showOutputable $ pprCoreBinding bind
-  putStrLn . showOutputable $ pprParendExpr exp
+  printDepth
+  lPutStr "Let "
+  lOutput $ pprCoreBinding bind
+  lOutput $ pprParendExpr exp
+  incDepth
   step exp
 step (Case exp b t alts) = do
-   putStr "Case "
-   putStrLn . showOutputable $ pprParendExpr exp
-   putStrLn . showOutputable $ map pprCoreAlt alts
-   step exp
-step (Cast exp coer) = do
-   putStr "Cast "
-   putStrLn . showOutputable $ pprParendExpr exp
-   putStrLn . showOutputable $ pprOptCo coer
-   step exp
-step (Tick tid exp) = do
-  putStr "Tick "
-  putStrLn . showOutputable $ pprParendExpr exp
+  printDepth
+  lPutStr "Case "
+  lOutput $ pprParendExpr exp
+  lOutput $ map pprCoreAlt alts
+  incDepth
   step exp
-step (Type t) = putStr "Type "
+step (Cast exp coer) = do
+  printDepth
+  lPutStr "Cast "
+  lOutput $ pprParendExpr exp
+  lOutput $ pprOptCo coer
+  incDepth
+  step exp
+step (Tick tid exp) = do
+  printDepth
+  lPutStr "Tick "
+  lOutput $ pprParendExpr exp
+  incDepth
+  step exp
+step (Type t) = do
+  printDepth
+  lPutStr "Type "
+  lOutput $ ppr t
 step (Coercion coer) = do
-  putStr "Coer "
-  putStrLn . showOutputable $ pprOptCo coer
+  printDepth
+  lPutStr "Coer "
+  lOutput $ pprOptCo coer
+
+-- lifted version of common functions used in the stepper
+lOutput :: (MonadState StepState m, MonadIO m, Outputable a) => a -> m ()
+lOutput = liftIO . putStrLn . showOutputable
+
+lPrint :: (MonadState StepState m, MonadIO m, Show a) => a -> m ()
+lPrint = liftIO . print
+
+lPutStr :: (MonadState StepState m, MonadIO m) => String -> m ()
+lPutStr = liftIO . putStr
+
+-- state of the stepper
+data StepState = StepState {depth :: Integer} deriving (Show)
+
+initStepState :: StepState
+initStepState = StepState 0
+
+incDepth :: (MonadState StepState m, MonadIO m) => m ()
+incDepth = modify $ \s -> StepState {depth = depth s + 1}
+
+printDepth :: (MonadState StepState m, MonadIO m) => m ()
+printDepth = do
+  s <- get
+  lPutStr (replicate (fromIntegral (depth s)) '=')
