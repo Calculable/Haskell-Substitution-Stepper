@@ -85,6 +85,7 @@ step (Lam x exp) = do
   step exp
 step (Let bind exp) = do
   putStr "Let "
+  putStrLn . showOutputable $ pprCoreBinding bind
   putStrLn . showOutputable $ pprParendExpr exp
   step exp
 step (Case exp b t alts) = do
