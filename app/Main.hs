@@ -43,7 +43,7 @@ import GHC.Types.Literal
 import GHC.Types.Var (Var (varName, varType))
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import TypedStepperProofOfConceptExamples (printExampleStepping)
-import Utils (dumpAST, showOutputable)
+import Utils (dumpAst, showOutputable)
 
 main :: IO ((), StepState)
 main = runGhc (Just libdir) $ do
@@ -64,8 +64,8 @@ main = runGhc (Just libdir) $ do
   tcmod <- typecheckModule psmod
   dsmod <- desugarModule tcmod
 
-  let parserAST = pm_parsed_source psmod
-      tcAST = tm_typechecked_source tcmod
+  let parserAst = pm_parsed_source psmod
+      tcAst = tm_typechecked_source tcmod
 
       coreModule = dm_core_module dsmod
       coreAst = mg_binds coreModule
@@ -75,15 +75,15 @@ main = runGhc (Just libdir) $ do
   -- coreFamInsts = mg_fam_insts coreModule
   -- corePatternSyns = mg_patsyns coreModule
 
-  liftIO $ writeFile "parserAST.txt" (dumpAST parserAST)
-  liftIO $ writeFile "tcAST.txt" (dumpAST tcAST)
-  liftIO $ writeFile "coreAST.txt" (dumpAST coreAst)
+  liftIO $ writeFile "parserAst.txt" (dumpAst parserAst)
+  liftIO $ writeFile "tcAst.txt" (dumpAst tcAst)
+  liftIO $ writeFile "coreAST.txt" (dumpAst coreAst)
   liftIO $ writeFile "coreProgram.txt" (showOutputable coreAst)
-  -- liftIO $ writeFile "coreReaderEnv.txt" (dumpAST coreReaderEnv)
-  -- liftIO $ writeFile "coreTyCons.txt" (dumpAST coreTyCons)
-  -- liftIO $ writeFile "coreClassInsts.txt" (dumpAST coreClassInsts)
+  -- liftIO $ writeFile "coreReaderEnv.txt" (dumpAst coreReaderEnv)
+  -- liftIO $ writeFile "coreTyCons.txt" (dumpAst coreTyCons)
+  -- liftIO $ writeFile "coreClassInsts.txt" (dumpAst coreClassInsts)
   -- liftIO $ writeFile "coreFamInsts.txt" (showOutputable coreFamInsts)
-  -- liftIO $ writeFile "corePatternSyns.txt" (dumpAST corePatternSyns)
+  -- liftIO $ writeFile "corePatternSyns.txt" (dumpAst corePatternSyns)
 
   liftIO printExampleStepping
 

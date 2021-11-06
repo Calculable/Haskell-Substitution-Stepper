@@ -11,5 +11,5 @@ showOutputable :: GHC.Outputable o => o -> String
 showOutputable = GHC.showSDoc baseDynFlags . GHC.ppr
 
 -- https://hackage.haskell.org/package/ghc-lib-parser-9.0.1.20210324/docs/GHC-Hs-Dump.html
-dumpAST :: Data a => a -> String
-dumpAST x = showOutputable $ showAstData BlankSrcSpan x
+dumpAst :: Data a => a -> String
+dumpAst x = showOutputable $ showAstData BlankSrcSpan x

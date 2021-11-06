@@ -1,0 +1,119 @@
+
+({ ss }
+ (HsModule
+  (VirtualBraces
+   (1))
+  (Just
+   ({ ss }
+    {ModuleName: Source}))
+  (Nothing)
+  []
+  [({ ss }
+    (SigD
+     (NoExtField)
+     (TypeSig
+      (NoExtField)
+      [({ ss }
+        (Unqual
+         {OccName: add}))]
+      (HsWC
+       (NoExtField)
+       (HsIB
+        (NoExtField)
+        ({ ss }
+         (HsFunTy
+          (NoExtField)
+          (HsUnrestrictedArrow
+           (NormalSyntax))
+          ({ ss }
+           (HsTyVar
+            (NoExtField)
+            (NotPromoted)
+            ({ ss }
+             (Unqual
+              {OccName: Int}))))
+          ({ ss }
+           (HsFunTy
+            (NoExtField)
+            (HsUnrestrictedArrow
+             (NormalSyntax))
+            ({ ss }
+             (HsTyVar
+              (NoExtField)
+              (NotPromoted)
+              ({ ss }
+               (Unqual
+                {OccName: Int}))))
+            ({ ss }
+             (HsTyVar
+              (NoExtField)
+              (NotPromoted)
+              ({ ss }
+               (Unqual
+                {OccName: Int})))))))))))))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: add}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: add}))
+            (Prefix)
+            (NoSrcStrict))
+           [({ ss }
+             (VarPat
+              (NoExtField)
+              ({ ss }
+               (Unqual
+                {OccName: x}))))
+           ,({ ss }
+             (VarPat
+              (NoExtField)
+              ({ ss }
+               (Unqual
+                {OccName: y}))))]
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (OpApp
+                 (NoExtField)
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: x}))))
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: +}))))
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: y}))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))]
+  (Nothing)
+  (Nothing)))
