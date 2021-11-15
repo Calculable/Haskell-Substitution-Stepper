@@ -45,7 +45,7 @@ printFlatCoreExpression (Lit lit) = do
 printFlatCoreExpression (App exp arg) = do
   putStr "("
   printFlatCoreExpression exp
-  putStr ") "
+  putStr ")"
   printFlatCoreExpression arg
 printFlatCoreExpression (Lam b exp) = do
   putStr "\\"
@@ -75,7 +75,30 @@ printFlatCoreExpression x = do
 
 printFlatAlt :: (OutputableBndr b) => Alt b -> IO ()
 printFlatAlt (altCon, b, exp) = do
-    putStr (showOutputable altCon)
+    putStr "\n\t"
+    putStr (showOutputable altCon) --either literal or constructor or _
     putStr (unwords ( (map showOutputable b)))
     putStr " -> "
     printFlatCoreExpression exp
+
+data ExpressionS
+    = VarS String --for example "x" or "+"
+    | LitS LiteralS --for example "4"
+    | AppS {expressionS:: ExpressionS, argumentS :: ExpressionS} --for example "+ 1"
+    | LamS {parameterS:: String, expressionS:: ExpressionS} --for example "\x -> ...""
+    | CaseS {expressionS:: ExpressionS, alternativesS:: [AltS]} --for example "\a -> case (== a 1) of {true -> "One" false -> "not one"};"
+    | InvalidExpression String --for example "unsupported expression"
+
+data LiteralS
+    = LitCharS Char
+    | LitNumberS Integer
+    | LitStringS String
+    | LitFloatS Rational
+    | LitDoubleS Rational
+
+type AltS = (AltConS, [String], ExpressionS)
+
+data AltConS
+    = DataAltS String --pattern is a constructor, for example ":"
+    | LitAltS  LiteralS -- pattern is a literal, for example "TRUE"
+    | DefaultS -- pattern is "_"
