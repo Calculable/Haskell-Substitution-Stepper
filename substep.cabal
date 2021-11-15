@@ -27,6 +27,9 @@ library
   exposed-modules:
       DynFlags
       FlatCoreASTPrinter
+      SimplifiedCoreAST.SimplifiedCoreAST
+      SimplifiedCoreAST.SimplifiedCoreASTConverter
+      SimplifiedCoreAST.SimplifiedCoreASTPrinter
       Source
       Source2
       TypedStepperProofOfConcept

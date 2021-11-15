@@ -46,20 +46,23 @@ import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import TypedStepperProofOfConceptExamples (printExampleStepping)
 import Utils (printAst, showOutputable)
 import FlatCoreASTPrinter (printFlatCoreAST)
+import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
+import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
+import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
 
 main :: IO ((), StepState)
 main = runGhc (Just libdir) $ do
   dFlags <- getSessionDynFlags
   setSessionDynFlags dFlags {hscTarget = HscNothing}
 
-  target <- guessTarget "src/Source.hs" Nothing
+  target <- guessTarget "src/Source2.hs" Nothing
   addTarget target
   res <- load LoadAllTargets
   case res of
     Succeeded -> liftIO $ putStrLn "successfully loaded targets"
     Failed -> liftIO $ putStrLn "failed to load targets"
 
-  let modName = mkModuleName "Source"
+  let modName = mkModuleName "Source2"
   modSum <- getModSummary modName
 
   psmod <- parseModule modSum
@@ -95,8 +98,11 @@ main = runGhc (Just libdir) $ do
 
   let addAst = extract coreAst
 
-  liftIO $ putStrLn "\n*****Example Flat Printing of Source.hs:*****"
-  liftIO $ printFlatCoreAST coreAst
+  --liftIO $ putStrLn "\n*****Example Flat Printing of Source.hs:*****"
+  --liftIO $ printFlatCoreAST coreAst
+
+  liftIO $ putStrLn "\n*****Example Simplified Core AST Printing of Source.hs:*****"
+  liftIO $ printSimplifiedCoreAST (simplifyBindings coreAst)
 
   liftIO $ putStrLn "\n*****Example Stepping of Source.hs:*****"
   runStateT (step addAst) initStepState
