@@ -2,9 +2,45 @@
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 80 10}]
- $trModule = Module (TrNameS "main"#) (TrNameS "Source"#),
- add :: Int -> Int -> Int
+ $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#),
+ y :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 240 0}]
+ y = - @Integer $fNumInteger 3 4,
+ x :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 380 0}]
+ x = + @Integer $fNumInteger 1 (* @Integer $fNumInteger 2 3),
+ z :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 40 0}]
+ z = + @Integer $fNumInteger x y,
+ sayMe :: Integer -> String
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [0 0] 40 0}]
- add = \ (x :: Int) (y :: Int) -> + @Int $fNumInt x y]
+          WorkFree=True, Expandable=True, Guidance=NEVER}]
+ sayMe
+   = \ (ds_d1lI :: Integer) ->
+       case == @Integer $fEqInteger ds_d1lI 1 of {
+         False ->
+           case == @Integer $fEqInteger ds_d1lI 2 of {
+             False ->
+               case == @Integer $fEqInteger ds_d1lI 3 of {
+                 False ->
+                   case == @Integer $fEqInteger ds_d1lI 4 of {
+                     False ->
+                       case == @Integer $fEqInteger ds_d1lI 5 of {
+                         False -> unpackCString# "Not between 1 and 5"#;
+                         True -> unpackCString# "Five!"#
+                       };
+                     True -> unpackCString# "Four!"#
+                   };
+                 True -> unpackCString# "Three!"#
+               };
+             True -> unpackCString# "Two!"#
+           };
+         True -> unpackCString# "One!"#
+       }]

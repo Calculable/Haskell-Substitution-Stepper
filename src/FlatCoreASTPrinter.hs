@@ -3,14 +3,17 @@ module FlatCoreASTPrinter
   )
 where
 
-import GHC.Core (Bind (NonRec, Rec), Expr (..))
+import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt)
 import GHC.Types.Literal
   ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
   )
-import GHC.Types.Var (Var (varName, varType))
+import GHC.Types.Var (Var (varName, varType), TyVar, Id)
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import Utils (printAst, showOutputable)
-
+import GHC.Core.Ppr
+  ( pprCoreAlt,
+  )
+import Data.List(isPrefixOf)
 
 printFlatCoreAST :: (OutputableBndr a) => [Bind a] -> IO ()
 printFlatCoreAST x = mapM_ printFlatCoreBinding x
@@ -27,8 +30,11 @@ printFlatBindingWithExpression (b, exp) = do
     putStrLn ""
 
 printFlatCoreExpression :: (OutputableBndr b) => Expr b -> IO ()
-printFlatCoreExpression (Var id) =
-    putStr (showOutputable (varName id))
+printFlatCoreExpression (Var id) = do
+    let name = (showOutputable $ varName id)
+    if (isPrefixOf "$" name)
+      then putStr ""
+      else putStr name
 printFlatCoreExpression (Lit lit) = do
     case lit of
       LitChar c -> putStr (show c)
@@ -47,7 +53,28 @@ printFlatCoreExpression (Lam b exp) = do
   putStr " -> ("
   printFlatCoreExpression exp
   putStr ")"
-printFlatCoreExpression (Type t) = do
-  putStr (showOutputable (ppr t))
+printFlatCoreExpression (Type t) = --do
+  --putStr (showOutputable (ppr t))
+  putStr ""
+printFlatCoreExpression (Let bind exp) = do
+  --printFlatCoreBinding bind
+  printFlatCoreExpression exp
+printFlatCoreExpression (Case exp b t alts) = do
+  putStr "case "
+  printFlatCoreExpression exp
+  --putStr "(b)"
+  --putStr (showOutputable b)
+  --putStr "(t)"
+  --putStr (showOutputable (ppr t))
+  putStr " of {"
+  mapM_ printFlatAlt alts
+  putStr "};"
 printFlatCoreExpression x = do
   putStr "Unsupported Constructor"
+
+
+printFlatAlt :: (OutputableBndr b) => Alt b -> IO ()
+printFlatAlt (altCon, _, exp) = do
+    putStr (showOutputable altCon)
+    putStr "->"
+    printFlatCoreExpression exp
