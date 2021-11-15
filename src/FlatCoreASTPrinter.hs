@@ -53,11 +53,11 @@ printFlatCoreExpression (Lam b exp) = do
   putStr " -> ("
   printFlatCoreExpression exp
   putStr ")"
-printFlatCoreExpression (Type t) = --do
+printFlatCoreExpression (Type t) = do
   --putStr (showOutputable (ppr t))
   putStr ""
 printFlatCoreExpression (Let bind exp) = do
-  --printFlatCoreBinding bind
+  printFlatCoreBinding bind
   printFlatCoreExpression exp
 printFlatCoreExpression (Case exp b t alts) = do
   putStr "case "
@@ -74,7 +74,8 @@ printFlatCoreExpression x = do
 
 
 printFlatAlt :: (OutputableBndr b) => Alt b -> IO ()
-printFlatAlt (altCon, _, exp) = do
+printFlatAlt (altCon, b, exp) = do
     putStr (showOutputable altCon)
-    putStr "->"
+    putStr (unwords ( (map showOutputable b)))
+    putStr " -> "
     printFlatCoreExpression exp

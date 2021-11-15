@@ -13,3 +13,9 @@ sayMe x = "Not between 1 and 5"
 
 y = 3 - 4
 z = x + y
+
+reverseList :: [Integer] -> [Integer]
+reverseList [] = []
+reverseList (a:bc) = reverseList bc ++ [a]
+
+abc = reverseList [1, 2, 3]
