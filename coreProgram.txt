@@ -1,63 +1,20 @@
-[reverseList [Occ=LoopBreaker] :: [Integer] -> [Integer]
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
- reverseList
-   = \ (ds_d1mq :: [Integer]) ->
-       case ds_d1mq of {
-         [] -> [] @Integer;
-         : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
-       };,
- abc :: [Integer]
+[x :: Integer
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 350 0}]
- abc
-   = reverseList
-       (: @Integer 1 (: @Integer 2 (: @Integer 3 ([] @Integer)))),
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 240 0}]
+ x = * @Integer $fNumInteger 100 100,
+ y :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 40 0}]
+ y = * @Integer $fNumInteger x x,
+ z :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 140 0}]
+ z = * @Integer $fNumInteger y 2,
  $trModule :: Module
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 80 10}]
- $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#),
- y :: Integer
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 240 0}]
- y = - @Integer $fNumInteger 3 4,
- x :: Integer
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 380 0}]
- x = + @Integer $fNumInteger 1 (* @Integer $fNumInteger 2 3),
- z :: Integer
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 40 0}]
- z = + @Integer $fNumInteger x y,
- sayMe :: Integer -> String
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=NEVER}]
- sayMe
-   = \ (ds_d1mv :: Integer) ->
-       case == @Integer $fEqInteger ds_d1mv 1 of {
-         False ->
-           case == @Integer $fEqInteger ds_d1mv 2 of {
-             False ->
-               case == @Integer $fEqInteger ds_d1mv 3 of {
-                 False ->
-                   case == @Integer $fEqInteger ds_d1mv 4 of {
-                     False ->
-                       case == @Integer $fEqInteger ds_d1mv 5 of {
-                         False -> unpackCString# "Not between 1 and 5"#;
-                         True -> unpackCString# "Five!"#
-                       };
-                     True -> unpackCString# "Four!"#
-                   };
-                 True -> unpackCString# "Three!"#
-               };
-             True -> unpackCString# "Two!"#
-           };
-         True -> unpackCString# "One!"#
-       }]
+ $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#)]

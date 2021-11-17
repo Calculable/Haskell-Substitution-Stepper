@@ -33,6 +33,7 @@ dependencies:
 - ghc-lib
 - ghc-lib-parser
 - ghc-paths
+- optparse-applicative
 
 library:
   source-dirs: src

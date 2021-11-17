@@ -49,20 +49,50 @@ import FlatCoreASTPrinter (printFlatCoreAST)
 import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
 import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
+import Options.Applicative
+
+data Opts = Opts
+    {filePath :: !String, moduleName :: !String
+    }
 
 main :: IO ((), StepState)
-main = runGhc (Just libdir) $ do
+main = do
+    opts <- execParser optsParser
+    runStepper (filePath opts) (moduleName opts)
+  where
+    optsParser :: ParserInfo Opts
+    optsParser =
+        info
+            (helper <*> versionOption <*> programOptions)
+            (fullDesc <> progDesc "Haskell Substitution Stepper" <>
+             header
+                 "a stepper for Haskell Core")
+    versionOption :: Parser (a -> a)
+    versionOption = infoOption "0.0" (long "version" <> help "Show version")
+    programOptions :: Parser Opts
+    programOptions =
+        Opts <$> strOption
+            (long "file" <> metavar "VALUE" <> value "src/Source2.hs" <>
+             help "path to the haskell file that should be read") <*>
+        strOption
+            (long "module" <> metavar "VALUE" <> value "Source2" <>
+             help "name of the module inside the haskell file")
+       
+
+runStepper :: String -> String -> IO ((), StepState)
+runStepper filePath moduleName = runGhc (Just libdir) $ do
+  
   dFlags <- getSessionDynFlags
   setSessionDynFlags dFlags {hscTarget = HscNothing}
-
-  target <- guessTarget "src/Source2.hs" Nothing
+  
+  target <- guessTarget filePath Nothing
   addTarget target
   res <- load LoadAllTargets
   case res of
     Succeeded -> liftIO $ putStrLn "successfully loaded targets"
     Failed -> liftIO $ putStrLn "failed to load targets"
 
-  let modName = mkModuleName "Source2"
+  let modName = mkModuleName moduleName
   modSum <- getModSummary modName
 
   psmod <- parseModule modSum
