@@ -59,6 +59,7 @@ printLiteral (LitNumberS v) indent = putStr (show v)
 printLiteral (LitStringS s) indent = putStr s
 printLiteral (LitFloatS f) indent = putStr (show f)
 printLiteral (LitDoubleS d) indent = putStr (show d)
+printLiteral (InvalidLiteral error) indent = putStr ("Invalid Literal: " ++ error)
 
 printSimplifiedAlt :: Integer -> AltS -> IO ()
 printSimplifiedAlt indent (altCon, b, exp) = do

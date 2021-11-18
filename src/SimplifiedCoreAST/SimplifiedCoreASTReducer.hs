@@ -31,6 +31,8 @@ reduce bindings expression    | canBeReduced expression = do
 canBeReduced :: ExpressionS -> Bool
 canBeReduced (VarS _) = True
 canBeReduced (AppS _ _) = True
+canBeReduced (MultiArgumentAppS _ _) = True
+
 canBeReduced _ = False
 
 findBinding :: String -> [BindS] -> ExpressionS
@@ -52,7 +54,10 @@ Nothing ?? y = y
 applyStep :: [BindS] -> ExpressionS -> (ReductionStepDescription, ExpressionS)
 applyStep bindings (VarS name) = (("Replace '" ++ name ++ "' with definition"),(findBinding name bindings)) {-replace binding reference with actual expression (Delta Reduction)-}
 applyStep bindings (AppS (LamS parameter expression) argument) = ("Application", deepReplaceVarWithinExpression parameter argument expression)
-applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = ("Add argument to built-in multi-argument function", (MultiArgumentAppS name (arguments ++ [argument])))
+applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = if (canBeReduced argument)
+                                                                          then (description, (AppS (MultiArgumentAppS name arguments) reducedArgument))
+                                                                          else ("Add argument to built-in multi-argument function", (MultiArgumentAppS name (arguments ++ [argument])))
+                                                                          where (description, reducedArgument) = applyStep bindings argument
 applyStep bindings (AppS (AppS name firstArgument) secondArgument) = (description, (AppS simplifiedFirstApplication secondArgument))  --if the expression of the application is itself an application, the first application should be simplified
                                                                       where (description, simplifiedFirstApplication) = applyStep bindings (AppS name firstArgument)
 applyStep bindings (AppS (VarS name) argument) = do
@@ -62,6 +67,7 @@ applyStep bindings (AppS (VarS name) argument) = do
     else ("Replace '" ++ name ++ "' with definition", (AppS (fromJust userDefinedExpression) argument))
 
 applyStep bindings _  = ("ToDo: Implement Reduction", InvalidExpression "No reduction implemented for this type of expression")
+
 
 deepReplaceVarWithinExpression :: String -> ExpressionS -> ExpressionS -> ExpressionS
 deepReplaceVarWithinExpression name replaceExpression (VarS varName) = if ((==) varName name) then replaceExpression else (VarS varName)
@@ -81,6 +87,11 @@ deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundString
 
 sum :: ExpressionS -> ExpressionS -> ExpressionS
 sum _ _ = LitS (LitNumberS 4)
+
+
+boolToExpression :: Bool -> ExpressionS
+boolToExpression True = VarS "True"
+boolToExpression False = VarS "False"
 
 --verschiedene Arten  Function Application
 

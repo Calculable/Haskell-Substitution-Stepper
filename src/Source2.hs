@@ -27,3 +27,5 @@ b = z
 c = (\x -> x + x)
 
 d = c 1
+
+e = True
