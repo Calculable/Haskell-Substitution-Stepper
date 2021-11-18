@@ -33,9 +33,16 @@ canBeReduced bindings (VarS name) = if (isNothing (tryFindBinding name bindings)
                               then False
                               else True
 canBeReduced _ (AppS _ _) = True
-canBeReduced _ (MultiArgumentAppS _ _) = True --return false if it is a constructor
+canBeReduced _ (MultiArgumentAppS name arguments) = if (isConstructor name) 
+                                                      then False
+                                                      else True
 canBeReduced _ (CaseS _ _) = True
 canBeReduced _ _ = False
+
+isConstructor :: String -> Bool
+isConstructor ":" = True
+isConstructor _ = False
+--ToDo: add more well known constructors
 
 findBinding :: String -> [BindS] -> ExpressionS
 findBinding key bindings = (tryFindBinding key bindings) ?? (InvalidExpression "Binding not Found")
@@ -57,7 +64,7 @@ applyStep :: [BindS] -> ExpressionS -> (ReductionStepDescription, ExpressionS)
 applyStep bindings (VarS name) = (("Replace '" ++ name ++ "' with definition"),(findBinding name bindings)) {-replace binding reference with actual expression (Delta Reduction)-}
 applyStep bindings (AppS (LamS parameter expression) argument) = ("Application", deepReplaceVarWithinExpression parameter argument expression)
 applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = if (canBeReduced bindings argument)
-                                                                          then (description ++ " (please note that this is an eager reduction and not default GHC behaviour. This approach is chosen because this expression will be used as a parameter for an application that can not be further stepped or where further stepping ist not yet supported)", (AppS (MultiArgumentAppS name arguments) reducedArgument))
+                                                                          then (description {-++ " (please note that this is an eager reduction and not default GHC behaviour. This approach is chosen because this expression will be used as a parameter for an application that can not be further stepped or where further stepping ist not yet supported)"-}, (AppS (MultiArgumentAppS name arguments) reducedArgument))
                                                                           else ("Add argument to built-in multi-argument function", (MultiArgumentAppS name (arguments ++ [argument])))
                                                                           where (description, reducedArgument) = applyStep bindings argument
 applyStep bindings (AppS (AppS name firstArgument) secondArgument) = (description, (AppS simplifiedFirstApplication secondArgument))  --if the expression of the application is itself an application, the first application should be simplified
@@ -85,7 +92,12 @@ findMatchingPattern _ ((DefaultS, _, expression):xs) = expression --default matc
 findMatchingPattern (VarS name) (((DataAltS patternConstructorName), _, expression):xs) = if ((==) name patternConstructorName)
                                                                                             then expression
                                                                                             else (findMatchingPattern (VarS name) xs)
-
+findMatchingPattern (LitS literal) (((LitAltS patternLiteral), _, expression):xs) = if ((==) literal patternLiteral)
+                                                                                            then expression
+                                                                                            else (findMatchingPattern (LitS literal) xs)
+findMatchingPattern (MultiArgumentAppS name arguments) (((DataAltS patternConstructorName), boundNames, expression):xs) = if ((==) name patternConstructorName)
+                                                                                                                            then deepReplaceMultipleVarWithinExpression boundNames arguments expression
+                                                                                                                            else (findMatchingPattern (MultiArgumentAppS name arguments) xs)
 findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
 --toDo: Support more types of pattern matching
 
@@ -96,6 +108,10 @@ findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
 --     | LitAltS  LiteralS -- pattern is a literal, for example "5"
 --     | DefaultS -- pattern is "_"
 
+deepReplaceMultipleVarWithinExpression :: [String] -> [ExpressionS] -> ExpressionS -> ExpressionS
+deepReplaceMultipleVarWithinExpression [] _ expression = expression
+deepReplaceMultipleVarWithinExpression _ [] expression = expression
+deepReplaceMultipleVarWithinExpression (x:xs) (y:ys) expression = deepReplaceMultipleVarWithinExpression xs ys (deepReplaceVarWithinExpression x y expression)
 
 deepReplaceVarWithinExpression :: String -> ExpressionS -> ExpressionS -> ExpressionS
 deepReplaceVarWithinExpression name replaceExpression (VarS varName) = if ((==) varName name) then replaceExpression else (VarS varName)
