@@ -62,7 +62,7 @@ Nothing ?? y = y
 
 applyStep :: [BindS] -> ExpressionS -> (ReductionStepDescription, ExpressionS)
 applyStep bindings (VarS name) = (("Replace '" ++ name ++ "' with definition"),(findBinding name bindings)) {-replace binding reference with actual expression (Delta Reduction)-}
-applyStep bindings (AppS (LamS parameter expression) argument) = ("Application", deepReplaceVarWithinExpression parameter argument expression)
+applyStep bindings (AppS (LamS parameter expression) argument) = ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
 applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = if (canBeReduced bindings argument)
                                                                           then (description {-++ " (please note that this is an eager reduction and not default GHC behaviour. This approach is chosen because this expression will be used as a parameter for an application that can not be further stepped or where further stepping ist not yet supported)"-}, (AppS (MultiArgumentAppS name arguments) reducedArgument))
                                                                           else ("Add argument to built-in multi-argument function", (MultiArgumentAppS name (arguments ++ [argument])))
@@ -99,14 +99,7 @@ findMatchingPattern (MultiArgumentAppS name arguments) (((DataAltS patternConstr
                                                                                                                             then deepReplaceMultipleVarWithinExpression boundNames arguments expression
                                                                                                                             else (findMatchingPattern (MultiArgumentAppS name arguments) xs)
 findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
---toDo: Support more types of pattern matching
 
--- type AltS = (AltConS, [String], ExpressionS)
-
--- data AltConS
---     = DataAltS String --pattern is a constructor, for example ":"
---     | LitAltS  LiteralS -- pattern is a literal, for example "5"
---     | DefaultS -- pattern is "_"
 
 deepReplaceMultipleVarWithinExpression :: [String] -> [ExpressionS] -> ExpressionS -> ExpressionS
 deepReplaceMultipleVarWithinExpression [] _ expression = expression
@@ -152,32 +145,3 @@ boolToExpression False = VarS "False"
 
 integerToExpression :: Integer -> ExpressionS
 integerToExpression x = LitS (LitNumberS x)
-
---verschiedene Arten  Function Application
-
---Expression ist ein Lamda => Wert einsetzen
---Expression ist eine MultiFunctionApplication => Das Argument zur Liste der Parameter hinzufügen
--- Expression ist eine Application => Expression vereinfachen
-
---Expression ist ein Var
-    --Hinter dem Var ist ein Lamda => Var durch Lamda ersetzen
-    --Hinter dem Var ist ein Operator oder eine Funktion aus der Prelude
-        --App in ein MultiFunctionApplication umwandeln 
-
--- data ExpressionS
---     = VarS String --for example "x" or "+"
---     | LitS LiteralS --for example "4"
---     | AppS {expressionS:: ExpressionS, argumentS :: ExpressionS} --for example "+ 1"
---     | LamS {parameterS:: String, expressionS:: ExpressionS} --for example "\x -> ...""
---     | CaseS {expressionS:: ExpressionS, alternativesS:: [AltS]} --for example "\a -> case (== a 1) of {true -> "One" false -> "not one"};"
---     | TypeS --not implemented
---     | MultiArgumentAppS {name:: String, argumentsS :: [ExpressionS]} --not in original core but used so we can make a reduction with build-in functions/operators from the prelude like (+ 1) 2 -> (+ 1 2) -> 3 
---     | InvalidExpression String --for example "unsupported expression"
-
-
--- vier Arten von Funktionen: integrierte direkt evaluierte, über code integrierte, vom user bereitgestellte, unbekannte 
-
-
--- wie kann ich Dinge wie (+1) 2 vereinfachen wenn jede Funktion immer nur ein Parameter haben kann?
--- kann ich zum Beispiel schreiben (+ 1 2)?
--- das ist ein Argument für den simplified AST

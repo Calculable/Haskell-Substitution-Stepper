@@ -36,6 +36,168 @@
                (NoExtField)
                []
                ({ ss }
+                (HsOverLit
+                 (NoExtField)
+                 (OverLit
+                  (NoExtField)
+                  (HsIntegral
+                   (IL
+                    (SourceText
+                     "1")
+                    (False)
+                    (1)))
+                  (HsLit
+                   (NoExtField)
+                   (HsString
+                    (SourceText
+                     "noExpr")
+                    {FastString: "noExpr"})))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: y}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: y}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsOverLit
+                 (NoExtField)
+                 (OverLit
+                  (NoExtField)
+                  (HsIntegral
+                   (IL
+                    (SourceText
+                     "2")
+                    (False)
+                    (2)))
+                  (HsLit
+                   (NoExtField)
+                   (HsString
+                    (SourceText
+                     "noExpr")
+                    {FastString: "noExpr"})))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: namedValueDemo}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: namedValueDemo}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (OpApp
+                 (NoExtField)
+                 ({ ss }
+                  (HsOverLit
+                   (NoExtField)
+                   (OverLit
+                    (NoExtField)
+                    (HsIntegral
+                     (IL
+                      (SourceText
+                       "1")
+                      (False)
+                      (1)))
+                    (HsLit
+                     (NoExtField)
+                     (HsString
+                      (SourceText
+                       "noExpr")
+                      {FastString: "noExpr"})))))
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: -}))))
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: y}))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: arithmeticDemo}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: arithmeticDemo}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
                 (OpApp
                  (NoExtField)
                  ({ ss }
@@ -104,6 +266,216 @@
                       (SourceText
                        "noExpr")
                       {FastString: "noExpr"})))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: lamdaDemo}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: lamdaDemo}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsPar
+                 (NoExtField)
+                 ({ ss }
+                  (HsLam
+                   (NoExtField)
+                   (MG
+                    (NoExtField)
+                    ({ ss }
+                     [({ ss }
+                       (Match
+                        (NoExtField)
+                        (LambdaExpr)
+                        [({ ss }
+                          (VarPat
+                           (NoExtField)
+                           ({ ss }
+                            (Unqual
+                             {OccName: x}))))]
+                        (GRHSs
+                         (NoExtField)
+                         [({ ss }
+                           (GRHS
+                            (NoExtField)
+                            []
+                            ({ ss }
+                             (OpApp
+                              (NoExtField)
+                              ({ ss }
+                               (HsVar
+                                (NoExtField)
+                                ({ ss }
+                                 (Unqual
+                                  {OccName: x}))))
+                              ({ ss }
+                               (HsVar
+                                (NoExtField)
+                                ({ ss }
+                                 (Unqual
+                                  {OccName: +}))))
+                              ({ ss }
+                               (HsVar
+                                (NoExtField)
+                                ({ ss }
+                                 (Unqual
+                                  {OccName: x}))))))))]
+                         ({ ss }
+                          (EmptyLocalBinds
+                           (NoExtField))))))])
+                    (FromSource))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: lamdaApplicationDemo}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: lamdaApplicationDemo}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsApp
+                 (NoExtField)
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: lamdaDemo}))))
+                 ({ ss }
+                  (HsOverLit
+                   (NoExtField)
+                   (OverLit
+                    (NoExtField)
+                    (HsIntegral
+                     (IL
+                      (SourceText
+                       "1")
+                      (False)
+                      (1)))
+                    (HsLit
+                     (NoExtField)
+                     (HsString
+                      (SourceText
+                       "noExpr")
+                      {FastString: "noExpr"})))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: usageOfPreludeFunctionsDemo}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: usageOfPreludeFunctionsDemo}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsApp
+                 (NoExtField)
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: abs}))))
+                 ({ ss }
+                  (HsPar
+                   (NoExtField)
+                   ({ ss }
+                    (HsApp
+                     (NoExtField)
+                     ({ ss }
+                      (HsVar
+                       (NoExtField)
+                       ({ ss }
+                        (Unqual
+                         {OccName: negate}))))
+                     ({ ss }
+                      (HsOverLit
+                       (NoExtField)
+                       (OverLit
+                        (NoExtField)
+                        (HsIntegral
+                         (IL
+                          (SourceText
+                           "3")
+                          (False)
+                          (3)))
+                        (HsLit
+                         (NoExtField)
+                         (HsString
+                          (SourceText
+                           "noExpr")
+                          {FastString: "noExpr"})))))))))))))]
             ({ ss }
              (EmptyLocalBinds
               (NoExtField))))))])
@@ -296,96 +668,6 @@
             (Prefix)
             (NoSrcStrict))
            [({ ss }
-             (NPat
-              (NoExtField)
-              ({ ss }
-               (OverLit
-                (NoExtField)
-                (HsIntegral
-                 (IL
-                  (SourceText
-                   "4")
-                  (False)
-                  (4)))
-                (HsLit
-                 (NoExtField)
-                 (HsString
-                  (SourceText
-                   "noExpr")
-                  {FastString: "noExpr"}))))
-              (Nothing)
-              (NoExtField)))]
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsLit
-                 (NoExtField)
-                 (HsString
-                  (SourceText
-                   "\"Four!\"")
-                  {FastString: "Four!"})))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))
-        ,({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: sayMe}))
-            (Prefix)
-            (NoSrcStrict))
-           [({ ss }
-             (NPat
-              (NoExtField)
-              ({ ss }
-               (OverLit
-                (NoExtField)
-                (HsIntegral
-                 (IL
-                  (SourceText
-                   "5")
-                  (False)
-                  (5)))
-                (HsLit
-                 (NoExtField)
-                 (HsString
-                  (SourceText
-                   "noExpr")
-                  {FastString: "noExpr"}))))
-              (Nothing)
-              (NoExtField)))]
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsLit
-                 (NoExtField)
-                 (HsString
-                  (SourceText
-                   "\"Five!\"")
-                  {FastString: "Five!"})))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))
-        ,({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: sayMe}))
-            (Prefix)
-            (NoSrcStrict))
-           [({ ss }
              (VarPat
               (NoExtField)
               ({ ss }
@@ -402,8 +684,8 @@
                  (NoExtField)
                  (HsString
                   (SourceText
-                   "\"Not between 1 and 5\"")
-                  {FastString: "Not between 1 and 5"})))))]
+                   "\"Not between 1 and 3\"")
+                  {FastString: "Not between 1 and 3"})))))]
             ({ ss }
              (EmptyLocalBinds
               (NoExtField))))))])
@@ -416,7 +698,7 @@
       (NoExtField)
       ({ ss }
        (Unqual
-        {OccName: y}))
+        {OccName: patternMatchingOnValueDemo}))
       (MG
        (NoExtField)
        ({ ss }
@@ -426,7 +708,7 @@
            (FunRhs
             ({ ss }
              (Unqual
-              {OccName: y}))
+              {OccName: patternMatchingOnValueDemo}))
             (Prefix)
             (NoSrcStrict))
            []
@@ -437,31 +719,14 @@
                (NoExtField)
                []
                ({ ss }
-                (OpApp
+                (HsApp
                  (NoExtField)
-                 ({ ss }
-                  (HsOverLit
-                   (NoExtField)
-                   (OverLit
-                    (NoExtField)
-                    (HsIntegral
-                     (IL
-                      (SourceText
-                       "3")
-                      (False)
-                      (3)))
-                    (HsLit
-                     (NoExtField)
-                     (HsString
-                      (SourceText
-                       "noExpr")
-                      {FastString: "noExpr"})))))
                  ({ ss }
                   (HsVar
                    (NoExtField)
                    ({ ss }
                     (Unqual
-                     {OccName: -}))))
+                     {OccName: sayMe}))))
                  ({ ss }
                   (HsOverLit
                    (NoExtField)
@@ -470,68 +735,15 @@
                     (HsIntegral
                      (IL
                       (SourceText
-                       "4")
+                       "1")
                       (False)
-                      (4)))
+                      (1)))
                     (HsLit
                      (NoExtField)
                      (HsString
                       (SourceText
                        "noExpr")
                       {FastString: "noExpr"})))))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: z}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: z}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (OpApp
-                 (NoExtField)
-                 ({ ss }
-                  (HsVar
-                   (NoExtField)
-                   ({ ss }
-                    (Unqual
-                     {OccName: x}))))
-                 ({ ss }
-                  (HsVar
-                   (NoExtField)
-                   ({ ss }
-                    (Unqual
-                     {OccName: +}))))
-                 ({ ss }
-                  (HsVar
-                   (NoExtField)
-                   ({ ss }
-                    (Unqual
-                     {OccName: y}))))))))]
             ({ ss }
              (EmptyLocalBinds
               (NoExtField))))))])
@@ -700,7 +912,7 @@
       (NoExtField)
       ({ ss }
        (Unqual
-        {OccName: abc}))
+        {OccName: patternMatchingOnOperatorDemo}))
       (MG
        (NoExtField)
        ({ ss }
@@ -710,7 +922,7 @@
            (FunRhs
             ({ ss }
              (Unqual
-              {OccName: abc}))
+              {OccName: patternMatchingOnOperatorDemo}))
             (Prefix)
             (NoSrcStrict))
            []
@@ -784,350 +996,6 @@
                          (SourceText
                           "noExpr")
                          {FastString: "noExpr"})))))]))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: a}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: a}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsApp
-                 (NoExtField)
-                 ({ ss }
-                  (HsVar
-                   (NoExtField)
-                   ({ ss }
-                    (Unqual
-                     {OccName: sayMe}))))
-                 ({ ss }
-                  (HsOverLit
-                   (NoExtField)
-                   (OverLit
-                    (NoExtField)
-                    (HsIntegral
-                     (IL
-                      (SourceText
-                       "1")
-                      (False)
-                      (1)))
-                    (HsLit
-                     (NoExtField)
-                     (HsString
-                      (SourceText
-                       "noExpr")
-                      {FastString: "noExpr"})))))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: b}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: b}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsVar
-                 (NoExtField)
-                 ({ ss }
-                  (Unqual
-                   {OccName: z}))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: c}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: c}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsPar
-                 (NoExtField)
-                 ({ ss }
-                  (HsLam
-                   (NoExtField)
-                   (MG
-                    (NoExtField)
-                    ({ ss }
-                     [({ ss }
-                       (Match
-                        (NoExtField)
-                        (LambdaExpr)
-                        [({ ss }
-                          (VarPat
-                           (NoExtField)
-                           ({ ss }
-                            (Unqual
-                             {OccName: x}))))]
-                        (GRHSs
-                         (NoExtField)
-                         [({ ss }
-                           (GRHS
-                            (NoExtField)
-                            []
-                            ({ ss }
-                             (OpApp
-                              (NoExtField)
-                              ({ ss }
-                               (HsVar
-                                (NoExtField)
-                                ({ ss }
-                                 (Unqual
-                                  {OccName: x}))))
-                              ({ ss }
-                               (HsVar
-                                (NoExtField)
-                                ({ ss }
-                                 (Unqual
-                                  {OccName: +}))))
-                              ({ ss }
-                               (HsVar
-                                (NoExtField)
-                                ({ ss }
-                                 (Unqual
-                                  {OccName: x}))))))))]
-                         ({ ss }
-                          (EmptyLocalBinds
-                           (NoExtField))))))])
-                    (FromSource))))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: d}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: d}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsApp
-                 (NoExtField)
-                 ({ ss }
-                  (HsVar
-                   (NoExtField)
-                   ({ ss }
-                    (Unqual
-                     {OccName: c}))))
-                 ({ ss }
-                  (HsOverLit
-                   (NoExtField)
-                   (OverLit
-                    (NoExtField)
-                    (HsIntegral
-                     (IL
-                      (SourceText
-                       "1")
-                      (False)
-                      (1)))
-                    (HsLit
-                     (NoExtField)
-                     (HsString
-                      (SourceText
-                       "noExpr")
-                      {FastString: "noExpr"})))))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: e}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: e}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsVar
-                 (NoExtField)
-                 ({ ss }
-                  (Unqual
-                   {OccName: True}))))))]
-            ({ ss }
-             (EmptyLocalBinds
-              (NoExtField))))))])
-       (FromSource))
-      [])))
-  ,({ ss }
-    (ValD
-     (NoExtField)
-     (FunBind
-      (NoExtField)
-      ({ ss }
-       (Unqual
-        {OccName: f}))
-      (MG
-       (NoExtField)
-       ({ ss }
-        [({ ss }
-          (Match
-           (NoExtField)
-           (FunRhs
-            ({ ss }
-             (Unqual
-              {OccName: f}))
-            (Prefix)
-            (NoSrcStrict))
-           []
-           (GRHSs
-            (NoExtField)
-            [({ ss }
-              (GRHS
-               (NoExtField)
-               []
-               ({ ss }
-                (HsApp
-                 (NoExtField)
-                 ({ ss }
-                  (HsVar
-                   (NoExtField)
-                   ({ ss }
-                    (Unqual
-                     {OccName: abs}))))
-                 ({ ss }
-                  (HsPar
-                   (NoExtField)
-                   ({ ss }
-                    (HsApp
-                     (NoExtField)
-                     ({ ss }
-                      (HsVar
-                       (NoExtField)
-                       ({ ss }
-                        (Unqual
-                         {OccName: negate}))))
-                     ({ ss }
-                      (HsOverLit
-                       (NoExtField)
-                       (OverLit
-                        (NoExtField)
-                        (HsIntegral
-                         (IL
-                          (SourceText
-                           "3")
-                          (False)
-                          (3)))
-                        (HsLit
-                         (NoExtField)
-                         (HsString
-                          (SourceText
-                           "noExpr")
-                          {FastString: "noExpr"})))))))))))))]
             ({ ss }
              (EmptyLocalBinds
               (NoExtField))))))])

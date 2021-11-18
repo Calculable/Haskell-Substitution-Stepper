@@ -1,12 +1,24 @@
 
-[(Rec
+[(NonRec
+  {Var: x}
+  (Lit
+   (LitNumber
+    (LitNumInteger)
+    (1))))
+,(NonRec
+  {Var: y}
+  (Lit
+   (LitNumber
+    (LitNumInteger)
+    (2))))
+,(Rec
   [((,)
     {Var: reverseList}
     (Lam
-     {Var: ds_d1om}
+     {Var: ds_d1o5}
      (Case
       (Var
-       {Var: ds_d1om})
+       {Var: ds_d1o5})
       {Var: wild_00}
       (TyConApp
        ({abstract:TyCon})
@@ -62,7 +74,7 @@
              ({abstract:TyCon})
              []))))))])))])
 ,(NonRec
-  {Var: abc}
+  {Var: patternMatchingOnOperatorDemo}
   (App
    (Var
     {Var: reverseList})
@@ -113,10 +125,6 @@
          ({abstract:TyCon})
          []))))))))
 ,(NonRec
-  {Var: e}
-  (Var
-   {Var: True}))
-,(NonRec
   {Var: $trModule}
   (App
    (App
@@ -135,7 +143,7 @@
      (LitString
       "Source2")))))
 ,(NonRec
-  {Var: f}
+  {Var: usageOfPreludeFunctionsDemo}
   (App
    (App
     (App
@@ -163,7 +171,7 @@
       (LitNumInteger)
       (3))))))
 ,(NonRec
-  {Var: c}
+  {Var: lamdaDemo}
   (Lam
    {Var: x}
    (App
@@ -183,38 +191,16 @@
     (Var
      {Var: x}))))
 ,(NonRec
-  {Var: d}
+  {Var: lamdaApplicationDemo}
   (App
    (Var
-    {Var: c})
+    {Var: lamdaDemo})
    (Lit
     (LitNumber
      (LitNumInteger)
      (1)))))
 ,(NonRec
-  {Var: y}
-  (App
-   (App
-    (App
-     (App
-      (Var
-       {Var: -})
-      (Type
-       (TyConApp
-        ({abstract:TyCon})
-        [])))
-     (Var
-      {Var: $fNumInteger}))
-    (Lit
-     (LitNumber
-      (LitNumInteger)
-      (3))))
-   (Lit
-    (LitNumber
-     (LitNumInteger)
-     (4)))))
-,(NonRec
-  {Var: x}
+  {Var: arithmeticDemo}
   (App
    (App
     (App
@@ -252,31 +238,29 @@
       (LitNumInteger)
       (3))))))
 ,(NonRec
-  {Var: z}
+  {Var: namedValueDemo}
   (App
    (App
     (App
      (App
       (Var
-       {Var: +})
+       {Var: -})
       (Type
        (TyConApp
         ({abstract:TyCon})
         [])))
      (Var
       {Var: $fNumInteger}))
-    (Var
-     {Var: x}))
+    (Lit
+     (LitNumber
+      (LitNumInteger)
+      (1))))
    (Var
     {Var: y})))
 ,(NonRec
-  {Var: b}
-  (Var
-   {Var: z}))
-,(NonRec
   {Var: sayMe}
   (Lam
-   {Var: ds_d1or}
+   {Var: ds_d1oa}
    (Case
     (App
      (App
@@ -291,7 +275,7 @@
        (Var
         {Var: $fEqInteger}))
       (Var
-       {Var: ds_d1or}))
+       {Var: ds_d1oa}))
      (Lit
       (LitNumber
        (LitNumInteger)
@@ -320,7 +304,7 @@
           (Var
            {Var: $fEqInteger}))
          (Var
-          {Var: ds_d1or}))
+          {Var: ds_d1oa}))
         (Lit
          (LitNumber
           (LitNumInteger)
@@ -349,7 +333,7 @@
              (Var
               {Var: $fEqInteger}))
             (Var
-             {Var: ds_d1or}))
+             {Var: ds_d1oa}))
            (Lit
             (LitNumber
              (LitNumInteger)
@@ -364,90 +348,12 @@
             (DataAlt
              {DataCon: False})
             []
-            (Case
-             (App
-              (App
-               (App
-                (App
-                 (Var
-                  {Var: ==})
-                 (Type
-                  (TyConApp
-                   ({abstract:TyCon})
-                   [])))
-                (Var
-                 {Var: $fEqInteger}))
-               (Var
-                {Var: ds_d1or}))
-              (Lit
-               (LitNumber
-                (LitNumInteger)
-                (4))))
-             {Var: wild_X3}
-             (TyConApp
-              ({abstract:TyCon})
-              [(TyConApp
-                ({abstract:TyCon})
-                [])])
-             [((,,)
-               (DataAlt
-                {DataCon: False})
-               []
-               (Case
-                (App
-                 (App
-                  (App
-                   (App
-                    (Var
-                     {Var: ==})
-                    (Type
-                     (TyConApp
-                      ({abstract:TyCon})
-                      [])))
-                   (Var
-                    {Var: $fEqInteger}))
-                  (Var
-                   {Var: ds_d1or}))
-                 (Lit
-                  (LitNumber
-                   (LitNumInteger)
-                   (5))))
-                {Var: wild_X4}
-                (TyConApp
-                 ({abstract:TyCon})
-                 [(TyConApp
-                   ({abstract:TyCon})
-                   [])])
-                [((,,)
-                  (DataAlt
-                   {DataCon: False})
-                  []
-                  (App
-                   (Var
-                    {Var: unpackCString#})
-                   (Lit
-                    (LitString
-                     "Not between 1 and 5"))))
-                ,((,,)
-                  (DataAlt
-                   {DataCon: True})
-                  []
-                  (App
-                   (Var
-                    {Var: unpackCString#})
-                   (Lit
-                    (LitString
-                     "Five!"))))]))
-             ,((,,)
-               (DataAlt
-                {DataCon: True})
-               []
-               (App
-                (Var
-                 {Var: unpackCString#})
-                (Lit
-                 (LitString
-                  "Four!"))))]))
+            (App
+             (Var
+              {Var: unpackCString#})
+             (Lit
+              (LitString
+               "Not between 1 and 3"))))
           ,((,,)
             (DataAlt
              {DataCon: True})
@@ -479,7 +385,7 @@
         (LitString
          "One!"))))])))
 ,(NonRec
-  {Var: a}
+  {Var: patternMatchingOnValueDemo}
   (App
    (Var
     {Var: sayMe})
