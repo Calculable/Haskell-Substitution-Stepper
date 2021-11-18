@@ -16,7 +16,7 @@ printSimplifiedCoreBinding (x, expression) = do
     printSimplifiedCoreExpression expression 0
     putStrLn ""
 
-printSimplifiedCoreExpression :: ExpressionS -> Integer -> IO ()
+printSimplifiedCoreExpression :: ExpressionS -> Integer -> IO () --maybe replace with "show"
 printSimplifiedCoreExpression (VarS var) indent  = putStr var
 printSimplifiedCoreExpression (LitS lit) indent = printLiteral lit indent
 printSimplifiedCoreExpression (AppS exp arg) indent = do
@@ -40,8 +40,18 @@ printSimplifiedCoreExpression (CaseS exp alts) indent = do
   putStrLn("")
   printDepth indent
   putStr "}"
-printSimplifiedCoreExpression (InvalidExpression reason) indent = do
-  putStr ("Unsupported Expression " ++ reason)
+printSimplifiedCoreExpression (MultiArgumentAppS name expressions) indent = do
+  putStr "("
+  putStr name
+  putStr " "
+  mapM_ (printSimplifiedCoreExpressionAndSpace indent) expressions
+  putStr ")"
+printSimplifiedCoreExpression (InvalidExpression reason) indent = putStr ("Unsupported Expression " ++ reason)
+
+printSimplifiedCoreExpressionAndSpace :: Integer -> ExpressionS -> IO ()
+printSimplifiedCoreExpressionAndSpace indent expression = do 
+  printSimplifiedCoreExpression expression indent
+  putStr " "
 
 printLiteral :: LiteralS -> Integer -> IO ()
 printLiteral (LitCharS c) indent = putStr (show c)

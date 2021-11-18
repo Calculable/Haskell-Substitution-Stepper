@@ -19,3 +19,11 @@ reverseList [] = []
 reverseList (a:bc) = reverseList bc ++ [a]
 
 abc = reverseList [1, 2, 3]
+
+a = sayMe 1
+
+b = z
+
+c = (\x -> x + x)
+
+d = c 1

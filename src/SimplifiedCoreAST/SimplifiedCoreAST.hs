@@ -12,6 +12,7 @@ data ExpressionS
     | LamS {parameterS:: String, expressionS:: ExpressionS} --for example "\x -> ...""
     | CaseS {expressionS:: ExpressionS, alternativesS:: [AltS]} --for example "\a -> case (== a 1) of {true -> "One" false -> "not one"};"
     | TypeS --not implemented
+    | MultiArgumentAppS {name:: String, argumentsS :: [ExpressionS]} --not in original core but used so we can make a reduction with build-in functions/operators from the prelude like (+ 1) 2 -> (+ 1 2) -> 3 
     | InvalidExpression String --for example "unsupported expression"
 
 data LiteralS

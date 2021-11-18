@@ -49,7 +49,7 @@ import FlatCoreASTPrinter (printFlatCoreAST)
 import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
 import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
-import SimplifiedCoreAST.SimplifiedCoreASTReducer (reduce)
+import SimplifiedCoreAST.SimplifiedCoreASTReducer (printStepByStepReduction)
 import Options.Applicative
 
 data Opts = Opts
@@ -139,7 +139,7 @@ runStepper filePath moduleName = runGhc (Just libdir) $ do
 
   liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
   --show reduction for every binding in the file
-  liftIO $ mapM_ (reduce simplifiedCoreAST) simplifiedCoreAST
+  liftIO $ mapM_ (printStepByStepReduction simplifiedCoreAST) simplifiedCoreAST
 
   liftIO $ putStrLn "\n*****Example Stepping*****"
   let addAst = extract coreAst

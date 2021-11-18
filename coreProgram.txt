@@ -1,20 +1,84 @@
-[x :: Integer
+[reverseList [Occ=LoopBreaker] :: [Integer] -> [Integer]
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
+ reverseList
+   = \ (ds_d1nG :: [Integer]) ->
+       case ds_d1nG of {
+         [] -> [] @Integer;
+         : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
+       };,
+ abc :: [Integer]
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 240 0}]
- x = * @Integer $fNumInteger 100 100,
- y :: Integer
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 40 0}]
- y = * @Integer $fNumInteger x x,
- z :: Integer
- [LclIdX,
-  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
-          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 140 0}]
- z = * @Integer $fNumInteger y 2,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 350 0}]
+ abc
+   = reverseList
+       (: @Integer 1 (: @Integer 2 (: @Integer 3 ([] @Integer)))),
  $trModule :: Module
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 80 10}]
- $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#)]
+ $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#),
+ c :: Integer -> Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 40 0}]
+ c = \ (x :: Integer) -> + @Integer $fNumInteger x x,
+ d :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 120 0}]
+ d = c 1,
+ y :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 240 0}]
+ y = - @Integer $fNumInteger 3 4,
+ x :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 380 0}]
+ x = + @Integer $fNumInteger 1 (* @Integer $fNumInteger 2 3),
+ z :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 40 0}]
+ z = + @Integer $fNumInteger x y,
+ b :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=True, Expandable=True,
+          Guidance=ALWAYS_IF(arity=0,unsat_ok=True,boring_ok=True)}]
+ b = z,
+ sayMe :: Integer -> String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=NEVER}]
+ sayMe
+   = \ (ds_d1nL :: Integer) ->
+       case == @Integer $fEqInteger ds_d1nL 1 of {
+         False ->
+           case == @Integer $fEqInteger ds_d1nL 2 of {
+             False ->
+               case == @Integer $fEqInteger ds_d1nL 3 of {
+                 False ->
+                   case == @Integer $fEqInteger ds_d1nL 4 of {
+                     False ->
+                       case == @Integer $fEqInteger ds_d1nL 5 of {
+                         False -> unpackCString# "Not between 1 and 5"#;
+                         True -> unpackCString# "Five!"#
+                       };
+                     True -> unpackCString# "Four!"#
+                   };
+                 True -> unpackCString# "Three!"#
+               };
+             True -> unpackCString# "Two!"#
+           };
+         True -> unpackCString# "One!"#
+       },
+ a :: String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 120 0}]
+ a = sayMe 1]
