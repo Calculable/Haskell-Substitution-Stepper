@@ -46,7 +46,7 @@ printSimplifiedCoreExpression (MultiArgumentAppS name expressions) indent = do
   putStr " "
   mapM_ (printSimplifiedCoreExpressionAndSpace indent) expressions
   putStr ")"
-printSimplifiedCoreExpression (InvalidExpression reason) indent = putStr ("Unsupported Expression " ++ reason)
+printSimplifiedCoreExpression (InvalidExpression reason) indent = putStr ("Invalid Expression: " ++ reason)
 
 printSimplifiedCoreExpressionAndSpace :: Integer -> ExpressionS -> IO ()
 printSimplifiedCoreExpressionAndSpace indent expression = do 

@@ -21,19 +21,21 @@ printStepByStepReduction bindings (x, expression) = do
 
 {-Printing-}
 reduce :: [BindS] -> ExpressionS -> IO ()
-reduce bindings expression    | canBeReduced expression = do
+reduce bindings expression    | canBeReduced bindings expression = do
                                 let (reductionStepDescription, reducedExpression) = (applyStep bindings expression)
                                 putStrLn ("\n{-" ++ reductionStepDescription ++ "-}")
                                 printSimplifiedCoreExpression reducedExpression 0
                                 reduce bindings reducedExpression
                               | otherwise = putStrLn "\n{-reduction complete-}"
 
-canBeReduced :: ExpressionS -> Bool
-canBeReduced (VarS _) = True
-canBeReduced (AppS _ _) = True
-canBeReduced (MultiArgumentAppS _ _) = True
-
-canBeReduced _ = False
+canBeReduced :: [BindS] -> ExpressionS -> Bool
+canBeReduced bindings (VarS name) = if (isNothing (tryFindBinding name bindings))
+                              then False
+                              else True
+canBeReduced _ (AppS _ _) = True
+canBeReduced _ (MultiArgumentAppS _ _) = True
+canBeReduced _ (CaseS _ _) = True
+canBeReduced _ _ = False
 
 findBinding :: String -> [BindS] -> ExpressionS
 findBinding key bindings = (tryFindBinding key bindings) ?? (InvalidExpression "Binding not Found")
@@ -54,7 +56,7 @@ Nothing ?? y = y
 applyStep :: [BindS] -> ExpressionS -> (ReductionStepDescription, ExpressionS)
 applyStep bindings (VarS name) = (("Replace '" ++ name ++ "' with definition"),(findBinding name bindings)) {-replace binding reference with actual expression (Delta Reduction)-}
 applyStep bindings (AppS (LamS parameter expression) argument) = ("Application", deepReplaceVarWithinExpression parameter argument expression)
-applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = if (canBeReduced argument)
+applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = if (canBeReduced bindings argument)
                                                                           then (description ++ " (please note that this is an eager reduction and not default GHC behaviour. This approach is chosen because this expression will be used as a parameter for an application that can not be further stepped or where further stepping ist not yet supported)", (AppS (MultiArgumentAppS name arguments) reducedArgument))
                                                                           else ("Add argument to built-in multi-argument function", (MultiArgumentAppS name (arguments ++ [argument])))
                                                                           where (description, reducedArgument) = applyStep bindings argument
@@ -64,12 +66,16 @@ applyStep bindings (AppS (VarS name) argument) = do
   let userDefinedExpression = tryFindBinding name bindings 
   if (isNothing (userDefinedExpression))
     then
-      if (canBeReduced argument)
+      if (canBeReduced bindings argument)
         then (description, (AppS (VarS name) (reducedArgument))) 
         else ("Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself.", (MultiArgumentAppS name [argument]))
     else ("Replace '" ++ name ++ "' with definition", (AppS (fromJust userDefinedExpression) argument))
   where (description, reducedArgument) = applyStep bindings argument 
 applyStep bindings (MultiArgumentAppS name arguments) = ("apply " ++ name ++ " (note: showing substeps is not possible or implemented for this function)", applyFunction name arguments)
+applyStep bindings (CaseS expression alternatives) = if (canBeReduced bindings expression)
+                                                      then (description, (CaseS reducedExpression alternatives))
+                                                      else ("ToDo: Implement Pattern Matching", InvalidExpression "Pattern Matching not yet implemented")
+                                                      where (description, reducedExpression) = applyStep bindings expression
 
 applyStep bindings _  = ("ToDo: Implement Reduction", InvalidExpression "No reduction implemented for this type of expression")
 
