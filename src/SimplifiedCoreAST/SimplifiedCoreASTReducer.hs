@@ -63,10 +63,13 @@ applyStep bindings (AppS (AppS name firstArgument) secondArgument) = (descriptio
 applyStep bindings (AppS (VarS name) argument) = do
   let userDefinedExpression = tryFindBinding name bindings 
   if (isNothing (userDefinedExpression))
-    then ("Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself.", (MultiArgumentAppS name [argument]))
+    then
+      if (canBeReduced argument)
+        then (description, (AppS (VarS name) (reducedArgument))) 
+        else ("Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself.", (MultiArgumentAppS name [argument]))
     else ("Replace '" ++ name ++ "' with definition", (AppS (fromJust userDefinedExpression) argument))
-
-applyStep bindings (MultiArgumentAppS name arguments) = ("apply " ++ name ++ "(note: showing substeps is not possible or implemented for this function)", applyFunction name arguments)
+  where (description, reducedArgument) = applyStep bindings argument 
+applyStep bindings (MultiArgumentAppS name arguments) = ("apply " ++ name ++ " (note: showing substeps is not possible or implemented for this function)", applyFunction name arguments)
 
 applyStep bindings _  = ("ToDo: Implement Reduction", InvalidExpression "No reduction implemented for this type of expression")
 
