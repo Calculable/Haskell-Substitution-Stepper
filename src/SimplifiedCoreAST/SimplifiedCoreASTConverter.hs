@@ -28,7 +28,12 @@ simplifyBindingWithExpression (b, exp)  = ((showOutputable b), (simplifyExpressi
 simplifyExpression :: (OutputableBndr b) => Expr b -> ExpressionS
 simplifyExpression (Var id) = VarS (showOutputable $ varName id)
 simplifyExpression (Lit lit) = LitS (simplifyLiteral lit)
-simplifyExpression (App exp arg) = AppS (simplifyExpression exp) (simplifyExpression arg)
+simplifyExpression (App exp arg) = 
+  if (isTypeInformation simplifiedArgument) then simplifiedExpression
+  else if (isUnnecessaryFunction simplifiedExpression) then simplifiedArgument
+  else AppS simplifiedExpression simplifiedArgument
+    where simplifiedArgument = (simplifyExpression arg)
+          simplifiedExpression = (simplifyExpression exp)
 simplifyExpression (Lam b exp) = LamS (showOutputable b) (simplifyExpression exp)
 simplifyExpression (Type t) = TypeS
 simplifyExpression (Case exp b t alts) = CaseS (simplifyExpression exp) (map simplifyAlt alts)
@@ -51,3 +56,12 @@ simplifyAltCon :: AltCon -> AltConS
 simplifyAltCon (DataAlt constructor) = DataAltS (showOutputable constructor)
 simplifyAltCon (LitAlt literal) = LitAltS (simplifyLiteral literal)
 simplifyAltCon (DEFAULT) = DefaultS
+
+isTypeInformation :: ExpressionS -> Bool
+isTypeInformation (TypeS) = True
+isTypeInformation (VarS name) = isPrefixOf "$" name
+isTypeInformation x = False
+
+isUnnecessaryFunction :: ExpressionS -> Bool
+isUnnecessaryFunction (VarS name) = (==) "unpackCString#" name 
+isUnnecessaryFunction x = False

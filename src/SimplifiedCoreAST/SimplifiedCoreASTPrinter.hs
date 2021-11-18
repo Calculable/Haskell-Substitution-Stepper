@@ -17,10 +17,7 @@ printSimplifiedCoreBinding (x, expression) = do
     putStrLn ""
 
 printSimplifiedCoreExpression :: ExpressionS -> Integer -> IO ()
-printSimplifiedCoreExpression (VarS var) indent  = do
-    if (isPrefixOf "$" var)
-      then putStr ""
-      else putStr var
+printSimplifiedCoreExpression (VarS var) indent  = putStr var
 printSimplifiedCoreExpression (LitS lit) indent = printLiteral lit indent
 printSimplifiedCoreExpression (AppS exp arg) indent = do
   putStr "("
@@ -34,7 +31,7 @@ printSimplifiedCoreExpression (LamS b exp) indent= do
   putStr " -> ("
   printSimplifiedCoreExpression exp indent
   putStr ")"
-printSimplifiedCoreExpression (TypeS) indent = putStr ""
+printSimplifiedCoreExpression (TypeS) indent = putStr "(Type-Argument not supported)"
 printSimplifiedCoreExpression (CaseS exp alts) indent = do
   putStr "case "
   printSimplifiedCoreExpression exp indent
