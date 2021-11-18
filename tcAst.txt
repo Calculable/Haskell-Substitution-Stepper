@@ -53,6 +53,140 @@
     []
     [(ABE
       (NoExtField)
+      {Var: f}
+      {Var: f}
+      (WpHole)
+      (SpecPrags
+       []))]
+    [({abstract:TcEvBinds})]
+    {Bag(Located (HsBind Var)):
+     [({ ss }
+       (FunBind
+        (WpHole)
+        ({ ss }
+         {Var: f})
+        (MG
+         (MatchGroupTc
+          []
+          (TyConApp
+           ({abstract:TyCon})
+           []))
+         ({ ss }
+          [({ ss }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ ss }
+               {Name: f})
+              (Prefix)
+              (NoSrcStrict))
+             []
+             (GRHSs
+              (NoExtField)
+              [({ ss }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ ss }
+                  (HsApp
+                   (NoExtField)
+                   ({ ss }
+                    (XExpr
+                     (WrapExpr
+                      (HsWrap
+                       (WpCompose
+                        (WpEvApp
+                         (EvExpr
+                          (Var
+                           {Var: $dNum_a1me})))
+                        (WpTyApp
+                         (TyConApp
+                          ({abstract:TyCon})
+                          [])))
+                       (HsVar
+                        (NoExtField)
+                        ({ ss }
+                         {Var: abs}))))))
+                   ({ ss }
+                    (HsPar
+                     (NoExtField)
+                     ({ ss }
+                      (HsApp
+                       (NoExtField)
+                       ({ ss }
+                        (XExpr
+                         (WrapExpr
+                          (HsWrap
+                           (WpCompose
+                            (WpEvApp
+                             (EvExpr
+                              (Var
+                               {Var: $dNum_a1mg})))
+                            (WpTyApp
+                             (TyConApp
+                              ({abstract:TyCon})
+                              [])))
+                           (HsVar
+                            (NoExtField)
+                            ({ ss }
+                             {Var: negate}))))))
+                       ({ ss }
+                        (HsOverLit
+                         (NoExtField)
+                         (OverLit
+                          (OverLitTc
+                           (False)
+                           (TyConApp
+                            ({abstract:TyCon})
+                            []))
+                          (HsIntegral
+                           (IL
+                            (SourceText
+                             "3")
+                            (False)
+                            (3)))
+                          (HsApp
+                           (NoExtField)
+                           ({ ss }
+                            (XExpr
+                             (WrapExpr
+                              (HsWrap
+                               (WpCompose
+                                (WpEvApp
+                                 (EvExpr
+                                  (Var
+                                   {Var: $dNum_a1mi})))
+                                (WpTyApp
+                                 (TyConApp
+                                  ({abstract:TyCon})
+                                  [])))
+                               (HsVar
+                                (NoExtField)
+                                ({ ss }
+                                 {Var: fromInteger}))))))
+                           ({ ss }
+                            (HsLit
+                             (NoExtField)
+                             (HsInteger
+                              (SourceText
+                               "3")
+                              (3)
+                              (TyConApp
+                               ({abstract:TyCon})
+                               []))))))))))))))))]
+              ({ ss }
+               (EmptyLocalBinds
+                (NoExtField))))))])
+         (FromSource))
+        []))]}
+    (False)))
+ ,({ ss }
+   (AbsBinds
+    (NoExtField)
+    []
+    []
+    [(ABE
+      (NoExtField)
       {Var: e}
       {Var: e}
       (WpHole)
@@ -196,7 +330,7 @@
                                      (WpEvApp
                                       (EvExpr
                                        (Var
-                                        {Var: $dNum_a1m9})))
+                                        {Var: $dNum_a1mC})))
                                      (WpTyApp
                                       (TyConApp
                                        ({abstract:TyCon})
@@ -294,7 +428,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1mi})))
+                               {Var: $dNum_a1mL})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -693,7 +827,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1mC})))
+                               {Var: $dNum_a1n5})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -720,7 +854,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1mA})))
+                           {Var: $dNum_a1n3})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -754,7 +888,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1mE})))
+                               {Var: $dNum_a1n7})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -847,7 +981,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1mO})))
+                           {Var: $dNum_a1nh})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -875,7 +1009,7 @@
                      (WpEvApp
                       (EvExpr
                        (Var
-                        {Var: $dEq_a1mM})))
+                        {Var: $dEq_a1nf})))
                      (WpTyApp
                       (TyConApp
                        ({abstract:TyCon})
@@ -939,7 +1073,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1mS})))
+                           {Var: $dNum_a1nl})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -967,7 +1101,7 @@
                      (WpEvApp
                       (EvExpr
                        (Var
-                        {Var: $dEq_a1mQ})))
+                        {Var: $dEq_a1nj})))
                      (WpTyApp
                       (TyConApp
                        ({abstract:TyCon})
@@ -1031,7 +1165,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1mW})))
+                           {Var: $dNum_a1np})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -1059,7 +1193,7 @@
                      (WpEvApp
                       (EvExpr
                        (Var
-                        {Var: $dEq_a1mU})))
+                        {Var: $dEq_a1nn})))
                      (WpTyApp
                       (TyConApp
                        ({abstract:TyCon})
@@ -1123,7 +1257,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1n0})))
+                           {Var: $dNum_a1nt})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -1151,7 +1285,7 @@
                      (WpEvApp
                       (EvExpr
                        (Var
-                        {Var: $dEq_a1mY})))
+                        {Var: $dEq_a1nr})))
                      (WpTyApp
                       (TyConApp
                        ({abstract:TyCon})
@@ -1215,7 +1349,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1n4})))
+                           {Var: $dNum_a1nx})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -1243,7 +1377,7 @@
                      (WpEvApp
                       (EvExpr
                        (Var
-                        {Var: $dEq_a1n2})))
+                        {Var: $dEq_a1nv})))
                      (WpTyApp
                       (TyConApp
                        ({abstract:TyCon})
@@ -1451,7 +1585,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1ng})))
+                               {Var: $dNum_a1nJ})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -1478,7 +1612,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1ne})))
+                           {Var: $dNum_a1nH})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -1515,7 +1649,7 @@
                               (WpEvApp
                                (EvExpr
                                 (Var
-                                 {Var: $dNum_a1nl})))
+                                 {Var: $dNum_a1nO})))
                               (WpTyApp
                                (TyConApp
                                 ({abstract:TyCon})
@@ -1542,7 +1676,7 @@
                           (WpEvApp
                            (EvExpr
                             (Var
-                             {Var: $dNum_a1nj})))
+                             {Var: $dNum_a1nM})))
                           (WpTyApp
                            (TyConApp
                             ({abstract:TyCon})
@@ -1576,7 +1710,7 @@
                               (WpEvApp
                                (EvExpr
                                 (Var
-                                 {Var: $dNum_a1nn})))
+                                 {Var: $dNum_a1nQ})))
                               (WpTyApp
                                (TyConApp
                                 ({abstract:TyCon})
@@ -1658,7 +1792,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1nx})))
+                           {Var: $dNum_a1o0})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})

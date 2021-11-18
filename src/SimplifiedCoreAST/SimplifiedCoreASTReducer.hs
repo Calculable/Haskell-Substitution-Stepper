@@ -55,7 +55,7 @@ applyStep :: [BindS] -> ExpressionS -> (ReductionStepDescription, ExpressionS)
 applyStep bindings (VarS name) = (("Replace '" ++ name ++ "' with definition"),(findBinding name bindings)) {-replace binding reference with actual expression (Delta Reduction)-}
 applyStep bindings (AppS (LamS parameter expression) argument) = ("Application", deepReplaceVarWithinExpression parameter argument expression)
 applyStep bindings (AppS (MultiArgumentAppS name arguments) argument) = if (canBeReduced argument)
-                                                                          then (description, (AppS (MultiArgumentAppS name arguments) reducedArgument))
+                                                                          then (description ++ " (please note that this is an eager reduction and not default GHC behaviour. This approach is chosen because this expression will be used as a parameter for an application that can not be further stepped or where further stepping ist not yet supported)", (AppS (MultiArgumentAppS name arguments) reducedArgument))
                                                                           else ("Add argument to built-in multi-argument function", (MultiArgumentAppS name (arguments ++ [argument])))
                                                                           where (description, reducedArgument) = applyStep bindings argument
 applyStep bindings (AppS (AppS name firstArgument) secondArgument) = (description, (AppS simplifiedFirstApplication secondArgument))  --if the expression of the application is itself an application, the first application should be simplified
@@ -65,6 +65,8 @@ applyStep bindings (AppS (VarS name) argument) = do
   if (isNothing (userDefinedExpression))
     then ("Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself.", (MultiArgumentAppS name [argument]))
     else ("Replace '" ++ name ++ "' with definition", (AppS (fromJust userDefinedExpression) argument))
+
+applyStep bindings (MultiArgumentAppS name arguments) = ("apply " ++ name ++ "(note: showing substeps is not possible or implemented for this function)", applyFunction name arguments)
 
 applyStep bindings _  = ("ToDo: Implement Reduction", InvalidExpression "No reduction implemented for this type of expression")
 
@@ -84,14 +86,30 @@ deepReplaceVarWithinAlternative :: String -> ExpressionS -> AltS-> AltS
 deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundStrings, expression) = if (elem name localBoundStrings)
                                                                                                   then (altCon, localBoundStrings, expression) --do nothing, use local lamda parameter with the same name
                                                                                                   else (altCon, localBoundStrings, (deepReplaceVarWithinExpression name replaceExpression expression))
-
-sum :: ExpressionS -> ExpressionS -> ExpressionS
-sum _ _ = LitS (LitNumberS 4)
-
+applyFunction :: String -> [ExpressionS] -> ExpressionS
+applyFunction "+" [x, y] = (+) x y
+applyFunction "-" [x, y] = (-) x y
+applyFunction "*" [x, y] = (*) x y
+applyFunction "/" [x, y] = (/) x y
+applyFunction "recip" [x] = signum x
+applyFunction "signum" [x] = signum x
+applyFunction "abs" [x] = abs x
+applyFunction "/=" [x, y] = boolToExpression ((/=) x y)
+applyFunction "==" [x, y] = boolToExpression ((==) x y)
+applyFunction "<" [x, y] = boolToExpression ((<) x y)
+applyFunction ">" [x, y] = boolToExpression ((>) x y)
+applyFunction ">=" [x, y] = boolToExpression ((>=) x y)
+applyFunction "<=" [x, y] = boolToExpression ((<=) x y)
+applyFunction "negate" [(LitS (LitNumberS x))] = integerToExpression (negate x) --example of an arbitrary function from the prelude. note how the arguments must have the right type and the result is converted back into an expressino
+applyFunction name _ = InvalidExpression (name ++ " not supported (yet)") 
+-- toDo: Add more functions from the prelude
 
 boolToExpression :: Bool -> ExpressionS
 boolToExpression True = VarS "True"
 boolToExpression False = VarS "False"
+
+integerToExpression :: Integer -> ExpressionS
+integerToExpression x = LitS (LitNumberS x)
 
 --verschiedene Arten  Function Application
 

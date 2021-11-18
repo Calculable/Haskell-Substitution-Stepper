@@ -3,10 +3,10 @@
   [((,)
     {Var: reverseList}
     (Lam
-     {Var: ds_d1nR}
+     {Var: ds_d1om}
      (Case
       (Var
-       {Var: ds_d1nR})
+       {Var: ds_d1om})
       {Var: wild_00}
       (TyConApp
        ({abstract:TyCon})
@@ -135,6 +135,34 @@
      (LitString
       "Source2")))))
 ,(NonRec
+  {Var: f}
+  (App
+   (App
+    (App
+     (Var
+      {Var: abs})
+     (Type
+      (TyConApp
+       ({abstract:TyCon})
+       [])))
+    (Var
+     {Var: $fNumInteger}))
+   (App
+    (App
+     (App
+      (Var
+       {Var: negate})
+      (Type
+       (TyConApp
+        ({abstract:TyCon})
+        [])))
+     (Var
+      {Var: $fNumInteger}))
+    (Lit
+     (LitNumber
+      (LitNumInteger)
+      (3))))))
+,(NonRec
   {Var: c}
   (Lam
    {Var: x}
@@ -248,7 +276,7 @@
 ,(NonRec
   {Var: sayMe}
   (Lam
-   {Var: ds_d1nW}
+   {Var: ds_d1or}
    (Case
     (App
      (App
@@ -263,7 +291,7 @@
        (Var
         {Var: $fEqInteger}))
       (Var
-       {Var: ds_d1nW}))
+       {Var: ds_d1or}))
      (Lit
       (LitNumber
        (LitNumInteger)
@@ -292,7 +320,7 @@
           (Var
            {Var: $fEqInteger}))
          (Var
-          {Var: ds_d1nW}))
+          {Var: ds_d1or}))
         (Lit
          (LitNumber
           (LitNumInteger)
@@ -321,7 +349,7 @@
              (Var
               {Var: $fEqInteger}))
             (Var
-             {Var: ds_d1nW}))
+             {Var: ds_d1or}))
            (Lit
             (LitNumber
              (LitNumInteger)
@@ -350,7 +378,7 @@
                 (Var
                  {Var: $fEqInteger}))
                (Var
-                {Var: ds_d1nW}))
+                {Var: ds_d1or}))
               (Lit
                (LitNumber
                 (LitNumInteger)
@@ -379,7 +407,7 @@
                    (Var
                     {Var: $fEqInteger}))
                   (Var
-                   {Var: ds_d1nW}))
+                   {Var: ds_d1or}))
                  (Lit
                   (LitNumber
                    (LitNumInteger)

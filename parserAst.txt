@@ -1062,6 +1062,76 @@
              (EmptyLocalBinds
               (NoExtField))))))])
        (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: f}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: f}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsApp
+                 (NoExtField)
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: abs}))))
+                 ({ ss }
+                  (HsPar
+                   (NoExtField)
+                   ({ ss }
+                    (HsApp
+                     (NoExtField)
+                     ({ ss }
+                      (HsVar
+                       (NoExtField)
+                       ({ ss }
+                        (Unqual
+                         {OccName: negate}))))
+                     ({ ss }
+                      (HsOverLit
+                       (NoExtField)
+                       (OverLit
+                        (NoExtField)
+                        (HsIntegral
+                         (IL
+                          (SourceText
+                           "3")
+                          (False)
+                          (3)))
+                        (HsLit
+                         (NoExtField)
+                         (HsString
+                          (SourceText
+                           "noExpr")
+                          {FastString: "noExpr"})))))))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
       [])))]
   (Nothing)
   (Nothing)))

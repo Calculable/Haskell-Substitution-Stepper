@@ -3,8 +3,8 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
  reverseList
-   = \ (ds_d1nR :: [Integer]) ->
-       case ds_d1nR of {
+   = \ (ds_d1om :: [Integer]) ->
+       case ds_d1om of {
          [] -> [] @Integer;
          : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
        };,
@@ -26,6 +26,11 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 80 10}]
  $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#),
+ f :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 160 0}]
+ f = abs @Integer $fNumInteger (negate @Integer $fNumInteger 3),
  c :: Integer -> Integer
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
@@ -62,16 +67,16 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=NEVER}]
  sayMe
-   = \ (ds_d1nW :: Integer) ->
-       case == @Integer $fEqInteger ds_d1nW 1 of {
+   = \ (ds_d1or :: Integer) ->
+       case == @Integer $fEqInteger ds_d1or 1 of {
          False ->
-           case == @Integer $fEqInteger ds_d1nW 2 of {
+           case == @Integer $fEqInteger ds_d1or 2 of {
              False ->
-               case == @Integer $fEqInteger ds_d1nW 3 of {
+               case == @Integer $fEqInteger ds_d1or 3 of {
                  False ->
-                   case == @Integer $fEqInteger ds_d1nW 4 of {
+                   case == @Integer $fEqInteger ds_d1or 4 of {
                      False ->
-                       case == @Integer $fEqInteger ds_d1nW 5 of {
+                       case == @Integer $fEqInteger ds_d1or 5 of {
                          False -> unpackCString# "Not between 1 and 5"#;
                          True -> unpackCString# "Five!"#
                        };

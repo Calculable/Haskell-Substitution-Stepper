@@ -29,3 +29,5 @@ c = (\x -> x + x)
 d = c 1
 
 e = True
+
+f = abs (negate 3)
