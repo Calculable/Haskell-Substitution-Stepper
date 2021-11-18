@@ -33,7 +33,7 @@ canBeReduced bindings (VarS name) = if (isNothing (tryFindBinding name bindings)
                               then False
                               else True
 canBeReduced _ (AppS _ _) = True
-canBeReduced _ (MultiArgumentAppS _ _) = True
+canBeReduced _ (MultiArgumentAppS _ _) = True --return false if it is a constructor
 canBeReduced _ (CaseS _ _) = True
 canBeReduced _ _ = False
 
@@ -74,10 +74,27 @@ applyStep bindings (AppS (VarS name) argument) = do
 applyStep bindings (MultiArgumentAppS name arguments) = ("apply " ++ name ++ " (note: showing substeps is not possible or implemented for this function)", applyFunction name arguments)
 applyStep bindings (CaseS expression alternatives) = if (canBeReduced bindings expression)
                                                       then (description, (CaseS reducedExpression alternatives))
-                                                      else ("ToDo: Implement Pattern Matching", InvalidExpression "Pattern Matching not yet implemented")
+                                                      else ("Replace with matching pattern", findMatchingPattern expression alternatives)
                                                       where (description, reducedExpression) = applyStep bindings expression
 
 applyStep bindings _  = ("ToDo: Implement Reduction", InvalidExpression "No reduction implemented for this type of expression")
+
+findMatchingPattern :: ExpressionS -> [AltS] -> ExpressionS
+findMatchingPattern expression [] = InvalidExpression "No matching pattern was found or this type of pattern is not yet supported"
+findMatchingPattern _ ((DefaultS, _, expression):xs) = expression --default match
+findMatchingPattern (VarS name) (((DataAltS patternConstructorName), _, expression):xs) = if ((==) name patternConstructorName)
+                                                                                            then expression
+                                                                                            else (findMatchingPattern (VarS name) xs)
+
+findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
+--toDo: Support more types of pattern matching
+
+-- type AltS = (AltConS, [String], ExpressionS)
+
+-- data AltConS
+--     = DataAltS String --pattern is a constructor, for example ":"
+--     | LitAltS  LiteralS -- pattern is a literal, for example "5"
+--     | DefaultS -- pattern is "_"
 
 
 deepReplaceVarWithinExpression :: String -> ExpressionS -> ExpressionS -> ExpressionS
