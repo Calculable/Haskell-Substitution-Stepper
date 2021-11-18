@@ -30,6 +30,7 @@ library
       SimplifiedCoreAST.SimplifiedCoreAST
       SimplifiedCoreAST.SimplifiedCoreASTConverter
       SimplifiedCoreAST.SimplifiedCoreASTPrinter
+      SimplifiedCoreAST.SimplifiedCoreASTReducer
       Source
       Source2
       TypedStepperProofOfConcept

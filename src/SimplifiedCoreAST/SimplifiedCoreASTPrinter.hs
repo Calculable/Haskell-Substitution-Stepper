@@ -1,5 +1,5 @@
 module SimplifiedCoreAST.SimplifiedCoreASTPrinter
-  (printSimplifiedCoreAST
+  (printSimplifiedCoreAST, printSimplifiedCoreExpression
   )
 where
 

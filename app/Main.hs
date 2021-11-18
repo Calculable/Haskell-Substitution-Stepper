@@ -49,6 +49,7 @@ import FlatCoreASTPrinter (printFlatCoreAST)
 import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
 import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
+import SimplifiedCoreAST.SimplifiedCoreASTReducer (reduce)
 import Options.Applicative
 
 data Opts = Opts
@@ -126,15 +127,22 @@ runStepper filePath moduleName = runGhc (Just libdir) $ do
   --liftIO $ putStrLn "\n*****Proof of concept******"
   --liftIO printExampleStepping
 
-  let addAst = extract coreAst
+  
 
   --liftIO $ putStrLn "\n*****Example Flat Printing of Source.hs:*****"
   --liftIO $ printFlatCoreAST coreAst
 
-  liftIO $ putStrLn "\n*****Example Simplified Core AST Printing of Source.hs:*****"
-  liftIO $ printSimplifiedCoreAST (simplifyBindings coreAst)
+  liftIO $ putStrLn "\n*****Example Simplified Core AST Printing*****"
+  let simplifiedCoreAST = simplifyBindings coreAst
+  liftIO $ printSimplifiedCoreAST simplifiedCoreAST
 
-  liftIO $ putStrLn "\n*****Example Stepping of Source.hs:*****"
+
+  liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
+  --show reduction for every binding in the file
+  liftIO $ mapM_ (reduce simplifiedCoreAST) simplifiedCoreAST
+
+  liftIO $ putStrLn "\n*****Example Stepping*****"
+  let addAst = extract coreAst
   runStateT (step addAst) initStepState
 
 extract :: [Bind a] -> Expr a
