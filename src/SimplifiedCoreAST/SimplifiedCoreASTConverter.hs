@@ -1,5 +1,5 @@
 module SimplifiedCoreAST.SimplifiedCoreASTConverter
-  (simplifyBindings
+  (simplifyBindings, simplifyLiteral, isTypeInformation
   )
 where
 
