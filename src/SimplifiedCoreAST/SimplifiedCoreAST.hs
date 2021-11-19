@@ -27,7 +27,7 @@ type AltS = (AltConS, [String], ExpressionS)
 
 data AltConS
     = DataAltS String --pattern is a constructor, for example ":"
-    | LitAltS  LiteralS -- pattern is a literal, for example "TRUE"
+    | LitAltS  LiteralS -- pattern is a literal, for example 5
     | DefaultS -- pattern is "_"
 
 {-Type Classes-}
