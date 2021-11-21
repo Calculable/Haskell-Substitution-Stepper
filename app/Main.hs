@@ -8,6 +8,7 @@ import Control.Monad.State.Strict
     StateT (runStateT),
     modify,
   )
+import FlatCoreASTPrinter (printFlatCoreAST)
 import GHC
   ( DesugaredModule (dm_core_module),
     DynFlags (hscTarget),
@@ -32,9 +33,9 @@ import GHC.Core (Bind (NonRec), Expr (..))
 import GHC.Core.Ppr
   ( pprCoreAlt,
     pprCoreBinding,
+    pprCoreBindings,
     pprOptCo,
     pprParendExpr,
-    pprCoreBindings
   )
 import GHC.Driver.Types (ModGuts (mg_binds))
 import GHC.Paths (libdir)
@@ -43,49 +44,51 @@ import GHC.Types.Literal
   )
 import GHC.Types.Var (Var (varName, varType))
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
-import TypedStepperProofOfConceptExamples (printExampleStepping)
-import Utils (printAst, showOutputable)
-import FlatCoreASTPrinter (printFlatCoreAST)
-import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
+import Options.Applicative
+import SimplifiedCoreAST.SimplifiedCoreAST (AltConS (..), AltS (..), BindS (..), ExpressionS (..), LiteralS (..))
 import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
 import SimplifiedCoreAST.SimplifiedCoreASTReducer (printStepByStepReduction)
-import Options.Applicative
+import TypedStepperProofOfConceptExamples (printExampleStepping)
+import Utils (printAst, showOutputable)
 
 data Opts = Opts
-    {filePath :: !String, moduleName :: !String
-    }
+  { filePath :: !String,
+    moduleName :: !String
+  }
 
 main :: IO ((), StepState)
 main = do
-    opts <- execParser optsParser
-    runStepper (filePath opts) (moduleName opts)
+  opts <- execParser optsParser
+  runStepper (filePath opts) (moduleName opts)
   where
     optsParser :: ParserInfo Opts
     optsParser =
-        info
-            (helper <*> versionOption <*> programOptions)
-            (fullDesc <> progDesc "Haskell Substitution Stepper" <>
-             header
-                 "a stepper for Haskell Core")
+      info
+        (helper <*> versionOption <*> programOptions)
+        ( fullDesc <> progDesc "Haskell Substitution Stepper"
+            <> header
+              "a stepper for Haskell Core"
+        )
     versionOption :: Parser (a -> a)
     versionOption = infoOption "0.0" (long "version" <> help "Show version")
     programOptions :: Parser Opts
     programOptions =
-        Opts <$> strOption
-            (long "file" <> metavar "VALUE" <> value "src/Source2.hs" <>
-             help "path to the haskell file that should be read") <*>
-        strOption
-            (long "module" <> metavar "VALUE" <> value "Source2" <>
-             help "name of the module inside the haskell file")
-       
+      Opts
+        <$> strOption
+          ( long "file" <> metavar "VALUE" <> value "src/Source2.hs"
+              <> help "path to the haskell file that should be read"
+          )
+        <*> strOption
+          ( long "module" <> metavar "VALUE" <> value "Source2"
+              <> help "name of the module inside the haskell file"
+          )
 
 runStepper :: String -> String -> IO ((), StepState)
 runStepper filePath moduleName = runGhc (Just libdir) $ do
-  
   dFlags <- getSessionDynFlags
   setSessionDynFlags dFlags {hscTarget = HscNothing}
-  
+
   target <- guessTarget filePath Nothing
   addTarget target
   res <- load LoadAllTargets
@@ -127,15 +130,12 @@ runStepper filePath moduleName = runGhc (Just libdir) $ do
   --liftIO $ putStrLn "\n*****Proof of concept******"
   --liftIO printExampleStepping
 
-  
-
   --liftIO $ putStrLn "\n*****Example Flat Printing of Source.hs:*****"
   --liftIO $ printFlatCoreAST coreAst
 
   liftIO $ putStrLn "\n*****Example Simplified Core AST Printing*****"
   let simplifiedCoreAST = simplifyBindings coreAst
   liftIO $ printSimplifiedCoreAST simplifiedCoreAST
-
 
   liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
   --show reduction for every binding in the file
@@ -156,13 +156,13 @@ step (Var id) = do
   printDepth
   lPrint ("Var", showOutputable $ varName id, showOutputable $ varType id)
 step (Lit lit) = do
-    printDepth
-    case lit of
-      LitChar c -> lPrint ("Char ", c)
-      LitNumber t v -> lPrint ("Number ", v)
-      LitString bs -> lPrint ("String ", bs)
-      LitFloat f -> lPrint ("Float ", f)
-      LitDouble d -> lPrint ("Double ", d)
+  printDepth
+  case lit of
+    LitChar c -> lPrint ("Char ", c)
+    LitNumber t v -> lPrint ("Number ", v)
+    LitString bs -> lPrint ("String ", bs)
+    LitFloat f -> lPrint ("Float ", f)
+    LitDouble d -> lPrint ("Double ", d)
 step (App exp arg) = do
   printDepth
   lPutStr "App "
