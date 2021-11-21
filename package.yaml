@@ -33,6 +33,8 @@ dependencies:
 - ghc-lib
 - ghc-lib-parser
 - ghc-paths
+- optparse-applicative
+- hspec
 
 library:
   source-dirs: src
@@ -58,3 +60,4 @@ tests:
     - -with-rtsopts=-N
     dependencies:
     - substep
+    - hspec

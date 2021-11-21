@@ -1,5 +1,130 @@
 
 [(NonRec
+  {Var: x}
+  (Lit
+   (LitNumber
+    (LitNumInteger)
+    (1))))
+,(NonRec
+  {Var: y}
+  (Lit
+   (LitNumber
+    (LitNumInteger)
+    (2))))
+,(Rec
+  [((,)
+    {Var: reverseList}
+    (Lam
+     {Var: ds_d1o5}
+     (Case
+      (Var
+       {Var: ds_d1o5})
+      {Var: wild_00}
+      (TyConApp
+       ({abstract:TyCon})
+       [(TyConApp
+         ({abstract:TyCon})
+         [])])
+      [((,,)
+        (DataAlt
+         {DataCon: []})
+        []
+        (App
+         (Var
+          {Var: []})
+         (Type
+          (TyConApp
+           ({abstract:TyCon})
+           []))))
+      ,((,,)
+        (DataAlt
+         {DataCon: :})
+        [{Var: a}
+        ,{Var: bc}]
+        (App
+         (App
+          (App
+           (Var
+            {Var: ++})
+           (Type
+            (TyConApp
+             ({abstract:TyCon})
+             [])))
+          (App
+           (Var
+            {Var: reverseList})
+           (Var
+            {Var: bc})))
+         (App
+          (App
+           (App
+            (Var
+             {Var: :})
+            (Type
+             (TyConApp
+              ({abstract:TyCon})
+              [])))
+           (Var
+            {Var: a}))
+          (App
+           (Var
+            {Var: []})
+           (Type
+            (TyConApp
+             ({abstract:TyCon})
+             []))))))])))])
+,(NonRec
+  {Var: patternMatchingOnOperatorDemo}
+  (App
+   (Var
+    {Var: reverseList})
+   (App
+    (App
+     (App
+      (Var
+       {Var: :})
+      (Type
+       (TyConApp
+        ({abstract:TyCon})
+        [])))
+     (Lit
+      (LitNumber
+       (LitNumInteger)
+       (1))))
+    (App
+     (App
+      (App
+       (Var
+        {Var: :})
+       (Type
+        (TyConApp
+         ({abstract:TyCon})
+         [])))
+      (Lit
+       (LitNumber
+        (LitNumInteger)
+        (2))))
+     (App
+      (App
+       (App
+        (Var
+         {Var: :})
+        (Type
+         (TyConApp
+          ({abstract:TyCon})
+          [])))
+       (Lit
+        (LitNumber
+         (LitNumInteger)
+         (3))))
+      (App
+       (Var
+        {Var: []})
+       (Type
+        (TyConApp
+         ({abstract:TyCon})
+         []))))))))
+,(NonRec
   {Var: $trModule}
   (App
    (App
@@ -16,26 +141,255 @@
      {Var: TrNameS})
     (Lit
      (LitString
-      "Source")))))
+      "Source2")))))
 ,(NonRec
-  {Var: add}
+  {Var: usageOfPreludeFunctionsDemo}
+  (App
+   (App
+    (App
+     (Var
+      {Var: abs})
+     (Type
+      (TyConApp
+       ({abstract:TyCon})
+       [])))
+    (Var
+     {Var: $fNumInteger}))
+   (App
+    (App
+     (App
+      (Var
+       {Var: negate})
+      (Type
+       (TyConApp
+        ({abstract:TyCon})
+        [])))
+     (Var
+      {Var: $fNumInteger}))
+    (Lit
+     (LitNumber
+      (LitNumInteger)
+      (3))))))
+,(NonRec
+  {Var: lamdaDemo}
   (Lam
    {Var: x}
-   (Lam
-    {Var: y}
+   (App
+    (App
+     (App
+      (App
+       (Var
+        {Var: +})
+       (Type
+        (TyConApp
+         ({abstract:TyCon})
+         [])))
+      (Var
+       {Var: $fNumInteger}))
+     (Var
+      {Var: x}))
+    (Var
+     {Var: x}))))
+,(NonRec
+  {Var: lamdaApplicationDemo}
+  (App
+   (Var
+    {Var: lamdaDemo})
+   (Lit
+    (LitNumber
+     (LitNumInteger)
+     (1)))))
+,(NonRec
+  {Var: arithmeticDemo}
+  (App
+   (App
+    (App
+     (App
+      (Var
+       {Var: +})
+      (Type
+       (TyConApp
+        ({abstract:TyCon})
+        [])))
+     (Var
+      {Var: $fNumInteger}))
+    (Lit
+     (LitNumber
+      (LitNumInteger)
+      (1))))
+   (App
+    (App
+     (App
+      (App
+       (Var
+        {Var: *})
+       (Type
+        (TyConApp
+         ({abstract:TyCon})
+         [])))
+      (Var
+       {Var: $fNumInteger}))
+     (Lit
+      (LitNumber
+       (LitNumInteger)
+       (2))))
+    (Lit
+     (LitNumber
+      (LitNumInteger)
+      (3))))))
+,(NonRec
+  {Var: namedValueDemo}
+  (App
+   (App
+    (App
+     (App
+      (Var
+       {Var: -})
+      (Type
+       (TyConApp
+        ({abstract:TyCon})
+        [])))
+     (Var
+      {Var: $fNumInteger}))
+    (Lit
+     (LitNumber
+      (LitNumInteger)
+      (1))))
+   (Var
+    {Var: y})))
+,(NonRec
+  {Var: sayMe}
+  (Lam
+   {Var: ds_d1oa}
+   (Case
     (App
      (App
       (App
        (App
         (Var
-         {Var: +})
+         {Var: ==})
         (Type
          (TyConApp
           ({abstract:TyCon})
           [])))
        (Var
-        {Var: $fNumInt}))
+        {Var: $fEqInteger}))
       (Var
-       {Var: x}))
-     (Var
-      {Var: y})))))]
+       {Var: ds_d1oa}))
+     (Lit
+      (LitNumber
+       (LitNumInteger)
+       (1))))
+    {Var: wild_00}
+    (TyConApp
+     ({abstract:TyCon})
+     [(TyConApp
+       ({abstract:TyCon})
+       [])])
+    [((,,)
+      (DataAlt
+       {DataCon: False})
+      []
+      (Case
+       (App
+        (App
+         (App
+          (App
+           (Var
+            {Var: ==})
+           (Type
+            (TyConApp
+             ({abstract:TyCon})
+             [])))
+          (Var
+           {Var: $fEqInteger}))
+         (Var
+          {Var: ds_d1oa}))
+        (Lit
+         (LitNumber
+          (LitNumInteger)
+          (2))))
+       {Var: wild_X1}
+       (TyConApp
+        ({abstract:TyCon})
+        [(TyConApp
+          ({abstract:TyCon})
+          [])])
+       [((,,)
+         (DataAlt
+          {DataCon: False})
+         []
+         (Case
+          (App
+           (App
+            (App
+             (App
+              (Var
+               {Var: ==})
+              (Type
+               (TyConApp
+                ({abstract:TyCon})
+                [])))
+             (Var
+              {Var: $fEqInteger}))
+            (Var
+             {Var: ds_d1oa}))
+           (Lit
+            (LitNumber
+             (LitNumInteger)
+             (3))))
+          {Var: wild_X2}
+          (TyConApp
+           ({abstract:TyCon})
+           [(TyConApp
+             ({abstract:TyCon})
+             [])])
+          [((,,)
+            (DataAlt
+             {DataCon: False})
+            []
+            (App
+             (Var
+              {Var: unpackCString#})
+             (Lit
+              (LitString
+               "Not between 1 and 3"))))
+          ,((,,)
+            (DataAlt
+             {DataCon: True})
+            []
+            (App
+             (Var
+              {Var: unpackCString#})
+             (Lit
+              (LitString
+               "Three!"))))]))
+       ,((,,)
+         (DataAlt
+          {DataCon: True})
+         []
+         (App
+          (Var
+           {Var: unpackCString#})
+          (Lit
+           (LitString
+            "Two!"))))]))
+    ,((,,)
+      (DataAlt
+       {DataCon: True})
+      []
+      (App
+       (Var
+        {Var: unpackCString#})
+       (Lit
+        (LitString
+         "One!"))))])))
+,(NonRec
+  {Var: patternMatchingOnValueDemo}
+  (App
+   (Var
+    {Var: sayMe})
+   (Lit
+    (LitNumber
+     (LitNumInteger)
+     (1)))))]

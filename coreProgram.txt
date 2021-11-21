@@ -1,10 +1,82 @@
-[$trModule :: Module
+[x :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 100 0}]
+ x = 1,
+ y :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 100 0}]
+ y = 2,
+ reverseList [Occ=LoopBreaker] :: [Integer] -> [Integer]
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
+ reverseList
+   = \ (ds_d1o5 :: [Integer]) ->
+       case ds_d1o5 of {
+         [] -> [] @Integer;
+         : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
+       };,
+ patternMatchingOnOperatorDemo :: [Integer]
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 350 0}]
+ patternMatchingOnOperatorDemo
+   = reverseList
+       (: @Integer 1 (: @Integer 2 (: @Integer 3 ([] @Integer)))),
+ $trModule :: Module
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 80 10}]
- $trModule = Module (TrNameS "main"#) (TrNameS "Source"#),
- add :: Int -> Int -> Int
+ $trModule = Module (TrNameS "main"#) (TrNameS "Source2"#),
+ usageOfPreludeFunctionsDemo :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 160 0}]
+ usageOfPreludeFunctionsDemo
+   = abs @Integer $fNumInteger (negate @Integer $fNumInteger 3),
+ lamdaDemo :: Integer -> Integer
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
-          WorkFree=True, Expandable=True, Guidance=IF_ARGS [0 0] 40 0}]
- add = \ (x :: Int) (y :: Int) -> + @Int $fNumInt x y]
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 40 0}]
+ lamdaDemo = \ (x :: Integer) -> + @Integer $fNumInteger x x,
+ lamdaApplicationDemo :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 120 0}]
+ lamdaApplicationDemo = lamdaDemo 1,
+ arithmeticDemo :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 380 0}]
+ arithmeticDemo
+   = + @Integer $fNumInteger 1 (* @Integer $fNumInteger 2 3),
+ namedValueDemo :: Integer
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 140 0}]
+ namedValueDemo = - @Integer $fNumInteger 1 y,
+ sayMe :: Integer -> String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 690 0}]
+ sayMe
+   = \ (ds_d1oa :: Integer) ->
+       case == @Integer $fEqInteger ds_d1oa 1 of {
+         False ->
+           case == @Integer $fEqInteger ds_d1oa 2 of {
+             False ->
+               case == @Integer $fEqInteger ds_d1oa 3 of {
+                 False -> unpackCString# "Not between 1 and 3"#;
+                 True -> unpackCString# "Three!"#
+               };
+             True -> unpackCString# "Two!"#
+           };
+         True -> unpackCString# "One!"#
+       },
+ patternMatchingOnValueDemo :: String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 120 0}]
+ patternMatchingOnValueDemo = sayMe 1]

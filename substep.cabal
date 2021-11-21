@@ -13,7 +13,6 @@ author:         Author name here
 maintainer:     example@example.com
 copyright:      2021 Author name here
 license:        BSD3
-license-file:   LICENSE
 build-type:     Simple
 extra-source-files:
     README.md
@@ -26,7 +25,14 @@ source-repository head
 library
   exposed-modules:
       DynFlags
+      FlatCoreASTPrinter
+      SimplifiedCoreAST.SimplifiedCoreAST
+      SimplifiedCoreAST.SimplifiedCoreASTConverter
+      SimplifiedCoreAST.SimplifiedCoreASTPrinter
+      SimplifiedCoreAST.SimplifiedCoreASTReducer
       Source
+      Source2
+      TraverseAST
       TypedStepperProofOfConcept
       TypedStepperProofOfConceptExamples
       Utils
@@ -46,7 +52,9 @@ library
     , ghc-lib-parser
     , ghc-paths
     , hlint
+    , hspec
     , mtl
+    , optparse-applicative
     , text
   default-language: Haskell2010
 
@@ -69,7 +77,9 @@ executable substep-exe
     , ghc-lib-parser
     , ghc-paths
     , hlint
+    , hspec
     , mtl
+    , optparse-applicative
     , substep
     , text
   default-language: Haskell2010
@@ -94,7 +104,9 @@ test-suite substep-test
     , ghc-lib-parser
     , ghc-paths
     , hlint
+    , hspec
     , mtl
+    , optparse-applicative
     , substep
     , text
   default-language: Haskell2010

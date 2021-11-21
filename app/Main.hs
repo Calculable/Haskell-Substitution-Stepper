@@ -34,6 +34,7 @@ import GHC.Core.Ppr
     pprCoreBinding,
     pprOptCo,
     pprParendExpr,
+    pprCoreBindings
   )
 import GHC.Driver.Types (ModGuts (mg_binds))
 import GHC.Paths (libdir)
@@ -44,20 +45,55 @@ import GHC.Types.Var (Var (varName, varType))
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import TypedStepperProofOfConceptExamples (printExampleStepping)
 import Utils (printAst, showOutputable)
+import FlatCoreASTPrinter (printFlatCoreAST)
+import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
+import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
+import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
+import SimplifiedCoreAST.SimplifiedCoreASTReducer (printStepByStepReduction)
+import Options.Applicative
+
+data Opts = Opts
+    {filePath :: !String, moduleName :: !String
+    }
 
 main :: IO ((), StepState)
-main = runGhc (Just libdir) $ do
+main = do
+    opts <- execParser optsParser
+    runStepper (filePath opts) (moduleName opts)
+  where
+    optsParser :: ParserInfo Opts
+    optsParser =
+        info
+            (helper <*> versionOption <*> programOptions)
+            (fullDesc <> progDesc "Haskell Substitution Stepper" <>
+             header
+                 "a stepper for Haskell Core")
+    versionOption :: Parser (a -> a)
+    versionOption = infoOption "0.0" (long "version" <> help "Show version")
+    programOptions :: Parser Opts
+    programOptions =
+        Opts <$> strOption
+            (long "file" <> metavar "VALUE" <> value "src/Source2.hs" <>
+             help "path to the haskell file that should be read") <*>
+        strOption
+            (long "module" <> metavar "VALUE" <> value "Source2" <>
+             help "name of the module inside the haskell file")
+       
+
+runStepper :: String -> String -> IO ((), StepState)
+runStepper filePath moduleName = runGhc (Just libdir) $ do
+  
   dFlags <- getSessionDynFlags
   setSessionDynFlags dFlags {hscTarget = HscNothing}
-
-  target <- guessTarget "src/Source.hs" Nothing
+  
+  target <- guessTarget filePath Nothing
   addTarget target
   res <- load LoadAllTargets
   case res of
     Succeeded -> liftIO $ putStrLn "successfully loaded targets"
     Failed -> liftIO $ putStrLn "failed to load targets"
 
-  let modName = mkModuleName "Source"
+  let modName = mkModuleName moduleName
   modSum <- getModSummary modName
 
   psmod <- parseModule modSum
@@ -85,9 +121,27 @@ main = runGhc (Just libdir) $ do
   -- liftIO $ writeFile "coreFamInsts.txt" (showOutputable coreFamInsts)
   -- liftIO $ writeFile "corePatternSyns.txt" (printAst corePatternSyns)
 
-  liftIO printExampleStepping
+  liftIO $ putStrLn "\n*****Pretty Printed Core Bindings:******"
+  liftIO (putStrLn (showOutputable (pprCoreBindings coreAst)))
 
-  liftIO $ putStrLn "\nExample Stepping of Source.hs:"
+  --liftIO $ putStrLn "\n*****Proof of concept******"
+  --liftIO printExampleStepping
+
+  
+
+  --liftIO $ putStrLn "\n*****Example Flat Printing of Source.hs:*****"
+  --liftIO $ printFlatCoreAST coreAst
+
+  liftIO $ putStrLn "\n*****Example Simplified Core AST Printing*****"
+  let simplifiedCoreAST = simplifyBindings coreAst
+  liftIO $ printSimplifiedCoreAST simplifiedCoreAST
+
+
+  liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
+  --show reduction for every binding in the file
+  liftIO $ mapM_ (printStepByStepReduction simplifiedCoreAST) simplifiedCoreAST
+
+  liftIO $ putStrLn "\n*****Example Stepping*****"
   let addAst = extract coreAst
   runStateT (step addAst) initStepState
 
@@ -101,12 +155,14 @@ step :: (OutputableBndr b, MonadState StepState m, MonadIO m) => Expr b -> m ()
 step (Var id) = do
   printDepth
   lPrint ("Var", showOutputable $ varName id, showOutputable $ varType id)
-step (Lit lit) = case lit of
-  LitChar c -> lPrint ("Char ", c)
-  LitNumber t v -> lPrint ("Number ", v)
-  LitString bs -> lPrint ("String ", bs)
-  LitFloat f -> lPrint ("Float ", f)
-  LitDouble d -> lPrint ("Double ", d)
+step (Lit lit) = do
+    printDepth
+    case lit of
+      LitChar c -> lPrint ("Char ", c)
+      LitNumber t v -> lPrint ("Number ", v)
+      LitString bs -> lPrint ("String ", bs)
+      LitFloat f -> lPrint ("Float ", f)
+      LitDouble d -> lPrint ("Double ", d)
 step (App exp arg) = do
   printDepth
   lPutStr "App "
