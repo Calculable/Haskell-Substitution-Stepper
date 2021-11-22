@@ -88,6 +88,7 @@ test-suite substep-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      SimplifiedCoreAST.SimplifiedCoreASTConverterSpec
       Paths_substep
   hs-source-dirs:
       test
