@@ -3,30 +3,32 @@ module SimplifiedCoreAST.SimplifiedCoreASTConverter
   )
 where
 
-import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..))
+import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..), CoreBind)
 import GHC.Types.Literal
   ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
   )
 import GHC.Types.Var (Var (varName, varType), TyVar, Id)
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
-import Utils (printAst, showOutputable)
+import Utils (showOutputable)
 import GHC.Core.Ppr
   ( pprCoreAlt,
   )
 import Data.List(isPrefixOf)
 import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
+import GHC.Types.Name(nameUnique, Name)
 
-simplifyBindings :: (OutputableBndr a) => [Bind a] -> [BindS]
+simplifyBindings :: [CoreBind] -> [BindS]
 simplifyBindings x = concat (map simplifyBinding x)
-simplifyBinding :: (OutputableBndr a) => Bind a -> [BindS]
+
+simplifyBinding :: CoreBind -> [BindS]
 simplifyBinding (NonRec b exp) = [simplifyBindingWithExpression (b, exp)]
 simplifyBinding (Rec bindings) = map simplifyBindingWithExpression bindings
 
-simplifyBindingWithExpression ::  (OutputableBndr b) => (b, Expr b) -> BindS
-simplifyBindingWithExpression (b, exp)  = ((showOutputable b), (simplifyExpression exp))
+simplifyBindingWithExpression :: (Var, Expr Var) -> BindS
+simplifyBindingWithExpression (b, exp)  = ((varToString b), (simplifyExpression exp))
 
-simplifyExpression :: (OutputableBndr b) => Expr b -> ExpressionS
-simplifyExpression (Var id) = VarS (showOutputable $ varName id)
+simplifyExpression :: Expr Var -> ExpressionS
+simplifyExpression (Var id) = VarS (varToString id)
 simplifyExpression (Lit lit) = LitS (simplifyLiteral lit)
 simplifyExpression (App exp arg) = 
   if (isTypeInformation simplifiedArgument) then simplifiedExpression
@@ -34,7 +36,7 @@ simplifyExpression (App exp arg) =
   else AppS simplifiedExpression simplifiedArgument
     where simplifiedArgument = (simplifyExpression arg)
           simplifiedExpression = (simplifyExpression exp)
-simplifyExpression (Lam b exp) = LamS (showOutputable b) (simplifyExpression exp)
+simplifyExpression (Lam b exp) = LamS (varToString b) (simplifyExpression exp)
 simplifyExpression (Type t) = TypeS
 simplifyExpression (Case exp b t alts) = CaseS (simplifyExpression exp) (map simplifyAlt alts)
 simplifyExpression (Let bind exp) = InvalidExpression "Let Constructor not suppoted"
@@ -49,8 +51,8 @@ simplifyLiteral (LitString bs) =  (LitStringS (show bs))
 simplifyLiteral (LitFloat f) =  (LitFloatS f)
 simplifyLiteral (LitDouble d) =  (LitDoubleS d)
 
-simplifyAlt :: (OutputableBndr b) => Alt b -> AltS
-simplifyAlt (altCon, b, exp) =  ((simplifyAltCon altCon), (map showOutputable b), (simplifyExpression exp))
+simplifyAlt :: Alt Var -> AltS
+simplifyAlt (altCon, b, exp) =  ((simplifyAltCon altCon), (map varToString b), (simplifyExpression exp))
 
 simplifyAltCon :: AltCon -> AltConS
 simplifyAltCon (DataAlt constructor) = DataAltS (showOutputable constructor)
@@ -65,3 +67,9 @@ isTypeInformation x = False
 isUnnecessaryFunction :: ExpressionS -> Bool
 isUnnecessaryFunction (VarS name) = (==) "unpackCString#" name 
 isUnnecessaryFunction x = False
+
+varToString :: Var -> String
+varToString var = nameToString (varName var)
+
+nameToString :: Name -> String
+nameToString name = showOutputable name
