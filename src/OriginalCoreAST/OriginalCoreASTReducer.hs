@@ -1,5 +1,5 @@
 module OriginalCoreAST.OriginalCoreASTReducer
-  (printCoreStepByStepReduction
+  (printCoreStepByStepReduction, printCoreStepByStepReductionForEveryBinding
   )
 where
 
@@ -24,19 +24,31 @@ import GHC.Types.Name(nameUnique, Name)
 
 
 type ReductionStepDescription = String --for example: "replace x with definition"
+type Binding = (Var, Expr Var)
 
+printCoreStepByStepReductionForEveryBinding :: [CoreBind] -> IO()
+printCoreStepByStepReductionForEveryBinding bindings = do
+    let allBindings = convertToBindingsList bindings
+    mapM_ (printCoreStepByStepReduction allBindings) allBindings
 
-printCoreStepByStepReduction :: [CoreBind] -> CoreBind -> IO ()
-printCoreStepByStepReduction bindings (NonRec binding exp) = do
+printCoreStepByStepReduction :: [Binding] -> Binding -> IO ()
+printCoreStepByStepReduction bindings (var, exp) = do
     putStr "\n**Reduction of "
-    putStr (varToString binding)
+    putStr (varToString var)
     putStr "**"
     putStrLn ""
     putStr (showOutputable exp)
     reduce bindings exp
-printCoreStepByStepReduction bindings (Rec _) = putStrLn "Cannot Reduce Recursive Binding"
 
-reduce :: [CoreBind] -> Expr Var -> IO()
+convertToBindingsList :: [CoreBind] -> [Binding]
+convertToBindingsList bindings = concat (map convertCoreBindingToBindingList bindings)
+
+convertCoreBindingToBindingList :: CoreBind -> [Binding]
+convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
+convertCoreBindingToBindingList (Rec bindings) = bindings
+
+
+reduce :: [Binding] -> Expr Var -> IO()
 reduce bindings expression    | canBeReduced expression = do
                                 let reduction = (applyStep bindings expression)
                                 case reduction of
@@ -48,18 +60,31 @@ reduce bindings expression    | canBeReduced expression = do
                               | otherwise = putStrLn "\n{-reduction complete-}"
 
 
-applyStep :: [CoreBind] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
+applyStep :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStep bindings (Var name) = do
     foundBinding <- tryFindBinding name bindings
     return (("Replace '" ++ (varToString name) ++ "' with definition"),foundBinding) {-replace binding reference with actual expression (Delta Reduction)-}                                
+applyStep bindings (App (Lam parameter expression) argument) = Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
+applyStep bindings (App (App name firstArgument) secondArgument) = do
+    (description, simplifiedFirstApplication) <- applyStep bindings (App name firstArgument)
+    return (description, (App simplifiedFirstApplication secondArgument))
+applyStep bindings (App (Var name) argument) = do
+  let foundBinding = tryFindBinding name bindings 
+  if (isNothing (foundBinding))
+    then
+      if (canBeReduced argument)
+        then do
+            (description, reducedArgument) <- applyStep bindings argument 
+            return (description, (App (Var name) (reducedArgument))) 
+        else Nothing --function application to a function that we dont know from the bindings. ToDo: Check if we have this function or operator in the prelude and then continue
+    else Just ("Replace '" ++ (varToString name) ++ "' with definition", (App (fromJust foundBinding) argument))
 applyStep _ _ = Nothing
 
-tryFindBinding :: Var -> [CoreBind] -> Maybe (Expr Var)
+tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
 tryFindBinding key [] = Nothing
-tryFindBinding key ((NonRec binding exp):xs) = if ((==) (varToString binding) (varToString key))
+tryFindBinding key ((var, exp):xs) = if ((==) (varToString var) (varToString key))
                                                     then Just (exp)
                                                     else tryFindBinding key xs
-tryFindBinding key ((Rec _):xs) = tryFindBinding key xs --recursive bindings not supported
 
 deepReplaceVarWithinExpression :: Var -> Expr Var -> Expr Var -> Expr Var
 deepReplaceVarWithinExpression name replaceExpression (Var varName) = if (==) (varToString varName) (varToString name) then replaceExpression else (Var varName)
