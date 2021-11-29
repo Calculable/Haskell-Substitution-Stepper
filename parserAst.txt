@@ -113,6 +113,44 @@
       (NoExtField)
       ({ ss }
        (Unqual
+        {OccName: z}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: z}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsVar
+                 (NoExtField)
+                 ({ ss }
+                  (Unqual
+                   {OccName: x}))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
         {OccName: namedValueDemo}))
       (MG
        (NoExtField)

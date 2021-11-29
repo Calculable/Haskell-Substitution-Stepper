@@ -13,6 +13,7 @@ import GHC.Types.Literal
   )
 import GHC.Types.Var (Var (varName, varType), TyVar, Id)
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
+import GHC.Core.Utils (exprIsHNF)
 import Utils (showOutputable)
 import GHC.Core.Ppr
   ( pprCoreAlt,
@@ -32,11 +33,51 @@ printCoreStepByStepReduction bindings (NonRec binding exp) = do
     putStr "**"
     putStrLn ""
     putStr (showOutputable exp)
+    reduce bindings exp
 printCoreStepByStepReduction bindings (Rec _) = putStrLn "Cannot Reduce Recursive Binding"
 
+reduce :: [CoreBind] -> Expr Var -> IO()
+reduce bindings expression    | canBeReduced expression = do
+                                let reduction = (applyStep bindings expression)
+                                case reduction of
+                                    Just (reductionStepDescription, reducedExpression) -> do
+                                        putStrLn ("\n{-" ++ reductionStepDescription ++ "-}")
+                                        putStr (showOutputable reducedExpression)
+                                        reduce bindings reducedExpression
+                                    Nothing -> putStrLn "\n{-no reduction rule implemented for this expression-}"
+                              | otherwise = putStrLn "\n{-reduction complete-}"
 
 
+applyStep :: [CoreBind] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
+applyStep bindings (Var name) = do
+    foundBinding <- tryFindBinding name bindings
+    return (("Replace '" ++ (varToString name) ++ "' with definition"),foundBinding) {-replace binding reference with actual expression (Delta Reduction)-}                                
+applyStep _ _ = Nothing
 
+tryFindBinding :: Var -> [CoreBind] -> Maybe (Expr Var)
+tryFindBinding key [] = Nothing
+tryFindBinding key ((NonRec binding exp):xs) = if ((==) (varToString binding) (varToString key))
+                                                    then Just (exp)
+                                                    else tryFindBinding key xs
+tryFindBinding key ((Rec _):xs) = tryFindBinding key xs --recursive bindings not supported
+
+deepReplaceVarWithinExpression :: Var -> Expr Var -> Expr Var -> Expr Var
+deepReplaceVarWithinExpression name replaceExpression (Var varName) = if (==) (varToString varName) (varToString name) then replaceExpression else (Var varName)
+deepReplaceVarWithinExpression name replaceExpression (App expression argument) = App (deepReplaceVarWithinExpression name replaceExpression expression) (deepReplaceVarWithinExpression name replaceExpression argument)
+deepReplaceVarWithinExpression name replaceExpression (Lam parameter expression) =
+  if (varToString parameter) == (varToString name)
+    then Lam parameter expression --do nothing, use local lamda parameter with the same name (shadowing)
+    else Lam parameter (deepReplaceVarWithinExpression name replaceExpression expression)
+deepReplaceVarWithinExpression name replaceExpression (Case expression binding caseType alternatives) = Case (deepReplaceVarWithinExpression name replaceExpression expression) binding caseType (map (deepReplaceVarWithinAlternative name replaceExpression) alternatives)
+deepReplaceVarWithinExpression _ _ expression = expression --nothing to replace (ToDo: Let, Cast, Tick, Type, Coercion not implemented yet)
+
+deepReplaceVarWithinAlternative :: Var -> Expr Var -> Alt Var -> Alt Var 
+deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundVars, expression) = if (elem (varToString name) (map varToString localBoundVars))
+                                                                                                 then (altCon, localBoundVars, expression) --do nothing, use local parameter with the same name (shadowing)
+                                                                                                 else (altCon, localBoundVars, (deepReplaceVarWithinExpression name replaceExpression expression))
+
+
+--core utilities 
 varToString :: Var -> String
 varToString var = nameToString (varName var)
 
@@ -56,6 +97,11 @@ coreLiteralToFractional (LitDouble value) = fromRational value
 fractionalToCoreLiteral :: Real a => a -> Literal
 fractionalToCoreLiteral value =  (LitDouble (toRational value))
 
+isInHeadNormalForm :: Expr Var -> Bool
+isInHeadNormalForm exp = exprIsHNF exp
+
+canBeReduced :: Expr Var -> Bool
+canBeReduced exp = not (exprIsHNF exp)
 
 -- reduce :: [BindS] -> ExpressionS -> IO ()
 -- reduce bindings expression    | canBeReduced bindings expression = do

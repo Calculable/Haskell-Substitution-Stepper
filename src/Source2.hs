@@ -2,6 +2,7 @@ module Source2 where
 
 x = 1
 y = 2
+z = x
 namedValueDemo = 1 - y
 
 arithmeticDemo = 1 + 2 * 3
