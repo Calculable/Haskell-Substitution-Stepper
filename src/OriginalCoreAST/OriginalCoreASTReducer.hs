@@ -83,7 +83,7 @@ applyStep _ _ = Nothing
 
 simplifyNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var) --eval if all parameters are reduced
 simplifyNestedApp bindings expr = do
-    let (function, arguments) = (collectArgs expr)
+    let (function, arguments) = (convertToMultiArgumentFunction expr)
     if (any canBeReduced arguments) 
         then do 
             (description, simplifiedArguments) <- (applyStepToOneOfTheArguments bindings [] arguments)
@@ -103,7 +103,7 @@ convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
 
 applyFunctionToArguments :: Expr Var -> [Expr Var] -> Expr Var 
-applyFunctionToArguments _ _ = stringToCoreExpression "ToDo: Implement"
+applyFunctionToArguments expr arguments = stringToCoreExpression ("ToDo: Implement " ++ showOutputable expr ) --toDo: Implement
 
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
@@ -127,8 +127,13 @@ deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundVars, 
                                                                                                  then (altCon, localBoundVars, expression) --do nothing, use local parameter with the same name (shadowing)
                                                                                                  else (altCon, localBoundVars, (deepReplaceVarWithinExpression name replaceExpression expression))
 
+deepReplaceMultipleVarWithinExpression :: [Var] -> [Expr Var] -> Expr Var -> Expr Var
+deepReplaceMultipleVarWithinExpression [] _ expression = expression
+deepReplaceMultipleVarWithinExpression _ [] expression = expression
+deepReplaceMultipleVarWithinExpression (x:xs) (y:ys) expression = deepReplaceMultipleVarWithinExpression xs ys (deepReplaceVarWithinExpression x y expression)
+
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
-findMatchingPattern expression [] = Nothing
+findMatchingPattern expression [] = Nothing 
 findMatchingPattern _ ((DEFAULT, _, expression):_) = Just expression
 findMatchingPattern (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
                                                                             then Just expression
@@ -136,12 +141,22 @@ findMatchingPattern (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==
 findMatchingPattern (Lit literal) (((LitAlt patternLiteral), _, expression):xs) = if ((==) literal patternLiteral) --can we compare two literals like this?
                                                                                              then Just expression
                                                                                              else (findMatchingPattern (Lit literal) xs)
---findMatchingPattern (MultiArgumentAppS name arguments) (((DataAltS patternConstructorName), boundNames, expression):xs) = if ((==) name patternConstructorName) --toDo: Implement
---                                                                                                                             then deepReplaceMultipleVarWithinExpression boundNames arguments expression
---                                                                                                                             else (findMatchingPattern (MultiArgumentAppS name arguments) xs)
+findMatchingPattern (App expr argument) (((DataAlt patternConstructorName), boundNames, expression):xs) = do
+    let (function, arguments) = convertToMultiArgumentFunction (App expr argument)
+    if ((==) (showVarExpression function) (showOutputable patternConstructorName)) --check: is there a more elegant way than "show outputable"
+        then Just (deepReplaceMultipleVarWithinExpression boundNames (filter (not.isTypeInformation) arguments) expression)
+        else (findMatchingPattern (App expr argument) xs) 
 findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
 
 --core utilities 
+
+showVarExpression :: Expr Var -> String
+showVarExpression (Var var) = varToString var
+showVarExpression _ = error "Expression is no var"
+
+convertToMultiArgumentFunction :: Expr Var -> (Expr Var, [Expr Var])
+convertToMultiArgumentFunction expr = collectArgs expr
+
 varToString :: Var -> String
 varToString var = nameToString (varName var)
 
