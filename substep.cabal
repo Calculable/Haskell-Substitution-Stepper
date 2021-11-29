@@ -26,6 +26,7 @@ library
   exposed-modules:
       DynFlags
       FlatCoreASTPrinter
+      OriginalCoreAST.OriginalCoreASTReducer
       SimplifiedCoreAST.SimplifiedCoreAST
       SimplifiedCoreAST.SimplifiedCoreASTConverter
       SimplifiedCoreAST.SimplifiedCoreASTPrinter
