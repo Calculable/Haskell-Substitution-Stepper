@@ -7,7 +7,7 @@ import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(
 import Data.List(isPrefixOf, find)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreExpression)
 import Data.Maybe
-import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..), CoreBind)
+import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..), CoreBind, collectArgs)
 import GHC.Types.Literal
   ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString), mkLitInt64, mkLitString
   )
@@ -65,20 +65,46 @@ applyStep bindings (Var name) = do
     foundBinding <- tryFindBinding name bindings
     return (("Replace '" ++ (varToString name) ++ "' with definition"),foundBinding) {-replace binding reference with actual expression (Delta Reduction)-}                                
 applyStep bindings (App (Lam parameter expression) argument) = Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
-applyStep bindings (App (App name firstArgument) secondArgument) = do
-    (description, simplifiedFirstApplication) <- applyStep bindings (App name firstArgument)
-    return (description, (App simplifiedFirstApplication secondArgument))
+applyStep bindings (App (App first second) third) = simplifyNestedApp bindings (App (App first second) third) --nested app
 applyStep bindings (App (Var name) argument) = do
-  let foundBinding = tryFindBinding name bindings 
-  if (isNothing (foundBinding))
-    then
-      if (canBeReduced argument)
-        then do
-            (description, reducedArgument) <- applyStep bindings argument 
-            return (description, (App (Var name) (reducedArgument))) 
-        else Nothing --function application to a function that we dont know from the bindings. ToDo: Check if we have this function or operator in the prelude and then continue
-    else Just ("Replace '" ++ (varToString name) ++ "' with definition", (App (fromJust foundBinding) argument))
+    let expression = tryFindBinding name bindings
+    if isNothing expression 
+        then simplifyNestedApp bindings (App (Var name) argument)
+        else Just ("Replace '" ++ (varToString name) ++ "' with definition", (App (fromJust expression) argument))
+applyStep bindings (Case expression binding caseType alternatives) = do
+    (description, reducedExpression) <- applyStep bindings expression
+    if (canBeReduced expression) 
+        then return (description, (Case reducedExpression binding caseType alternatives))
+        else do
+            matchingPattern <- findMatchingPattern expression alternatives
+            return ("Replace with matching pattern", matchingPattern)
+
 applyStep _ _ = Nothing
+
+simplifyNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var) --eval if all parameters are reduced
+simplifyNestedApp bindings expr = do
+    let (function, arguments) = (collectArgs expr)
+    if (any canBeReduced arguments) 
+        then do 
+            (description, simplifiedArguments) <- (applyStepToOneOfTheArguments bindings [] arguments)
+            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments)
+        else Just ("Apply " ++ (showOutputable function), applyFunctionToArguments function arguments) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
+
+applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var])
+applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeReduced x 
+                                                                        then do
+                                                                            (description, reducedArgument) <- applyStep bindings x
+                                                                            return (description, (alreadyReducedArguments ++ [reducedArgument]) ++ xs)
+                                                                        else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
+applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = Nothing --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
+
+convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Expr Var -> [Expr Var] -> Expr Var
+convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression [] = expression
+convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
+
+applyFunctionToArguments :: Expr Var -> [Expr Var] -> Expr Var 
+applyFunctionToArguments _ _ = stringToCoreExpression "ToDo: Implement"
+
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
 tryFindBinding key [] = Nothing
@@ -101,6 +127,19 @@ deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundVars, 
                                                                                                  then (altCon, localBoundVars, expression) --do nothing, use local parameter with the same name (shadowing)
                                                                                                  else (altCon, localBoundVars, (deepReplaceVarWithinExpression name replaceExpression expression))
 
+findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
+findMatchingPattern expression [] = Nothing
+findMatchingPattern _ ((DEFAULT, _, expression):_) = Just expression
+findMatchingPattern (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
+                                                                            then Just expression
+                                                                            else (findMatchingPattern (Var name) xs)
+findMatchingPattern (Lit literal) (((LitAlt patternLiteral), _, expression):xs) = if ((==) literal patternLiteral) --can we compare two literals like this?
+                                                                                             then Just expression
+                                                                                             else (findMatchingPattern (Lit literal) xs)
+--findMatchingPattern (MultiArgumentAppS name arguments) (((DataAltS patternConstructorName), boundNames, expression):xs) = if ((==) name patternConstructorName) --toDo: Implement
+--                                                                                                                             then deepReplaceMultipleVarWithinExpression boundNames arguments expression
+--                                                                                                                             else (findMatchingPattern (MultiArgumentAppS name arguments) xs)
+findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
 
 --core utilities 
 varToString :: Var -> String
@@ -125,8 +164,14 @@ fractionalToCoreLiteral value =  (LitDouble (toRational value))
 isInHeadNormalForm :: Expr Var -> Bool
 isInHeadNormalForm exp = exprIsHNF exp
 
-canBeReduced :: Expr Var -> Bool
-canBeReduced exp = not (exprIsHNF exp)
+isTypeInformation :: Expr Var -> Bool
+isTypeInformation (Type _) = True
+isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
+isTypeInformation x = False
+
+canBeReduced exp = if isTypeInformation exp
+                    then False
+                    else not (exprIsHNF exp)
 
 -- reduce :: [BindS] -> ExpressionS -> IO ()
 -- reduce bindings expression    | canBeReduced bindings expression = do
