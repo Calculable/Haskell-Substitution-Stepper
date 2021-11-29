@@ -84,11 +84,19 @@ applyStep _ _ = Nothing
 simplifyNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var) --eval if all parameters are reduced
 simplifyNestedApp bindings expr = do
     let (function, arguments) = (convertToMultiArgumentFunction expr)
-    if (any canBeReduced arguments) 
-        then do 
-            (description, simplifiedArguments) <- (applyStepToOneOfTheArguments bindings [] arguments)
-            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments)
-        else Just ("Apply " ++ (showOutputable function), applyFunctionToArguments function arguments) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
+    case function of
+        (Var var) -> if (isNothing (tryFindBinding var bindings))
+                        then if (any canBeReduced arguments) 
+                            then do 
+                                (description, simplifiedArguments) <- (applyStepToOneOfTheArguments bindings [] arguments)
+                                return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments)
+                            else Just ("Apply " ++ (showOutputable function), applyFunctionToArguments function arguments) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
+                        else do
+                            (description, reducedFunction) <- applyStep bindings (App function (head arguments))
+                            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments))                            
+        (Lam _ _) -> do
+            (description, reducedFunction) <- applyStep bindings (App function (head arguments))
+            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments))
 
 applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var])
 applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeReduced x 
@@ -147,6 +155,7 @@ findMatchingPattern (App expr argument) (((DataAlt patternConstructorName), boun
         then Just (deepReplaceMultipleVarWithinExpression boundNames (filter (not.isTypeInformation) arguments) expression)
         else (findMatchingPattern (App expr argument) xs) 
 findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
+
 
 --core utilities 
 
