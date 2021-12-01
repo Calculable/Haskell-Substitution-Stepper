@@ -30,6 +30,8 @@ library
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CoreStepper
       OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
+      OriginalCoreAST.CoreStepperHelpers.CoreLookup
+      OriginalCoreAST.CoreStepperHelpers.CoreTransformator
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
       SimplifiedCoreAST.SimplifiedCoreAST
