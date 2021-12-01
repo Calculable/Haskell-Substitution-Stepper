@@ -1233,6 +1233,136 @@
              (EmptyLocalBinds
               (NoExtField))))))])
        (FromSource))
+      [])))
+  ,({ ss }
+    (SigD
+     (NoExtField)
+     (TypeSig
+      (NoExtField)
+      [({ ss }
+        (Unqual
+         {OccName: test}))]
+      (HsWC
+       (NoExtField)
+       (HsIB
+        (NoExtField)
+        ({ ss }
+         (HsFunTy
+          (NoExtField)
+          (HsUnrestrictedArrow
+           (NormalSyntax))
+          ({ ss }
+           (HsTyVar
+            (NoExtField)
+            (NotPromoted)
+            ({ ss }
+             (Unqual
+              {OccName: Integer}))))
+          ({ ss }
+           (HsTyVar
+            (NoExtField)
+            (NotPromoted)
+            ({ ss }
+             (Unqual
+              {OccName: String})))))))))))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: test}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: test}))
+            (Prefix)
+            (NoSrcStrict))
+           [({ ss }
+             (WildPat
+              (NoExtField)))]
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsLit
+                 (NoExtField)
+                 (HsString
+                  (SourceText
+                   "\"some string\"")
+                  {FastString: "some string"})))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
+      [])))
+  ,({ ss }
+    (ValD
+     (NoExtField)
+     (FunBind
+      (NoExtField)
+      ({ ss }
+       (Unqual
+        {OccName: applyTest}))
+      (MG
+       (NoExtField)
+       ({ ss }
+        [({ ss }
+          (Match
+           (NoExtField)
+           (FunRhs
+            ({ ss }
+             (Unqual
+              {OccName: applyTest}))
+            (Prefix)
+            (NoSrcStrict))
+           []
+           (GRHSs
+            (NoExtField)
+            [({ ss }
+              (GRHS
+               (NoExtField)
+               []
+               ({ ss }
+                (HsApp
+                 (NoExtField)
+                 ({ ss }
+                  (HsVar
+                   (NoExtField)
+                   ({ ss }
+                    (Unqual
+                     {OccName: test}))))
+                 ({ ss }
+                  (HsOverLit
+                   (NoExtField)
+                   (OverLit
+                    (NoExtField)
+                    (HsIntegral
+                     (IL
+                      (SourceText
+                       "4")
+                      (False)
+                      (4)))
+                    (HsLit
+                     (NoExtField)
+                     (HsString
+                      (SourceText
+                       "noExpr")
+                      {FastString: "noExpr"})))))))))]
+            ({ ss }
+             (EmptyLocalBinds
+              (NoExtField))))))])
+       (FromSource))
       [])))]
   (Nothing)
   (Nothing)))

@@ -25,8 +25,8 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [90] 150 0}]
  isTrue
-   = \ (ds_d1p1 :: Bool) ->
-       case ds_d1p1 of {
+   = \ (ds_d1pv :: Bool) ->
+       case ds_d1pv of {
          False -> unpackCString# "No its false"#;
          True -> unpackCString# "Yes, its True"#
        },
@@ -40,8 +40,8 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
  reverseList
-   = \ (ds_d1oW :: [Integer]) ->
-       case ds_d1oW of {
+   = \ (ds_d1pq :: [Integer]) ->
+       case ds_d1pq of {
          [] -> [] @Integer;
          : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
        };,
@@ -52,6 +52,16 @@
  patternMatchingOnOperatorDemo
    = reverseList
        (: @Integer 1 (: @Integer 2 (: @Integer 3 ([] @Integer)))),
+ test :: Integer -> String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 60 0}]
+ test = \ _ [Occ=Dead] -> unpackCString# "some string"#,
+ applyTest :: String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 120 0}]
+ applyTest = test 4,
  $trModule :: Module
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
@@ -89,12 +99,12 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 690 0}]
  sayMe
-   = \ (ds_d1p4 :: Integer) ->
-       case == @Integer $fEqInteger ds_d1p4 1 of {
+   = \ (ds_d1py :: Integer) ->
+       case == @Integer $fEqInteger ds_d1py 1 of {
          False ->
-           case == @Integer $fEqInteger ds_d1p4 2 of {
+           case == @Integer $fEqInteger ds_d1py 2 of {
              False ->
-               case == @Integer $fEqInteger ds_d1p4 3 of {
+               case == @Integer $fEqInteger ds_d1py 3 of {
                  False -> unpackCString# "Not between 1 and 3"#;
                  True -> unpackCString# "Three!"#
                };

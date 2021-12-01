@@ -35,3 +35,8 @@ reverseList [] = []
 reverseList (a:bc) = reverseList bc ++ [a]
 
 patternMatchingOnOperatorDemo = reverseList [1, 2, 3]
+
+test :: Integer -> String
+test _ = "some string"
+
+applyTest = test 4

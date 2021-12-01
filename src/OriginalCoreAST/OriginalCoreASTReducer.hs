@@ -163,23 +163,26 @@ applyStep :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStep bindings (Var name) = do
     foundBinding <- tryFindBinding name bindings
     return (("Replace '" ++ (varToString name) ++ "' with definition"),foundBinding) {-replace binding reference with actual expression (Delta Reduction)-}                                
-applyStep bindings (App (Lam parameter expression) argument) = Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
-applyStep bindings (App (App first second) third) = simplifyNestedApp bindings (App (App first second) third) --nested app
+applyStep bindings (App (Lam parameter expression) argument) = do
+    Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
+applyStep bindings (App (App first second) third) = do
+    simplifyNestedApp bindings (App (App first second) third) --nested app
 applyStep bindings (App (Var name) argument) = do
     let expression = tryFindBinding name bindings
     if isNothing expression 
-        then simplifyNestedApp bindings (App (Var name) argument)
+        then do
+            simplifyNestedApp bindings (App (Var name) argument)
         else Just ("Replace '" ++ (varToString name) ++ "' with definition", (App (fromJust expression) argument))
-applyStep bindings (Case expression binding caseType alternatives) = if (canBeReduced expression) 
-                                                                            then do 
-                                                                                (description, reducedExpression) <- applyStep bindings expression
-
-                                                                                return (description, (Case reducedExpression binding caseType alternatives))
-                                                                            else do
-                                                                                matchingPattern <- findMatchingPattern expression alternatives
-                                                                                return ("Replace with matching pattern", matchingPattern)
-
-applyStep _ _ = Nothing
+applyStep bindings (Case expression binding caseType alternatives) = do
+    if (canBeReduced expression) 
+        then do 
+            (description, reducedExpression) <- applyStep bindings expression
+            return (description, (Case reducedExpression binding caseType alternatives))
+        else do
+            matchingPattern <- findMatchingPattern expression alternatives
+            return ("Replace with matching pattern", matchingPattern)
+applyStep _ _ = do
+    Nothing
 
 simplifyNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var) --eval if all parameters are reduced
 simplifyNestedApp bindings expr = do
@@ -213,7 +216,8 @@ convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
 
 applyFunctionToArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var) 
-applyFunctionToArguments (Var functionOrOperatorName) arguments = applyUnsteppableFunctionToArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) arguments) --Precondition: function must be in the form of "var" and all arguments must be in the form of. This is already checked by the function which is calling this function
+applyFunctionToArguments (Var functionOrOperatorName) arguments = do
+    applyUnsteppableFunctionToArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) arguments) --Precondition: function must be in the form of "var" and all arguments must be in the form of. This is already checked by the function which is calling this function
 applyFunctionToArguments _ _ = error "function-expression has to be a 'Var'"
 
 applyUnsteppableFunctionToArguments :: String -> [Expr Var] -> Maybe (Expr Var) 
@@ -231,6 +235,7 @@ applyUnsteppableFunctionToArguments ">" [x, y] = Just (boolToExpression ((>) x y
 applyUnsteppableFunctionToArguments ">=" [x, y] = Just (boolToExpression ((>=) x y))
 applyUnsteppableFunctionToArguments "<=" [x, y] = Just (boolToExpression ((<=) x y))
 applyUnsteppableFunctionToArguments "negate" [(Lit (LitNumber _ x))] = Just (integerToCoreExpression (negate x)) --example of an arbitrary function from the prelude. note how the arguments must have the right type and the result is converted back into an expressino
+applyUnsteppableFunctionToArguments "unpackCString#" [x] = Just x
 applyUnsteppableFunctionToArguments name _ = Nothing --function not supported
 -- toDo: Add more functions from the prelude
 
