@@ -19,14 +19,52 @@
    (LitNumber
     (LitNumInteger)
     (2))))
+,(NonRec
+  {Var: isTrue}
+  (Lam
+   {Var: ds_d1p1}
+   (Case
+    (Var
+     {Var: ds_d1p1})
+    {Var: wild_00}
+    (TyConApp
+     ({abstract:TyCon})
+     [])
+    [((,,)
+      (DataAlt
+       {DataCon: False})
+      []
+      (App
+       (Var
+        {Var: unpackCString#})
+       (Lit
+        (LitString
+         "No its false"))))
+    ,((,,)
+      (DataAlt
+       {DataCon: True})
+      []
+      (App
+       (Var
+        {Var: unpackCString#})
+       (Lit
+        (LitString
+         "Yes, its True"))))])))
+,(NonRec
+  {Var: q}
+  (App
+   (Var
+    {Var: isTrue})
+   (Var
+    {Var: True})))
 ,(Rec
   [((,)
     {Var: reverseList}
     (Lam
-     {Var: ds_d1or}
+     {Var: ds_d1oW}
      (Case
       (Var
-       {Var: ds_d1or})
+       {Var: ds_d1oW})
       {Var: wild_00}
       (TyConApp
        ({abstract:TyCon})
@@ -268,7 +306,7 @@
 ,(NonRec
   {Var: sayMe}
   (Lam
-   {Var: ds_d1ow}
+   {Var: ds_d1p4}
    (Case
     (App
      (App
@@ -283,7 +321,7 @@
        (Var
         {Var: $fEqInteger}))
       (Var
-       {Var: ds_d1ow}))
+       {Var: ds_d1p4}))
      (Lit
       (LitNumber
        (LitNumInteger)
@@ -312,7 +350,7 @@
           (Var
            {Var: $fEqInteger}))
          (Var
-          {Var: ds_d1ow}))
+          {Var: ds_d1p4}))
         (Lit
          (LitNumber
           (LitNumInteger)
@@ -341,7 +379,7 @@
              (Var
               {Var: $fEqInteger}))
             (Var
-             {Var: ds_d1ow}))
+             {Var: ds_d1p4}))
            (Lit
             (LitNumber
              (LitNumInteger)
@@ -393,11 +431,11 @@
         (LitString
          "One!"))))])))
 ,(NonRec
-  {Var: patternMatchingOnValueDemo}
+  {Var: aPatternMatchingOnValueDemo}
   (App
    (Var
     {Var: sayMe})
    (Lit
     (LitNumber
      (LitNumInteger)
-     (1)))))]
+     (4)))))]

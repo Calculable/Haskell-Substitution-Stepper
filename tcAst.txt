@@ -358,8 +358,8 @@
     []
     [(ABE
       (NoExtField)
-      {Var: sayMe}
-      {Var: sayMe}
+      {Var: isTrue}
+      {Var: isTrue}
       (WpHole)
       (SpecPrags
        []))]
@@ -369,7 +369,7 @@
        (FunBind
         (WpHole)
         ({ ss }
-         {Var: sayMe})
+         {Var: isTrue})
         (MG
          (MatchGroupTc
           [(Scaled
@@ -388,77 +388,21 @@
              (NoExtField)
              (FunRhs
               ({ ss }
-               {Name: sayMe})
+               {Name: isTrue})
               (Prefix)
               (NoSrcStrict))
              [({ ss }
-               (NPat
-                (TyConApp
-                 ({abstract:TyCon})
-                 [])
+               (ConPat
+                (ConPatTc
+                 []
+                 []
+                 []
+                 ({abstract:TcEvBinds})
+                 (WpHole))
                 ({ ss }
-                 (OverLit
-                  (OverLitTc
-                   (False)
-                   (TyConApp
-                    ({abstract:TyCon})
-                    []))
-                  (HsIntegral
-                   (IL
-                    (SourceText
-                     "1")
-                    (False)
-                    (1)))
-                  (HsApp
-                   (NoExtField)
-                   ({ ss }
-                    (XExpr
-                     (WrapExpr
-                      (HsWrap
-                       (WpCompose
-                        (WpEvApp
-                         (EvExpr
-                          (Var
-                           {Var: $dNum_a1mp})))
-                        (WpTyApp
-                         (TyConApp
-                          ({abstract:TyCon})
-                          [])))
-                       (HsVar
-                        (NoExtField)
-                        ({ ss }
-                         {Var: fromInteger}))))))
-                   ({ ss }
-                    (HsLit
-                     (NoExtField)
-                     (HsInteger
-                      (SourceText
-                       "1")
-                      (1)
-                      (TyConApp
-                       ({abstract:TyCon})
-                       [])))))))
-                (Nothing)
-                (SyntaxExprTc
-                 (XExpr
-                  (WrapExpr
-                   (HsWrap
-                    (WpCompose
-                     (WpEvApp
-                      (EvExpr
-                       (Var
-                        {Var: $dEq_a1mn})))
-                     (WpTyApp
-                      (TyConApp
-                       ({abstract:TyCon})
-                       [])))
-                    (HsVar
-                     (NoExtField)
-                     ({ ss }
-                      {Var: ==})))))
-                 [(WpHole)
-                 ,(WpHole)]
-                 (WpHole))))]
+                 ({abstract:ConLike}))
+                (PrefixCon
+                 [])))]
              (GRHSs
               (NoExtField)
               [({ ss }
@@ -470,8 +414,8 @@
                    (NoExtField)
                    (HsString
                     (SourceText
-                     "\"One!\"")
-                    {FastString: "One!"})))))]
+                     "\"Yes, its True\"")
+                    {FastString: "Yes, its True"})))))]
               ({ ss }
                (EmptyLocalBinds
                 (NoExtField))))))
@@ -480,77 +424,21 @@
              (NoExtField)
              (FunRhs
               ({ ss }
-               {Name: sayMe})
+               {Name: isTrue})
               (Prefix)
               (NoSrcStrict))
              [({ ss }
-               (NPat
-                (TyConApp
-                 ({abstract:TyCon})
-                 [])
+               (ConPat
+                (ConPatTc
+                 []
+                 []
+                 []
+                 ({abstract:TcEvBinds})
+                 (WpHole))
                 ({ ss }
-                 (OverLit
-                  (OverLitTc
-                   (False)
-                   (TyConApp
-                    ({abstract:TyCon})
-                    []))
-                  (HsIntegral
-                   (IL
-                    (SourceText
-                     "2")
-                    (False)
-                    (2)))
-                  (HsApp
-                   (NoExtField)
-                   ({ ss }
-                    (XExpr
-                     (WrapExpr
-                      (HsWrap
-                       (WpCompose
-                        (WpEvApp
-                         (EvExpr
-                          (Var
-                           {Var: $dNum_a1mt})))
-                        (WpTyApp
-                         (TyConApp
-                          ({abstract:TyCon})
-                          [])))
-                       (HsVar
-                        (NoExtField)
-                        ({ ss }
-                         {Var: fromInteger}))))))
-                   ({ ss }
-                    (HsLit
-                     (NoExtField)
-                     (HsInteger
-                      (SourceText
-                       "2")
-                      (2)
-                      (TyConApp
-                       ({abstract:TyCon})
-                       [])))))))
-                (Nothing)
-                (SyntaxExprTc
-                 (XExpr
-                  (WrapExpr
-                   (HsWrap
-                    (WpCompose
-                     (WpEvApp
-                      (EvExpr
-                       (Var
-                        {Var: $dEq_a1mr})))
-                     (WpTyApp
-                      (TyConApp
-                       ({abstract:TyCon})
-                       [])))
-                    (HsVar
-                     (NoExtField)
-                     ({ ss }
-                      {Var: ==})))))
-                 [(WpHole)
-                 ,(WpHole)]
-                 (WpHole))))]
+                 ({abstract:ConLike}))
+                (PrefixCon
+                 [])))]
              (GRHSs
               (NoExtField)
               [({ ss }
@@ -562,129 +450,8 @@
                    (NoExtField)
                    (HsString
                     (SourceText
-                     "\"Two!\"")
-                    {FastString: "Two!"})))))]
-              ({ ss }
-               (EmptyLocalBinds
-                (NoExtField))))))
-          ,({ ss }
-            (Match
-             (NoExtField)
-             (FunRhs
-              ({ ss }
-               {Name: sayMe})
-              (Prefix)
-              (NoSrcStrict))
-             [({ ss }
-               (NPat
-                (TyConApp
-                 ({abstract:TyCon})
-                 [])
-                ({ ss }
-                 (OverLit
-                  (OverLitTc
-                   (False)
-                   (TyConApp
-                    ({abstract:TyCon})
-                    []))
-                  (HsIntegral
-                   (IL
-                    (SourceText
-                     "3")
-                    (False)
-                    (3)))
-                  (HsApp
-                   (NoExtField)
-                   ({ ss }
-                    (XExpr
-                     (WrapExpr
-                      (HsWrap
-                       (WpCompose
-                        (WpEvApp
-                         (EvExpr
-                          (Var
-                           {Var: $dNum_a1mx})))
-                        (WpTyApp
-                         (TyConApp
-                          ({abstract:TyCon})
-                          [])))
-                       (HsVar
-                        (NoExtField)
-                        ({ ss }
-                         {Var: fromInteger}))))))
-                   ({ ss }
-                    (HsLit
-                     (NoExtField)
-                     (HsInteger
-                      (SourceText
-                       "3")
-                      (3)
-                      (TyConApp
-                       ({abstract:TyCon})
-                       [])))))))
-                (Nothing)
-                (SyntaxExprTc
-                 (XExpr
-                  (WrapExpr
-                   (HsWrap
-                    (WpCompose
-                     (WpEvApp
-                      (EvExpr
-                       (Var
-                        {Var: $dEq_a1mv})))
-                     (WpTyApp
-                      (TyConApp
-                       ({abstract:TyCon})
-                       [])))
-                    (HsVar
-                     (NoExtField)
-                     ({ ss }
-                      {Var: ==})))))
-                 [(WpHole)
-                 ,(WpHole)]
-                 (WpHole))))]
-             (GRHSs
-              (NoExtField)
-              [({ ss }
-                (GRHS
-                 (NoExtField)
-                 []
-                 ({ ss }
-                  (HsLit
-                   (NoExtField)
-                   (HsString
-                    (SourceText
-                     "\"Three!\"")
-                    {FastString: "Three!"})))))]
-              ({ ss }
-               (EmptyLocalBinds
-                (NoExtField))))))
-          ,({ ss }
-            (Match
-             (NoExtField)
-             (FunRhs
-              ({ ss }
-               {Name: sayMe})
-              (Prefix)
-              (NoSrcStrict))
-             [({ ss }
-               (VarPat
-                (NoExtField)
-                ({ ss }
-                 {Var: x})))]
-             (GRHSs
-              (NoExtField)
-              [({ ss }
-                (GRHS
-                 (NoExtField)
-                 []
-                 ({ ss }
-                  (HsLit
-                   (NoExtField)
-                   (HsString
-                    (SourceText
-                     "\"Not between 1 and 3\"")
-                    {FastString: "Not between 1 and 3"})))))]
+                     "\"No its false\"")
+                    {FastString: "No its false"})))))]
               ({ ss }
                (EmptyLocalBinds
                 (NoExtField))))))])
@@ -698,8 +465,8 @@
     []
     [(ABE
       (NoExtField)
-      {Var: patternMatchingOnValueDemo}
-      {Var: patternMatchingOnValueDemo}
+      {Var: q}
+      {Var: q}
       (WpHole)
       (SpecPrags
        []))]
@@ -709,7 +476,7 @@
        (FunBind
         (WpHole)
         ({ ss }
-         {Var: patternMatchingOnValueDemo})
+         {Var: q})
         (MG
          (MatchGroupTc
           []
@@ -722,7 +489,7 @@
              (NoExtField)
              (FunRhs
               ({ ss }
-               {Name: patternMatchingOnValueDemo})
+               {Name: q})
               (Prefix)
               (NoSrcStrict))
              []
@@ -739,31 +506,11 @@
                     (HsVar
                      (NoExtField)
                      ({ ss }
-                      {Var: sayMe})))
+                      {Var: isTrue})))
                    ({ ss }
-                    (HsOverLit
+                    (HsConLikeOut
                      (NoExtField)
-                     (OverLit
-                      (OverLitTc
-                       (False)
-                       (TyConApp
-                        ({abstract:TyCon})
-                        []))
-                      (HsIntegral
-                       (IL
-                        (SourceText
-                         "1")
-                        (False)
-                        (1)))
-                      (HsLit
-                       (NoExtField)
-                       (HsInteger
-                        (SourceText
-                         "1")
-                        (1)
-                        (TyConApp
-                         ({abstract:TyCon})
-                         []))))))))))]
+                     ({abstract:ConLike})))))))]
               ({ ss }
                (EmptyLocalBinds
                 (NoExtField))))))])
@@ -822,7 +569,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1mG})))
+                           {Var: $dNum_a1mT})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -845,7 +592,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1mI})))
+                               {Var: $dNum_a1mV})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -879,7 +626,7 @@
                                 (WpEvApp
                                  (EvExpr
                                   (Var
-                                   {Var: $dNum_a1mK})))
+                                   {Var: $dNum_a1mX})))
                                 (WpTyApp
                                  (TyConApp
                                   ({abstract:TyCon})
@@ -1003,7 +750,7 @@
                                      (WpEvApp
                                       (EvExpr
                                        (Var
-                                        {Var: $dNum_a1mZ})))
+                                        {Var: $dNum_a1nc})))
                                      (WpTyApp
                                       (TyConApp
                                        ({abstract:TyCon})
@@ -1101,7 +848,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1n8})))
+                               {Var: $dNum_a1nl})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -1195,7 +942,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1nj})))
+                               {Var: $dNum_a1nw})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -1222,7 +969,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1nh})))
+                           {Var: $dNum_a1nu})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -1259,7 +1006,7 @@
                               (WpEvApp
                                (EvExpr
                                 (Var
-                                 {Var: $dNum_a1no})))
+                                 {Var: $dNum_a1nB})))
                               (WpTyApp
                                (TyConApp
                                 ({abstract:TyCon})
@@ -1286,7 +1033,7 @@
                           (WpEvApp
                            (EvExpr
                             (Var
-                             {Var: $dNum_a1nm})))
+                             {Var: $dNum_a1nz})))
                           (WpTyApp
                            (TyConApp
                             ({abstract:TyCon})
@@ -1320,7 +1067,7 @@
                               (WpEvApp
                                (EvExpr
                                 (Var
-                                 {Var: $dNum_a1nq})))
+                                 {Var: $dNum_a1nD})))
                               (WpTyApp
                                (TyConApp
                                 ({abstract:TyCon})
@@ -1411,7 +1158,7 @@
                           (WpEvApp
                            (EvExpr
                             (Var
-                             {Var: $dNum_a1nB})))
+                             {Var: $dNum_a1nO})))
                           (WpTyApp
                            (TyConApp
                             ({abstract:TyCon})
@@ -1505,7 +1252,7 @@
                             (WpEvApp
                              (EvExpr
                               (Var
-                               {Var: $dNum_a1nN})))
+                               {Var: $dNum_a1o0})))
                             (WpTyApp
                              (TyConApp
                               ({abstract:TyCon})
@@ -1532,7 +1279,7 @@
                         (WpEvApp
                          (EvExpr
                           (Var
-                           {Var: $dNum_a1nL})))
+                           {Var: $dNum_a1nY})))
                         (WpTyApp
                          (TyConApp
                           ({abstract:TyCon})
@@ -1618,7 +1365,7 @@
                           (WpEvApp
                            (EvExpr
                             (Var
-                             {Var: $dNum_a1nX})))
+                             {Var: $dNum_a1oa})))
                           (WpTyApp
                            (TyConApp
                             ({abstract:TyCon})
@@ -1740,6 +1487,425 @@
                   (HsConLikeOut
                    (NoExtField)
                    ({abstract:ConLike})))))]
+              ({ ss }
+               (EmptyLocalBinds
+                (NoExtField))))))])
+         (FromSource))
+        []))]}
+    (False)))
+ ,({ ss }
+   (AbsBinds
+    (NoExtField)
+    []
+    []
+    [(ABE
+      (NoExtField)
+      {Var: sayMe}
+      {Var: sayMe}
+      (WpHole)
+      (SpecPrags
+       []))]
+    [({abstract:TcEvBinds})]
+    {Bag(Located (HsBind Var)):
+     [({ ss }
+       (FunBind
+        (WpHole)
+        ({ ss }
+         {Var: sayMe})
+        (MG
+         (MatchGroupTc
+          [(Scaled
+            (TyConApp
+             ({abstract:TyCon})
+             [])
+            (TyConApp
+             ({abstract:TyCon})
+             []))]
+          (TyConApp
+           ({abstract:TyCon})
+           []))
+         ({ ss }
+          [({ ss }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ ss }
+               {Name: sayMe})
+              (Prefix)
+              (NoSrcStrict))
+             [({ ss }
+               (NPat
+                (TyConApp
+                 ({abstract:TyCon})
+                 [])
+                ({ ss }
+                 (OverLit
+                  (OverLitTc
+                   (False)
+                   (TyConApp
+                    ({abstract:TyCon})
+                    []))
+                  (HsIntegral
+                   (IL
+                    (SourceText
+                     "1")
+                    (False)
+                    (1)))
+                  (HsApp
+                   (NoExtField)
+                   ({ ss }
+                    (XExpr
+                     (WrapExpr
+                      (HsWrap
+                       (WpCompose
+                        (WpEvApp
+                         (EvExpr
+                          (Var
+                           {Var: $dNum_a1ou})))
+                        (WpTyApp
+                         (TyConApp
+                          ({abstract:TyCon})
+                          [])))
+                       (HsVar
+                        (NoExtField)
+                        ({ ss }
+                         {Var: fromInteger}))))))
+                   ({ ss }
+                    (HsLit
+                     (NoExtField)
+                     (HsInteger
+                      (SourceText
+                       "1")
+                      (1)
+                      (TyConApp
+                       ({abstract:TyCon})
+                       [])))))))
+                (Nothing)
+                (SyntaxExprTc
+                 (XExpr
+                  (WrapExpr
+                   (HsWrap
+                    (WpCompose
+                     (WpEvApp
+                      (EvExpr
+                       (Var
+                        {Var: $dEq_a1os})))
+                     (WpTyApp
+                      (TyConApp
+                       ({abstract:TyCon})
+                       [])))
+                    (HsVar
+                     (NoExtField)
+                     ({ ss }
+                      {Var: ==})))))
+                 [(WpHole)
+                 ,(WpHole)]
+                 (WpHole))))]
+             (GRHSs
+              (NoExtField)
+              [({ ss }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ ss }
+                  (HsLit
+                   (NoExtField)
+                   (HsString
+                    (SourceText
+                     "\"One!\"")
+                    {FastString: "One!"})))))]
+              ({ ss }
+               (EmptyLocalBinds
+                (NoExtField))))))
+          ,({ ss }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ ss }
+               {Name: sayMe})
+              (Prefix)
+              (NoSrcStrict))
+             [({ ss }
+               (NPat
+                (TyConApp
+                 ({abstract:TyCon})
+                 [])
+                ({ ss }
+                 (OverLit
+                  (OverLitTc
+                   (False)
+                   (TyConApp
+                    ({abstract:TyCon})
+                    []))
+                  (HsIntegral
+                   (IL
+                    (SourceText
+                     "2")
+                    (False)
+                    (2)))
+                  (HsApp
+                   (NoExtField)
+                   ({ ss }
+                    (XExpr
+                     (WrapExpr
+                      (HsWrap
+                       (WpCompose
+                        (WpEvApp
+                         (EvExpr
+                          (Var
+                           {Var: $dNum_a1oy})))
+                        (WpTyApp
+                         (TyConApp
+                          ({abstract:TyCon})
+                          [])))
+                       (HsVar
+                        (NoExtField)
+                        ({ ss }
+                         {Var: fromInteger}))))))
+                   ({ ss }
+                    (HsLit
+                     (NoExtField)
+                     (HsInteger
+                      (SourceText
+                       "2")
+                      (2)
+                      (TyConApp
+                       ({abstract:TyCon})
+                       [])))))))
+                (Nothing)
+                (SyntaxExprTc
+                 (XExpr
+                  (WrapExpr
+                   (HsWrap
+                    (WpCompose
+                     (WpEvApp
+                      (EvExpr
+                       (Var
+                        {Var: $dEq_a1ow})))
+                     (WpTyApp
+                      (TyConApp
+                       ({abstract:TyCon})
+                       [])))
+                    (HsVar
+                     (NoExtField)
+                     ({ ss }
+                      {Var: ==})))))
+                 [(WpHole)
+                 ,(WpHole)]
+                 (WpHole))))]
+             (GRHSs
+              (NoExtField)
+              [({ ss }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ ss }
+                  (HsLit
+                   (NoExtField)
+                   (HsString
+                    (SourceText
+                     "\"Two!\"")
+                    {FastString: "Two!"})))))]
+              ({ ss }
+               (EmptyLocalBinds
+                (NoExtField))))))
+          ,({ ss }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ ss }
+               {Name: sayMe})
+              (Prefix)
+              (NoSrcStrict))
+             [({ ss }
+               (NPat
+                (TyConApp
+                 ({abstract:TyCon})
+                 [])
+                ({ ss }
+                 (OverLit
+                  (OverLitTc
+                   (False)
+                   (TyConApp
+                    ({abstract:TyCon})
+                    []))
+                  (HsIntegral
+                   (IL
+                    (SourceText
+                     "3")
+                    (False)
+                    (3)))
+                  (HsApp
+                   (NoExtField)
+                   ({ ss }
+                    (XExpr
+                     (WrapExpr
+                      (HsWrap
+                       (WpCompose
+                        (WpEvApp
+                         (EvExpr
+                          (Var
+                           {Var: $dNum_a1oC})))
+                        (WpTyApp
+                         (TyConApp
+                          ({abstract:TyCon})
+                          [])))
+                       (HsVar
+                        (NoExtField)
+                        ({ ss }
+                         {Var: fromInteger}))))))
+                   ({ ss }
+                    (HsLit
+                     (NoExtField)
+                     (HsInteger
+                      (SourceText
+                       "3")
+                      (3)
+                      (TyConApp
+                       ({abstract:TyCon})
+                       [])))))))
+                (Nothing)
+                (SyntaxExprTc
+                 (XExpr
+                  (WrapExpr
+                   (HsWrap
+                    (WpCompose
+                     (WpEvApp
+                      (EvExpr
+                       (Var
+                        {Var: $dEq_a1oA})))
+                     (WpTyApp
+                      (TyConApp
+                       ({abstract:TyCon})
+                       [])))
+                    (HsVar
+                     (NoExtField)
+                     ({ ss }
+                      {Var: ==})))))
+                 [(WpHole)
+                 ,(WpHole)]
+                 (WpHole))))]
+             (GRHSs
+              (NoExtField)
+              [({ ss }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ ss }
+                  (HsLit
+                   (NoExtField)
+                   (HsString
+                    (SourceText
+                     "\"Three!\"")
+                    {FastString: "Three!"})))))]
+              ({ ss }
+               (EmptyLocalBinds
+                (NoExtField))))))
+          ,({ ss }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ ss }
+               {Name: sayMe})
+              (Prefix)
+              (NoSrcStrict))
+             [({ ss }
+               (VarPat
+                (NoExtField)
+                ({ ss }
+                 {Var: x})))]
+             (GRHSs
+              (NoExtField)
+              [({ ss }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ ss }
+                  (HsLit
+                   (NoExtField)
+                   (HsString
+                    (SourceText
+                     "\"Not between 1 and 3\"")
+                    {FastString: "Not between 1 and 3"})))))]
+              ({ ss }
+               (EmptyLocalBinds
+                (NoExtField))))))])
+         (FromSource))
+        []))]}
+    (True)))
+ ,({ ss }
+   (AbsBinds
+    (NoExtField)
+    []
+    []
+    [(ABE
+      (NoExtField)
+      {Var: aPatternMatchingOnValueDemo}
+      {Var: aPatternMatchingOnValueDemo}
+      (WpHole)
+      (SpecPrags
+       []))]
+    [({abstract:TcEvBinds})]
+    {Bag(Located (HsBind Var)):
+     [({ ss }
+       (FunBind
+        (WpHole)
+        ({ ss }
+         {Var: aPatternMatchingOnValueDemo})
+        (MG
+         (MatchGroupTc
+          []
+          (TyConApp
+           ({abstract:TyCon})
+           []))
+         ({ ss }
+          [({ ss }
+            (Match
+             (NoExtField)
+             (FunRhs
+              ({ ss }
+               {Name: aPatternMatchingOnValueDemo})
+              (Prefix)
+              (NoSrcStrict))
+             []
+             (GRHSs
+              (NoExtField)
+              [({ ss }
+                (GRHS
+                 (NoExtField)
+                 []
+                 ({ ss }
+                  (HsApp
+                   (NoExtField)
+                   ({ ss }
+                    (HsVar
+                     (NoExtField)
+                     ({ ss }
+                      {Var: sayMe})))
+                   ({ ss }
+                    (HsOverLit
+                     (NoExtField)
+                     (OverLit
+                      (OverLitTc
+                       (False)
+                       (TyConApp
+                        ({abstract:TyCon})
+                        []))
+                      (HsIntegral
+                       (IL
+                        (SourceText
+                         "4")
+                        (False)
+                        (4)))
+                      (HsLit
+                       (NoExtField)
+                       (HsInteger
+                        (SourceText
+                         "4")
+                        (4)
+                        (TyConApp
+                         ({abstract:TyCon})
+                         []))))))))))]
               ({ ss }
                (EmptyLocalBinds
                 (NoExtField))))))])

@@ -20,13 +20,28 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 100 0}]
  y = 2,
+ isTrue :: Bool -> String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True, Guidance=IF_ARGS [90] 150 0}]
+ isTrue
+   = \ (ds_d1p1 :: Bool) ->
+       case ds_d1p1 of {
+         False -> unpackCString# "No its false"#;
+         True -> unpackCString# "Yes, its True"#
+       },
+ q :: String
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
+          WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 20 0}]
+ q = isTrue True,
  reverseList [Occ=LoopBreaker] :: [Integer] -> [Integer]
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
  reverseList
-   = \ (ds_d1or :: [Integer]) ->
-       case ds_d1or of {
+   = \ (ds_d1oW :: [Integer]) ->
+       case ds_d1oW of {
          [] -> [] @Integer;
          : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
        };,
@@ -74,12 +89,12 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 690 0}]
  sayMe
-   = \ (ds_d1ow :: Integer) ->
-       case == @Integer $fEqInteger ds_d1ow 1 of {
+   = \ (ds_d1p4 :: Integer) ->
+       case == @Integer $fEqInteger ds_d1p4 1 of {
          False ->
-           case == @Integer $fEqInteger ds_d1ow 2 of {
+           case == @Integer $fEqInteger ds_d1p4 2 of {
              False ->
-               case == @Integer $fEqInteger ds_d1ow 3 of {
+               case == @Integer $fEqInteger ds_d1p4 3 of {
                  False -> unpackCString# "Not between 1 and 3"#;
                  True -> unpackCString# "Three!"#
                };
@@ -87,8 +102,8 @@
            };
          True -> unpackCString# "One!"#
        },
- patternMatchingOnValueDemo :: String
+ aPatternMatchingOnValueDemo :: String
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=False, ConLike=False,
           WorkFree=False, Expandable=False, Guidance=IF_ARGS [] 120 0}]
- patternMatchingOnValueDemo = sayMe 1]
+ aPatternMatchingOnValueDemo = sayMe 4]

@@ -12,7 +12,7 @@ import GHC.Types.Literal
   ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString), mkLitInt64, mkLitString
   )
 import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
-import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
+import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr, showSDoc, showSDocUnsafe)
 import GHC.Core.Utils (exprIsHNF)
 import Utils (showOutputable)
 import GHC.Core.Ppr
@@ -20,7 +20,7 @@ import GHC.Core.Ppr
   )
 import Data.List(isPrefixOf)
 import SimplifiedCoreAST.SimplifiedCoreAST (ExpressionS(..), LiteralS(..), AltS(..), AltConS(..), BindS(..))
-import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName)
+import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString)
 import GHC.Types.Unique (minLocalUnique)
 import GHC.Data.FastString (mkFastString)
 import GHC.Core.TyCo.Rep (Type(..), TyLit(..))
@@ -170,13 +170,14 @@ applyStep bindings (App (Var name) argument) = do
     if isNothing expression 
         then simplifyNestedApp bindings (App (Var name) argument)
         else Just ("Replace '" ++ (varToString name) ++ "' with definition", (App (fromJust expression) argument))
-applyStep bindings (Case expression binding caseType alternatives) = do
-    (description, reducedExpression) <- applyStep bindings expression
-    if (canBeReduced expression) 
-        then return (description, (Case reducedExpression binding caseType alternatives))
-        else do
-            matchingPattern <- findMatchingPattern expression alternatives
-            return ("Replace with matching pattern", matchingPattern)
+applyStep bindings (Case expression binding caseType alternatives) = if (canBeReduced expression) 
+                                                                            then do 
+                                                                                (description, reducedExpression) <- applyStep bindings expression
+
+                                                                                return (description, (Case reducedExpression binding caseType alternatives))
+                                                                            else do
+                                                                                matchingPattern <- findMatchingPattern expression alternatives
+                                                                                return ("Replace with matching pattern", matchingPattern)
 
 applyStep _ _ = Nothing
 
@@ -220,7 +221,7 @@ applyUnsteppableFunctionToArguments "+" [x, y] = Just ((+) x y)
 applyUnsteppableFunctionToArguments "-" [x, y] = Just ((-) x y)
 applyUnsteppableFunctionToArguments "*" [x, y] = Just ((*) x y)
 applyUnsteppableFunctionToArguments "/" [x, y] = Just ((/) x y)
-applyUnsteppableFunctionToArguments "recip" [x] = Just (signum x)
+applyUnsteppableFunctionToArguments "recip" [x] = Just (recip x)
 applyUnsteppableFunctionToArguments "signum" [x] = Just (signum x)
 applyUnsteppableFunctionToArguments "abs" [x] = Just (abs x)
 applyUnsteppableFunctionToArguments "/=" [x, y] = Just (boolToExpression ((/=) x y))
@@ -274,8 +275,8 @@ findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingPattern expression [] = Nothing 
 findMatchingPattern _ ((DEFAULT, _, expression):_) = Just expression
 findMatchingPattern (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
-                                                                            then Just expression
-                                                                            else (findMatchingPattern (Var name) xs)
+                                                                                then Just expression
+                                                                                else (findMatchingPattern (Var name) xs)
 findMatchingPattern (Lit literal) (((LitAlt patternLiteral), _, expression):xs) = if ((==) literal patternLiteral) --can we compare two literals like this?
                                                                                              then Just expression
                                                                                              else (findMatchingPattern (Lit literal) xs)
@@ -296,11 +297,12 @@ showVarExpression _ = error "Expression is no var"
 convertToMultiArgumentFunction :: Expr Var -> (Expr Var, [Expr Var])
 convertToMultiArgumentFunction expr = collectArgs expr
 
+
 varToString :: Var -> String
 varToString var = nameToString (varName var)
 
 nameToString :: Name -> String
-nameToString name = showOutputable name
+nameToString name = getOccString name
 
 integerToCoreLiteral :: Integer -> Literal
 integerToCoreLiteral value = mkLitInt64 value
@@ -331,4 +333,11 @@ isTypeInformation x = False
 
 canBeReduced exp = if isTypeInformation exp
                     then False
-                    else not (exprIsHNF exp)
+                    else 
+                        if isBooleanVar exp --hack for booleans created by ourself. maybe replace with boolean from the prelude later
+                            then False
+                            else not (exprIsHNF exp)
+
+isBooleanVar :: Expr Var -> Bool
+isBooleanVar (Var x) = or [((==) (varToString x) "True"), ((==) (varToString x) "False")]
+isBooleanVar _ = False
