@@ -42,7 +42,7 @@ import GHC.Paths (libdir)
 import GHC.Types.Literal
   ( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
   )
-import GHC.Types.Var (Var (varName, varType))
+import GHC.Types.Var (Var (varName, varType), isId, isTyVar, isTcTyVar, isLocalId, isGlobalId, isLocalVar)
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
 import Options.Applicative
 import SimplifiedCoreAST.SimplifiedCoreAST (AltConS (..), AltS (..), BindS (..), ExpressionS (..), LiteralS (..))
@@ -137,11 +137,11 @@ runStepper filePath moduleName = runGhc (Just libdir) $ do
   --liftIO $ printFlatCoreAST coreAst
 
 
-  liftIO $ putStrLn "\n*****Example Simplified Core AST Printing*****"
-  let simplifiedCoreAST = simplifyBindings coreAst
-  liftIO $ printSimplifiedCoreAST simplifiedCoreAST
+ -- liftIO $ putStrLn "\n*****Example Simplified Core AST Printing*****"
+ -- let simplifiedCoreAST = simplifyBindings coreAst
+ -- liftIO $ printSimplifiedCoreAST simplifiedCoreAST
 
-  liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
+--  liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
   --show reduction for every binding in the file
   --liftIO $ mapM_ (printStepByStepReduction simplifiedCoreAST) simplifiedCoreAST
 
@@ -162,7 +162,7 @@ extract prog =
 step :: (OutputableBndr b, MonadState StepState m, MonadIO m) => Expr b -> m ()
 step (Var id) = do
   printDepth
-  lPrint ("Var", showOutputable $ varName id, showOutputable $ varType id)
+  lPrint ("Var", showOutputable $ varName id, showOutputable $ varType id, show (isId id), show (isTyVar id), show (isTcTyVar id), show (isLocalId id), show (isGlobalId id), show (isLocalVar id))
 step (Lit lit) = do
   printDepth
   case lit of

@@ -1,5 +1,7 @@
 module Source2 where
 
+a = True
+
 x = 1
 y = 2
 z = x

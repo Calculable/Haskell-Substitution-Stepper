@@ -1,4 +1,10 @@
-[x :: Integer
+[a :: Bool
+ [LclIdX,
+  Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
+          WorkFree=True, Expandable=True,
+          Guidance=ALWAYS_IF(arity=0,unsat_ok=True,boring_ok=True)}]
+ a = True,
+ x :: Integer
  [LclIdX,
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [] 100 0}]
@@ -19,8 +25,8 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [30] 80 10}]
  reverseList
-   = \ (ds_d1og :: [Integer]) ->
-       case ds_d1og of {
+   = \ (ds_d1or :: [Integer]) ->
+       case ds_d1or of {
          [] -> [] @Integer;
          : a bc -> ++ @Integer (reverseList bc) (: @Integer a ([] @Integer))
        };,
@@ -68,12 +74,12 @@
   Unf=Unf{Src=<vanilla>, TopLvl=True, Value=True, ConLike=True,
           WorkFree=True, Expandable=True, Guidance=IF_ARGS [0] 690 0}]
  sayMe
-   = \ (ds_d1ol :: Integer) ->
-       case == @Integer $fEqInteger ds_d1ol 1 of {
+   = \ (ds_d1ow :: Integer) ->
+       case == @Integer $fEqInteger ds_d1ow 1 of {
          False ->
-           case == @Integer $fEqInteger ds_d1ol 2 of {
+           case == @Integer $fEqInteger ds_d1ow 2 of {
              False ->
-               case == @Integer $fEqInteger ds_d1ol 3 of {
+               case == @Integer $fEqInteger ds_d1ow 3 of {
                  False -> unpackCString# "Not between 1 and 3"#;
                  True -> unpackCString# "Three!"#
                };

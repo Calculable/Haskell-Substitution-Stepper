@@ -1,5 +1,9 @@
 
 [(NonRec
+  {Var: a}
+  (Var
+   {Var: True}))
+,(NonRec
   {Var: x}
   (Lit
    (LitNumber
@@ -19,10 +23,10 @@
   [((,)
     {Var: reverseList}
     (Lam
-     {Var: ds_d1og}
+     {Var: ds_d1or}
      (Case
       (Var
-       {Var: ds_d1og})
+       {Var: ds_d1or})
       {Var: wild_00}
       (TyConApp
        ({abstract:TyCon})
@@ -264,7 +268,7 @@
 ,(NonRec
   {Var: sayMe}
   (Lam
-   {Var: ds_d1ol}
+   {Var: ds_d1ow}
    (Case
     (App
      (App
@@ -279,7 +283,7 @@
        (Var
         {Var: $fEqInteger}))
       (Var
-       {Var: ds_d1ol}))
+       {Var: ds_d1ow}))
      (Lit
       (LitNumber
        (LitNumInteger)
@@ -308,7 +312,7 @@
           (Var
            {Var: $fEqInteger}))
          (Var
-          {Var: ds_d1ol}))
+          {Var: ds_d1ow}))
         (Lit
          (LitNumber
           (LitNumInteger)
@@ -337,7 +341,7 @@
              (Var
               {Var: $fEqInteger}))
             (Var
-             {Var: ds_d1ol}))
+             {Var: ds_d1ow}))
            (Lit
             (LitNumber
              (LitNumInteger)
