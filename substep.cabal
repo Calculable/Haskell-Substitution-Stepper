@@ -29,6 +29,7 @@ library
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CoreStepper
+      OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
       SimplifiedCoreAST.SimplifiedCoreAST

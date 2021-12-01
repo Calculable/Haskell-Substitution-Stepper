@@ -25,13 +25,10 @@ import GHC.Types.Id.Info ( vanillaIdInfo, IdDetails(..))
 import GHC.Types.Name.Occurrence (mkOccName, mkVarOcc)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToExpression)
 import OriginalCoreAST.CoreInformationExtractorFunctions(showVarExpression, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(applyFunctionToArguments)
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (Var, Expr Var)
-
-
-
-
 
 applyStep :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStep bindings (Var name) = do
@@ -85,39 +82,11 @@ applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeR
                                                                         else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
 applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = Nothing --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
 
+
+
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Expr Var -> [Expr Var] -> Expr Var
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression [] = expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
-
-applyFunctionToArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var) 
-applyFunctionToArguments (Var functionOrOperatorName) arguments = do
-    applyUnsteppableFunctionToArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) arguments) --Precondition: function must be in the form of "var" and all arguments must be in the form of. This is already checked by the function which is calling this function
-applyFunctionToArguments _ _ = error "function-expression has to be a 'Var'"
-
-applyUnsteppableFunctionToArguments :: String -> [Expr Var] -> Maybe (Expr Var) 
-applyUnsteppableFunctionToArguments "+" [x, y] = Just ((+) x y)
-applyUnsteppableFunctionToArguments "-" [x, y] = Just ((-) x y)
-applyUnsteppableFunctionToArguments "*" [x, y] = Just ((*) x y)
-applyUnsteppableFunctionToArguments "/" [x, y] = Just ((/) x y)
-applyUnsteppableFunctionToArguments "recip" [x] = Just (recip x)
-applyUnsteppableFunctionToArguments "signum" [x] = Just (signum x)
-applyUnsteppableFunctionToArguments "abs" [x] = Just (abs x)
-applyUnsteppableFunctionToArguments "/=" [x, y] = Just (boolToExpression ((/=) x y))
-applyUnsteppableFunctionToArguments "==" [x, y] = Just (boolToExpression ((==) x y))
-applyUnsteppableFunctionToArguments "<" [x, y] = Just (boolToExpression ((<) x y))
-applyUnsteppableFunctionToArguments ">" [x, y] = Just (boolToExpression ((>) x y))
-applyUnsteppableFunctionToArguments ">=" [x, y] = Just (boolToExpression ((>=) x y))
-applyUnsteppableFunctionToArguments "<=" [x, y] = Just (boolToExpression ((<=) x y))
-applyUnsteppableFunctionToArguments "negate" [(Lit (LitNumber _ x))] = Just (integerToCoreExpression (negate x)) --example of an arbitrary function from the prelude. note how the arguments must have the right type and the result is converted back into an expressino
-applyUnsteppableFunctionToArguments "unpackCString#" [x] = Just x
-applyUnsteppableFunctionToArguments name _ = Nothing --function not supported
--- toDo: Add more functions from the prelude
-
---boolToExpression :: Bool -> Expr Var  --this is a wild hack, i just took the easiest constructors i found to create a "Var"-Instance without understanding what those constructors stand form 
---boolToExpression True = Var (mkCoVar (mkSystemVarName minLocalUnique (mkFastString "True")) (LitTy (StrTyLit (mkFastString "Bool"))))
---boolToExpression False = Var (mkCoVar (mkSystemVarName minLocalUnique (mkFastString "False")) (LitTy (StrTyLit (mkFastString "Bool"))))
-
-
 
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
