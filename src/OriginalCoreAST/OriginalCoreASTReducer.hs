@@ -25,7 +25,8 @@ import GHC.Data.FastString (mkFastString)
 import GHC.Core.TyCo.Rep (Type(..), TyLit(..))
 import GHC.Types.Id.Info ( vanillaIdInfo, IdDetails(..))
 import GHC.Types.Name.Occurrence (mkOccName, mkVarOcc)
-import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression)
+import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToExpression)
+import OriginalCoreAST.CoreInformationExtractorFunctions(showVarExpression, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (Var, Expr Var)
@@ -151,10 +152,6 @@ applyUnsteppableFunctionToArguments name _ = Nothing --function not supported
 --boolToExpression True = Var (mkCoVar (mkSystemVarName minLocalUnique (mkFastString "True")) (LitTy (StrTyLit (mkFastString "Bool"))))
 --boolToExpression False = Var (mkCoVar (mkSystemVarName minLocalUnique (mkFastString "False")) (LitTy (StrTyLit (mkFastString "Bool"))))
 
-boolToExpression :: Bool -> Expr Var  --this is a wild hack, i just took the easiest constructors i found to create a "Var"-Instance without understanding what those constructors stand form 
-boolToExpression True = Var (mkGlobalVar VanillaId (mkSystemName minLocalUnique (mkVarOcc ("True"))) (LitTy (StrTyLit (mkFastString "Bool"))) vanillaIdInfo)
-boolToExpression False = Var (mkGlobalVar VanillaId (mkSystemName minLocalUnique (mkVarOcc ("False"))) (LitTy (StrTyLit (mkFastString "Bool"))) vanillaIdInfo)
-
 
 
 
@@ -203,43 +200,5 @@ findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
 
 --core utilities 
 
-showVarExpression :: Expr Var -> String
-showVarExpression (Var var) = varToString var
-showVarExpression _ = error "Expression is no var"
-
 convertToMultiArgumentFunction :: Expr Var -> (Expr Var, [Expr Var])
 convertToMultiArgumentFunction expr = collectArgs expr
-
-
-varToString :: Var -> String
-varToString var = nameToString (varName var)
-
-nameToString :: Name -> String
-nameToString name = getOccString name
-
-
-coreLiteralToFractional :: Fractional a => Literal -> a
-coreLiteralToFractional (LitFloat value) = fromRational value
-coreLiteralToFractional (LitDouble value) = fromRational value
-
-
-
-
-isInHeadNormalForm :: Expr Var -> Bool
-isInHeadNormalForm exp = exprIsHNF exp
-
-isTypeInformation :: Expr Var -> Bool
-isTypeInformation (Type _) = True
-isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
-isTypeInformation x = False
-
-canBeReduced exp = if isTypeInformation exp
-                    then False
-                    else 
-                        if isBooleanVar exp --hack for booleans created by ourself. maybe replace with boolean from the prelude later
-                            then False
-                            else not (exprIsHNF exp)
-
-isBooleanVar :: Expr Var -> Bool
-isBooleanVar (Var x) = or [((==) (varToString x) "True"), ((==) (varToString x) "False")]
-isBooleanVar _ = False
