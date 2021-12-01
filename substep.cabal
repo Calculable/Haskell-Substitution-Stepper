@@ -28,8 +28,9 @@ library
       FlatCoreASTPrinter
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
-      OriginalCoreAST.OriginalCoreASTReducer
-      OriginalCoreAST.TypeClassInstances
+      OriginalCoreAST.CoreStepper
+      OriginalCoreAST.CoreStepperPrinter
+      OriginalCoreAST.CoreTypeClassInstances
       SimplifiedCoreAST.SimplifiedCoreAST
       SimplifiedCoreAST.SimplifiedCoreASTConverter
       SimplifiedCoreAST.SimplifiedCoreASTPrinter

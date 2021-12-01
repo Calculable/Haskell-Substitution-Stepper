@@ -1,9 +1,7 @@
-module OriginalCoreAST.OriginalCoreASTReducer
-  (printCoreStepByStepReduction, printCoreStepByStepReductionForEveryBinding
-  )
+module OriginalCoreAST.CoreStepper(applyStep)
 where
 
-import OriginalCoreAST.TypeClassInstances ()
+import OriginalCoreAST.CoreTypeClassInstances ()
 import Data.List(isPrefixOf, find)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreExpression)
 import Data.Maybe
@@ -33,39 +31,6 @@ type Binding = (Var, Expr Var)
 
 
 
-
-printCoreStepByStepReductionForEveryBinding :: [CoreBind] -> IO()
-printCoreStepByStepReductionForEveryBinding bindings = do
-    let allBindings = convertToBindingsList bindings
-    mapM_ (printCoreStepByStepReduction allBindings) allBindings
-
-printCoreStepByStepReduction :: [Binding] -> Binding -> IO ()
-printCoreStepByStepReduction bindings (var, exp) = do
-    putStr "\n**Reduction of "
-    putStr (varToString var)
-    putStr "**"
-    putStrLn ""
-    putStr (showOutputable exp)
-    reduce bindings exp
-
-convertToBindingsList :: [CoreBind] -> [Binding]
-convertToBindingsList bindings = concat (map convertCoreBindingToBindingList bindings)
-
-convertCoreBindingToBindingList :: CoreBind -> [Binding]
-convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
-convertCoreBindingToBindingList (Rec bindings) = bindings
-
-
-reduce :: [Binding] -> Expr Var -> IO()
-reduce bindings expression    | canBeReduced expression = do
-                                let reduction = (applyStep bindings expression)
-                                case reduction of
-                                    Just (reductionStepDescription, reducedExpression) -> do
-                                        putStrLn ("\n{-" ++ reductionStepDescription ++ "-}")
-                                        putStr (showOutputable reducedExpression)
-                                        reduce bindings reducedExpression
-                                    Nothing -> putStrLn "\n{-no reduction rule implemented for this expression-}"
-                              | otherwise = putStrLn "\n{-reduction complete-}"
 
 
 applyStep :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)

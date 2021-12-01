@@ -1,4 +1,4 @@
-module OriginalCoreAST.TypeClassInstances()
+module OriginalCoreAST.CoreTypeClassInstances()
 where
 
 import GHC.Core (Expr (..))
