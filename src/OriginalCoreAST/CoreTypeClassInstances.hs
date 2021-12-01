@@ -5,8 +5,6 @@ import GHC.Core (Expr (..))
 import GHC.Types.Literal(Literal (..))
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression)
 
-{-Type Classes-}
-
 instance Num (Expr b) where
   (+) (Lit x) (Lit y) = Lit ((+) x y)
   (+) _ _ = error "+ not supported by this type"
@@ -97,5 +95,3 @@ instance Fractional Literal where
   (/) _ _ = error "/ not supported by this type"
   recip expression = 1 / expression
   fromRational x = (LitDouble x)
-
--- instance EQ, instance Ord for Literal is already implemented inside GHC

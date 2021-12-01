@@ -52,7 +52,7 @@ import SimplifiedCoreAST.SimplifiedCoreASTReducer (printStepByStepReduction)
 import TypedStepperProofOfConceptExamples (printExampleStepping)
 import Utils (printAst, showOutputable)
 
-import OriginalCoreAST.CoreStepperPrinter (printCoreStepByStepReduction, printCoreStepByStepReductionForEveryBinding)
+import OriginalCoreAST.CoreStepperPrinter (printCoreStepByStepReductionForBinding, printCoreStepByStepReductionForEveryBinding)
 import Options.Applicative
 
 data Opts = Opts

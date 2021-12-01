@@ -23,9 +23,9 @@ import GHC.Data.FastString (mkFastString)
 import GHC.Core.TyCo.Rep (Type(..), TyLit(..))
 import GHC.Types.Id.Info ( vanillaIdInfo, IdDetails(..))
 import GHC.Types.Name.Occurrence (mkOccName, mkVarOcc)
-import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToExpression)
-import OriginalCoreAST.CoreInformationExtractorFunctions(showVarExpression, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
-import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(applyFunctionToArguments)
+import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern)
 
@@ -39,12 +39,12 @@ applyStep bindings (Var name) = do
 applyStep bindings (App (Lam parameter expression) argument) = do
     Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
 applyStep bindings (App (App first second) third) = do
-    simplifyNestedApp bindings (App (App first second) third) --nested app
+    applyStepToNestedApp bindings (App (App first second) third) --nested app
 applyStep bindings (App (Var name) argument) = do
     let expression = tryFindBinding name bindings
     if isNothing expression 
         then do
-            simplifyNestedApp bindings (App (Var name) argument)
+            applyStepToNestedApp bindings (App (Var name) argument)
         else Just ("Replace '" ++ (varToString name) ++ "' with definition", (App (fromJust expression) argument))
 applyStep bindings (Case expression binding caseType alternatives) = do
     if (canBeReduced expression) 
@@ -57,8 +57,9 @@ applyStep bindings (Case expression binding caseType alternatives) = do
 applyStep _ _ = do
     Nothing
 
-simplifyNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var) --eval if all parameters are reduced
-simplifyNestedApp bindings expr = do
+
+applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var) 
+applyStepToNestedApp bindings expr = do
     let (function, arguments) = (convertToMultiArgumentFunction expr)
     case function of
         (Var var) -> if (isNothing (tryFindBinding var bindings))
@@ -67,7 +68,7 @@ simplifyNestedApp bindings expr = do
                                 (description, simplifiedArguments) <- (applyStepToOneOfTheArguments bindings [] arguments)
                                 return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments)
                             else do
-                                appliedFunction <- applyFunctionToArguments function arguments --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
+                                appliedFunction <- evaluateFunctionWithArguments function arguments --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
                                 return ("Apply " ++ (showOutputable function), appliedFunction) 
                         else do
                             (description, reducedFunction) <- applyStep bindings (App function (head arguments))
@@ -82,6 +83,6 @@ applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeR
                                                                             (description, reducedArgument) <- applyStep bindings x
                                                                             return (description, (alreadyReducedArguments ++ [reducedArgument]) ++ xs)
                                                                         else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
-applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = Nothing --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
+applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no reducable argument found" --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
 
 
