@@ -28,6 +28,7 @@ library
       FlatCoreASTPrinter
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
+      OriginalCoreAST.CorePrettyPrinter
       OriginalCoreAST.CoreStepper
       OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
       OriginalCoreAST.CoreStepperHelpers.CoreLookup

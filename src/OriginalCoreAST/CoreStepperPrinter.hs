@@ -12,7 +12,7 @@ import GHC.Types.Literal
   )
 
 import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
-import Utils (showOutputable)
+import OriginalCoreAST.CorePrettyPrinter(prettyPrint)
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (Var, Expr Var)
@@ -29,7 +29,7 @@ printCoreStepByStepReduction bindings (var, exp) = do
     putStr (varToString var)
     putStr "**"
     putStrLn ""
-    putStr (showOutputable exp)
+    prettyPrint exp
     reduce bindings exp
 
 convertToBindingsList :: [CoreBind] -> [Binding]
@@ -46,7 +46,7 @@ reduce bindings expression    | canBeReduced expression = do
                                 case reduction of
                                     Just (reductionStepDescription, reducedExpression) -> do
                                         putStrLn ("\n{-" ++ reductionStepDescription ++ "-}")
-                                        putStr (showOutputable reducedExpression)
+                                        prettyPrint reducedExpression
                                         reduce bindings reducedExpression
                                     Nothing -> putStrLn "\n{-no reduction rule implemented for this expression-}"
                               | otherwise = putStrLn "\n{-reduction complete-}"
