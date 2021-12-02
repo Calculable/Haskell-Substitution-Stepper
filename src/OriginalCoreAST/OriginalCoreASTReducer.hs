@@ -1,5 +1,5 @@
 module OriginalCoreAST.OriginalCoreASTReducer
-  (printCoreStepByStepReduction, printCoreStepByStepReductionForEveryBinding
+  (printCoreStepByStepReduction, printCoreStepByStepReductionForEveryBinding, applyUnsteppableFunctionToArguments
   )
 where
 
