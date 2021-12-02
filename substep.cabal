@@ -26,7 +26,15 @@ library
   exposed-modules:
       DynFlags
       FlatCoreASTPrinter
-      OriginalCoreAST.OriginalCoreASTReducer
+      OriginalCoreAST.CoreInformationExtractorFunctions
+      OriginalCoreAST.CoreMakerFunctions
+      OriginalCoreAST.CorePrettyPrinter
+      OriginalCoreAST.CoreStepper
+      OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
+      OriginalCoreAST.CoreStepperHelpers.CoreLookup
+      OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+      OriginalCoreAST.CoreStepperPrinter
+      OriginalCoreAST.CoreTypeClassInstances
       SimplifiedCoreAST.SimplifiedCoreAST
       SimplifiedCoreAST.SimplifiedCoreASTConverter
       SimplifiedCoreAST.SimplifiedCoreASTPrinter
