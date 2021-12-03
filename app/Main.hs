@@ -8,7 +8,6 @@ import Control.Monad.State.Strict
     StateT (runStateT),
     modify,
   )
-import FlatCoreASTPrinter (printFlatCoreAST)
 import GHC
   ( DesugaredModule (dm_core_module),
     DynFlags (hscTarget),
@@ -44,16 +43,28 @@ import GHC.Types.Literal
   )
 import GHC.Types.Var (Var (varName, varType), isId, isTyVar, isTcTyVar, isLocalId, isGlobalId, isLocalVar)
 import GHC.Utils.Outputable (Outputable (ppr), OutputableBndr)
-import Options.Applicative
 import SimplifiedCoreAST.SimplifiedCoreAST (AltConS (..), AltS (..), BindS (..), ExpressionS (..), LiteralS (..))
 import SimplifiedCoreAST.SimplifiedCoreASTConverter (simplifyBindings)
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreAST)
 import SimplifiedCoreAST.SimplifiedCoreASTReducer (printStepByStepReduction)
-import TypedStepperProofOfConceptExamples (printExampleStepping)
 import Utils (printAst, showOutputable)
 
 import OriginalCoreAST.CoreStepperPrinter (printCoreStepByStepReductionForBinding, printCoreStepByStepReductionForEveryBinding)
 import Options.Applicative
+    ( fullDesc,
+      header,
+      help,
+      info,
+      infoOption,
+      long,
+      metavar,
+      progDesc,
+      strOption,
+      value,
+      execParser,
+      helper,
+      Parser,
+      ParserInfo )
 
 data Opts = Opts
   { filePath :: !String,
@@ -129,21 +140,6 @@ runStepper filePath moduleName = runGhc (Just libdir) $ do
 
   liftIO $ putStrLn "\n*****Pretty Printed Core Bindings:******"
   liftIO (putStrLn (showOutputable (pprCoreBindings coreAst)))
-
-  --liftIO $ putStrLn "\n*****Proof of concept******"
-  --liftIO printExampleStepping
-
-  --liftIO $ putStrLn "\n*****Example Flat Printing of Source.hs:*****"
-  --liftIO $ printFlatCoreAST coreAst
-
-
- -- liftIO $ putStrLn "\n*****Example Simplified Core AST Printing*****"
- -- let simplifiedCoreAST = simplifyBindings coreAst
- -- liftIO $ printSimplifiedCoreAST simplifiedCoreAST
-
---  liftIO $ putStrLn "\n*****Example Simplified Core AST Reduction(s)*****"
-  --show reduction for every binding in the file
-  --liftIO $ mapM_ (printStepByStepReduction simplifiedCoreAST) simplifiedCoreAST
 
   liftIO $ putStrLn "\n*****Example Original Core AST Reduction(s)*****"
   --show reduction for every binding in the file

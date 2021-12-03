@@ -35,6 +35,8 @@ library
       OriginalCoreAST.CoreStepperHelpers.CoreTransformator
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
+      SimplifiedAST.TypedStepperProofOfConcept
+      SimplifiedAST.TypedStepperProofOfConceptExamples
       SimplifiedCoreAST.SimplifiedCoreAST
       SimplifiedCoreAST.SimplifiedCoreASTConverter
       SimplifiedCoreAST.SimplifiedCoreASTPrinter
@@ -42,8 +44,6 @@ library
       Source
       Source2
       TraverseAST
-      TypedStepperProofOfConcept
-      TypedStepperProofOfConceptExamples
       Utils
   other-modules:
       Paths_substep
