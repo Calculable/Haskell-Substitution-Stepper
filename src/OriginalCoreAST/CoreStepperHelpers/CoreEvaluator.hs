@@ -2,7 +2,7 @@ module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArgu
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
-import Data.Maybe
+import Data.Maybe ()
 import GHC.Core (Expr (..))
 import GHC.Types.Literal ( Literal (..))
 import GHC.Types.Var (Var)
