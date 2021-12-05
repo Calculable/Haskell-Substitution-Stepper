@@ -28,6 +28,7 @@ library
       Compiler
       DynFlags
       FlatCoreASTPrinter
+      OldStepper
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CorePrettyPrinter
