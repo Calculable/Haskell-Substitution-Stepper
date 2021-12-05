@@ -6,7 +6,7 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Cli (runCli) where
+module Cli (runCli, dispatch) where
 
 import Options.Generic
   ( Generic,
@@ -24,8 +24,10 @@ import Options.Generic
   )
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
+import Compiler (compileToCore, getCoreProgram, writeDump)
+import OriginalCoreAST.CoreStepperPrinter (printCoreStepByStepReductionForEveryBinding)
 
-type FilePath = P.FilePath <?> "Haskell source file to step through"
+type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
 type FunctionName = String <?> "Top level function to step through"
 
@@ -45,9 +47,11 @@ data SubStep w
         function :: w ::: FunctionName
       }
   | List
-      { path :: w ::: FilePath,
-        function :: w ::: FunctionName
+      { path :: w ::: FilePath
       }
+  | Dump {
+    path :: w ::: FilePath
+  }
   deriving (Generic)
 
 instance ParseRecord (SubStep Wrapped) where
@@ -58,5 +62,29 @@ deriving instance Show (SubStep Unwrapped)
 modifiers :: Modifiers
 modifiers = defaultModifiers {shortNameModifier = firstLetter}
 
-runCli :: IO (SubStep Unwrapped)
+type Invocation = SubStep Unwrapped
+
+runCli :: IO Invocation
 runCli = unwrapRecord subStepDescription
+
+dispatch :: Invocation -> IO ()
+dispatch (Step p f v) = stepF p f v
+dispatch (Print p f) = printF p f
+dispatch (List p) = listF p
+dispatch (Dump p) = dumpF p
+
+dumpF :: [Char] -> IO ()
+dumpF fp = do
+  cr <- compileToCore fp
+  writeDump cr
+
+listF :: [Char] -> IO ()
+listF = error "not implemented"
+
+printF :: [Char] -> [Char] -> IO ()
+printF = error "not implemented"
+
+stepF :: [Char] -> [Char] -> Maybe Integer -> IO ()
+stepF fp fn v = do
+  cr <- compileToCore fp
+  printCoreStepByStepReductionForEveryBinding (getCoreProgram cr)
