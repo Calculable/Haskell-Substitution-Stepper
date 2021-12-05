@@ -93,7 +93,7 @@ compileToCore filePath = runGhc (Just libdir) $ do
   return $ CompilationResult coreAst debugInformation
 
 debugDirectoryPath :: String
-debugDirectoryPath = "debug"
+debugDirectoryPath = "dump"
 
 writeDump :: CompilationResult -> IO ()
 writeDump cr = do
