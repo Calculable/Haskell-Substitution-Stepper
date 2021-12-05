@@ -66,6 +66,8 @@ import Options.Applicative
       Parser,
       ParserInfo )
 
+import Cli
+
 data Opts = Opts
   { filePath :: !String,
     moduleName :: !String
