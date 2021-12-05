@@ -1,4 +1,4 @@
-module TypedStepperProofOfConcept
+module SimplifiedAST.TypedStepperProofOfConcept
   (printBindings, printStepByStepReduction, Expression(..)
   )
 where

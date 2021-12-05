@@ -54,7 +54,7 @@ printFlatCoreExpression (Lam b exp) = do
   printFlatCoreExpression exp
   putStr ")"
 printFlatCoreExpression (Type t) = do
-  --putStr (showOutputable (ppr t))
+  putStr (showOutputable (ppr t))
   putStr ""
 printFlatCoreExpression (Let bind exp) = do
   printFlatCoreBinding bind

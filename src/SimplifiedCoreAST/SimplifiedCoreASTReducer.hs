@@ -138,7 +138,7 @@ applyFunction "+" [x, y] = (+) x y
 applyFunction "-" [x, y] = (-) x y
 applyFunction "*" [x, y] = (*) x y
 applyFunction "/" [x, y] = (/) x y
-applyFunction "recip" [x] = signum x
+applyFunction "recip" [x] = recip x
 applyFunction "signum" [x] = signum x
 applyFunction "abs" [x] = abs x
 applyFunction "/=" [x, y] = boolToExpression ((/=) x y)
