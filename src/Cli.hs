@@ -26,10 +26,11 @@ import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
 import Compiler (compileToCore, getCoreProgram, writeDump)
 import OriginalCoreAST.CoreStepperPrinter (printCoreStepByStepReductionForEveryBinding)
+import Utils (printCore, listTopLevelFunctions)
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
-type FunctionName = String <?> "Top level function to step through"
+type FunctionName = Maybe String <?> "Top level function to step through"
 
 type VerbosityLevel = Maybe Integer <?> "Verbosity level between 1 and 3"
 
@@ -79,12 +80,16 @@ dumpF fp = do
   writeDump cr
 
 listF :: [Char] -> IO ()
-listF = error "not implemented"
+listF fp = do
+  cr <- compileToCore fp
+  listTopLevelFunctions $ getCoreProgram cr
 
-printF :: [Char] -> [Char] -> IO ()
-printF = error "not implemented"
+printF :: [Char] -> Maybe [Char] -> IO ()
+printF fp fn = do
+  cr <- compileToCore fp
+  printCore $ getCoreProgram cr
 
-stepF :: [Char] -> [Char] -> Maybe Integer -> IO ()
+stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
   printCoreStepByStepReductionForEveryBinding (getCoreProgram cr)
