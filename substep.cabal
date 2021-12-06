@@ -46,6 +46,7 @@ library
       SimplifiedCoreAST.SimplifiedCoreASTReducer
       Source
       Source2
+      Source3
       TraverseAST
       Utils
   other-modules:
