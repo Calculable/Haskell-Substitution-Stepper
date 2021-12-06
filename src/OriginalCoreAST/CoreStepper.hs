@@ -53,6 +53,7 @@ applyStep bindings (Case expression binding caseType alternatives) = do
         else do
             matchingPattern <- findMatchingPattern expression alternatives
             return ("Replace with matching pattern", matchingPattern)
+applyStep bindings (Let (NonRec b expr) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression)
 applyStep _ _ = do
     Nothing
 
