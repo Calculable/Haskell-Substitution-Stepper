@@ -16,7 +16,6 @@ import Utils (showOutputable)
 import GHC.Core.Ppr
   ( pprCoreAlt,
   )
-import Data.List(isPrefixOf)
 import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString)
 import GHC.Types.Unique (minLocalUnique)
 import GHC.Data.FastString (mkFastString)
