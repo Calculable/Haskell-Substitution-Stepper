@@ -16,26 +16,24 @@ varToString :: Var -> String
 varToString var = nameToString (varName var)
 
 nameToString :: Name -> String
-nameToString name = getOccString name
+nameToString = getOccString
 
 coreLiteralToFractional :: Fractional a => Literal -> a
 coreLiteralToFractional (LitFloat value) = fromRational value
 coreLiteralToFractional (LitDouble value) = fromRational value
 
 isInHeadNormalForm :: Expr Var -> Bool
-isInHeadNormalForm exp = exprIsHNF exp
+isInHeadNormalForm = exprIsHNF
 
 isTypeInformation :: Expr Var -> Bool
 isTypeInformation (Type _) = True
 isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
 isTypeInformation x = False
 
-canBeReduced exp = if isTypeInformation exp
-                    then False
-                    else 
-                        if isBooleanVar exp --workaround for booleans which are created by ourself
-                            then False
-                            else not (exprIsHNF exp)
+canBeReduced exp
+  | isTypeInformation exp = False
+  | isBooleanVar exp = False
+  | otherwise = not (exprIsHNF exp)
 
 isBooleanVar :: Expr Var -> Bool
 isBooleanVar (Var x) = or [((==) (varToString x) "True"), ((==) (varToString x) "False")]

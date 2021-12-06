@@ -1,9 +1,9 @@
-module TypedStepperProofOfConceptExamples
+module SimplifiedAST.TypedStepperProofOfConceptExamples
   (printExampleStepping
   )
 where
 
-import TypedStepperProofOfConcept
+import SimplifiedAST.TypedStepperProofOfConcept
 
 {-Examples-}
 
