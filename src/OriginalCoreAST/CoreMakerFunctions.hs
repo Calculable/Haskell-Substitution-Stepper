@@ -28,7 +28,7 @@ rationalToCoreLiteral = LitDouble
 
 
 integerToCoreExpression :: Integer -> Expr b
-integerToCoreExpression value = Lit (mkLitInt64 value)
+integerToCoreExpression value = Lit (integerToCoreLiteral value)
 
 stringToCoreExpression :: String -> Expr Var
 stringToCoreExpression value = Lit (mkLitString value)

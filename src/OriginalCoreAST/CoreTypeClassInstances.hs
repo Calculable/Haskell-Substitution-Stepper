@@ -47,13 +47,20 @@ instance Enum (Expr b) where
   succ (Lit x) = Lit (succ x)
   succ _ = error "succ not supported for this type"
 
-  fromEnum (Lit x) = (fromEnum x)
+  fromEnum (Lit x) = fromEnum x
   fromEnum _ = error "fromEnum not supported for this type"
 
+  enumFrom (Lit x) = map Lit (enumFrom x)
   enumFrom _ = error "enumFrom not supported for this type" 
-  enumFromThen _ = error "enumFromThen not supported for this type" 
-  enumFromTo _ = error "enumFromTo not supported for this type" 
-  enumFromThenTo _ = error "enumFromThenTo not supported for this type"
+
+  enumFromThen (Lit x) (Lit y) = map Lit (enumFromThen x y)
+  enumFromThen _ _ = error "enumFromThen not supported for this type" 
+
+  enumFromTo (Lit x) (Lit y) = map Lit (enumFromTo x y)
+  enumFromTo _ _ = error "enumFromTo not supported for this type" 
+  
+  enumFromThenTo (Lit x) (Lit y) (Lit z) = map Lit (enumFromThenTo x y z)
+  enumFromThenTo _ _ _ = error "enumFromThenTo not supported for this type"
   
   toEnum x = Lit (integerToCoreLiteral (toInteger x))
 
@@ -124,7 +131,10 @@ instance Integral (Expr b) where
   mod (Lit x) (Lit y) = Lit (mod x y)
   mod _ _ = error "mod not supported for this type"
 
+  quotRem (Lit x) (Lit y) = (Lit (fst res), Lit (snd res)) where res = quotRem x y
   quotRem _ _ = error "quotRem not supported" 
+
+  divMod (Lit x) (Lit y) = (Lit (fst res), Lit (snd res)) where res = divMod x y
   divMod _ _ = error "divMod not supported"
 
   toInteger (Lit x) = toInteger x
@@ -135,7 +145,8 @@ instance Real (Expr b) where
   toRational _ = error "toRational not supported for this type"
 
 instance RealFrac (Expr b) where
-  properFraction = error "properFraction not supported"
+  properFraction (Lit x) = ((fst res), Lit (snd res)) where res = properFraction x
+  properFraction _ = error "properFraction not supported for this type"
   
   truncate (Lit x) = truncate x
   truncate _ = error "truncate is not supported for this type"
@@ -151,19 +162,45 @@ instance RealFrac (Expr b) where
 
 instance RealFloat (Expr b) where
   floatRadix (Lit x) = floatRadix x
+  floatRadix _ = error "floatRadix is not supported for this type"
+  
   floatDigits (Lit x) = floatDigits x
-  floatRange _ = error "float range is not supported for this type"
-  decodeFloat _ = error "decode float is not supported for this type"
+  floatDigits _ = error "floatDigits is not supported for this type"
+  
+  floatRange (Lit x) = floatRange x
+  floatRange _ = error "floatRange is not supported for this type"
+  
+  decodeFloat (Lit x) = decodeFloat x
+  decodeFloat _ = error "decodeFloat is not supported for this type"
+  
   encodeFloat x y = Lit (encodeFloat x y)
+  
   exponent (Lit x) = exponent x
+  exponent _ = error "exponent is not supported for this type"
+  
   significand (Lit x) = Lit (significand x)
+  significand _ = error "significand is not supported for this type"
+  
   scaleFloat x (Lit y) = Lit (scaleFloat x y)
+  scaleFloat _ _ = error "scaleFloat is not supported for this type"
+  
   isNaN (Lit x) = isNaN x
+  isNaN _ = error "isNaN is not supported for this type"
+  
   isInfinite (Lit x) = isInfinite x
+  isInfinite _ = error "isInfinite is not supported for this type"
+  
   isDenormalized (Lit x) = isDenormalized x
+  isDenormalized _ = error "isDenormalized is not supported for this type"
+  
   isNegativeZero (Lit x) = isNegativeZero x
+  isNegativeZero _ = error "isNegativeZero is not supported for this type"
+  
   isIEEE (Lit x) = isIEEE x
+  isIEEE _ = error "isIEEE is not supported for this type"
+  
   atan2 (Lit x) (Lit y) = Lit (atan2 x y)  
+  atan2 _ _ = error "atan2 is not supported for this type"
 
 instance Num Literal where
   (+) (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral ((Prelude.+) x y)
@@ -233,11 +270,30 @@ instance Enum Literal where
   fromEnum (LitChar x) = fromEnum x
   fromEnum _ = error "fromEnum not supported for this type"
 
-  enumFrom _ = error "enumFrom not supported" --can be implemented when lists can be created
-  enumFromThen _ = error "enumFromThen not supported" --can be implemented when lists can be created
-  enumFromTo _ = error "enumFromTo not supported" --can be implemented when lists can be created
-  enumFromThenTo _ = error "enumFromThenTo not supported" --can be implemented when lists can be created
-  
+  enumFrom (LitNumber _ x) = map integerToCoreLiteral (enumFrom x)
+  enumFrom (LitDouble x) = map rationalToCoreLiteral (enumFrom x)
+  enumFrom (LitFloat x) = map rationalToCoreLiteral (enumFrom x)
+  enumFrom (LitChar x) = map charToCoreLiteral (enumFrom x)
+  enumFrom _ = error "enumFrom not supported for this type"
+
+  enumFromThen (LitNumber _ x) (LitNumber _ y) = map integerToCoreLiteral (enumFromThen x y)
+  enumFromThen (LitDouble x) (LitDouble y)= map rationalToCoreLiteral (enumFromThen x y)
+  enumFromThen (LitFloat x) (LitFloat y) = map rationalToCoreLiteral (enumFromThen x y)
+  enumFromThen (LitChar x) (LitChar y) = map charToCoreLiteral (enumFromThen x y)
+  enumFromThen _ _ = error "enumFromThen not supported for this type"
+
+  enumFromTo  (LitNumber _ x) (LitNumber _ y) = map integerToCoreLiteral (enumFromTo x y)
+  enumFromTo  (LitDouble x) (LitDouble y)= map rationalToCoreLiteral (enumFromTo x y)
+  enumFromTo  (LitFloat x) (LitFloat y) = map rationalToCoreLiteral (enumFromTo x y)
+  enumFromTo  (LitChar x) (LitChar y) = map charToCoreLiteral (enumFromTo x y)
+  enumFromTo _ _ = error "enumFromTo not supported for this type"
+
+  enumFromThenTo  (LitNumber _ x) (LitNumber _ y) (LitNumber _ z) = map integerToCoreLiteral (enumFromThenTo  x y z)
+  enumFromThenTo  (LitDouble x) (LitDouble y) (LitDouble z) = map rationalToCoreLiteral (enumFromThenTo  x y z)
+  enumFromThenTo  (LitFloat x) (LitFloat y) (LitFloat z) = map rationalToCoreLiteral (enumFromThenTo  x y z)
+  enumFromThenTo  (LitChar x) (LitChar y) (LitChar z) = map charToCoreLiteral (enumFromThenTo  x y z)
+  enumFromThenTo _ _ _ = error "enumFromThenTo not supported for this type"
+
   toEnum =  integerToCoreLiteral.toInteger
 
 instance Floating Literal where
@@ -321,13 +377,20 @@ instance Integral Literal where
   div _ _ = error "div not supported for this type"
   mod (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (mod x y) 
   mod _ _ = error "mod not supported for this type"
-  quotRem _ _ = error "quotRem not supported" --can be implemented when tuples can be created
-  divMod _ _ = error "divMod not supported" --can be implemented when tuples can be created
+ 
+  quotRem (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = quotRem x y
+  quotRem _ _ = error "quotRem not supported for this type"
+ 
+  divMod (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = divMod x y
+  divMod _ _ = error "divMod not supported for this type"
+ 
   toInteger (LitNumber _ x) = x
   toInteger _ = error "toInteger not supported for this type"
 
 instance RealFrac Literal where
-  properFraction _ = error "properFraction not supported"
+  properFraction (LitDouble x) = (fst res, rationalToCoreLiteral (snd res)) where res = properFraction x
+  properFraction (LitFloat y) = (fst res, rationalToCoreLiteral (snd res)) where res = properFraction y
+  properFraction _ = error "properFraction not supported for this type"
   truncate (LitDouble x) = truncate x
   truncate (LitFloat x) = truncate x
   truncate _ = error "truncate not supported for this type"
@@ -389,6 +452,10 @@ instance RealFloat Literal where
 
   encodeFloat x y = (encodeFloat x y)
 
-  floatRange = error "floatRange not supported" --can be implemented when tuples can be created
+  floatRange (LitDouble x) = floatRange (fromRational x)
+  floatRange (LitFloat x) = floatRange (fromRational x)
+  floatRange _ = error "floatRange not supported for this type"
   
-  decodeFloat = error "decodeFloat not supported" --can be implemented when tuples can be created
+  decodeFloat (LitDouble x) = decodeFloat (fromRational x)
+  decodeFloat (LitFloat x) = decodeFloat (fromRational x)
+  decodeFloat _ = error "decodeFloat not supported"
