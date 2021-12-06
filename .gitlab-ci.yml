@@ -25,7 +25,7 @@ lint:
       - .stack-work/
       - .stack-root/
   script:
-    - curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s . --report
+    - hlint . --report
   artifacts:
     paths:
       - report.html
@@ -50,5 +50,5 @@ haddock:
     - stack --no-terminal haddock
   artifacts:
     paths:
-      - index.html
-      - substep.txt
+      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/index.html
+      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/substep.txt
