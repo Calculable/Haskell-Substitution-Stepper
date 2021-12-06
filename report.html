@@ -1,0 +1,2006 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta http-equiv="Content-Type" content="application/xhtml+xml; charset=UTF-8" />
+<title>HLint Report</title>
+<script type='text/javascript'>
+
+/* == Algorithm for show/unshow ==
+   Each hint/file is given a number, hint# or file#
+   When we say showOnly with a class name we add the rules to
+   the css #content div {display:none}, #content div.className {display:block}
+   When going back to showAll we remove these results
+*/
+
+// CSS MANIPULATION //
+
+function deleteRules(n)
+{
+    var css = document.styleSheets[0];
+    for (var i = 0; i < n; i++)
+        css.deleteRule(css.cssRules.length-1);
+}
+
+function insertRule(s)
+{
+    var css = document.styleSheets[0];
+    css.insertRule(s, css.cssRules.length);
+}
+
+// SHOW/HIDE LOGIC //
+
+/**
+ * @param {bool} [initialise=false] - Used to signal we are loading the page, so
+ the current location doesn't match our presumed state.
+ */
+function show(id, initialise=false)
+{
+    var last;
+    if (initialise)
+    {
+        last = "";
+    }
+    else
+    {
+        last = document.location.hash.slice(1);
+    }
+
+    if (id === last) return;
+    if (id.length === 0)
+    {
+        deleteRules(3);
+        insertRule(".all {font-weight: bold;}");
+    }
+    else
+    {
+        if (last.length === 0)
+        {
+            deleteRules(1);
+            insertRule("#content div {display:none;}");
+        }
+        else
+        {
+            deleteRules(2);
+        }
+        insertRule("#content div." + id + " {display:block;}");
+        insertRule("#" + id + "{font-weight:bold;}");
+    }
+
+    if (window.history)
+        history.replaceState("", document.title, window.location.pathname + window.location.search + (id === "" ? "" : "#" + id));
+    else
+        document.location.hash = '#'.concat(id);
+}
+
+</script>
+<style type="text/css">
+/* These rules are manipulated by the script.
+   The commented form is how it looks with an id selected */
+
+.all {font-weight: bold;}      /* #content div {display:none;} */
+                               /* #content div.id {display:block;} */
+                               /* #id {font-weight: bold;} */
+
+</style>
+<style type="text/css">
+/* See http://www.webreference.com/programming/css_frames/ */
+body {
+    margin:0;
+    border:0;
+    padding:0;
+    height:100%;
+    max-height:100%;
+    font-family: sans-serif;
+    font-size:76%;
+    overflow: hidden;
+}
+
+#leftbar {
+    position:absolute;
+    top:0px;
+    left:0px;
+    width: 215px;
+    bottom: 0px;
+    overflow:auto;
+    background:rgb(202,223,255);
+    margin: 10px;
+    padding-top: 0;
+    padding-left: 7px;
+    padding-right: 7px;
+    border-radius: 5px;
+
+    display:none; /* Override if script present */
+}
+
+#content {
+    position:absolute;
+    top:0;
+    bottom:0;
+    right:0;
+    overflow:auto;
+    padding-bottom: 15px;
+    padding-right: 7px;
+
+    left:10px; /* Override if script present */
+}
+
+#leftbar ul {margin-top: 0px; padding-left: 15px;}
+#leftbar p {margin-bottom: 0px;}
+.note {color: gray; font-size: smaller;}
+
+pre {
+    font-family: "lucida console", monospace;
+    padding-left: 15px;
+    margin: 2px;
+}
+
+#content div {
+    margin-bottom: 10px;
+    margin-right: 10px;
+    padding-top: 4px;
+    border-top: 1px solid #ccc;
+}
+
+.script #content {left:250px;}
+.script #leftbar {display: block;}
+
+/* From HsColour */
+.hs-keyglyph, .hs-layout {color: red;}
+.hs-keyword {color: blue;}
+.hs-comment, .hs-comment a {color: green;}
+.hs-str, .hs-chr {color: teal;}
+</style>
+</head>
+<body>
+
+<script type='text/javascript'>
+document.body.className = "script";
+</script>
+
+<div id="leftbar" valign="top" style="min-width:200px">
+
+<p><a class="all" href="javascript:show('')">All hints</a></p>
+<ul>
+<li><a id="hint0" href="javascript:show('hint0')">Warning: Eta reduce (12)</a></li>
+<li><a id="hint1" href="javascript:show('hint1')">Warning: Redundant bracket (5)</a></li>
+<li><a id="hint2" href="javascript:show('hint2')">Warning: Redundant if (2)</a></li>
+<li><a id="hint3" href="javascript:show('hint3')">Warning: Redundant lambda (1)</a></li>
+<li><a id="hint4" href="javascript:show('hint4')">Warning: Use concatMap (2)</a></li>
+<li><a id="hint5" href="javascript:show('hint5')">Warning: Use fromMaybe (2)</a></li>
+<li><a id="hint6" href="javascript:show('hint6')">Suggestion: Redundant bracket (126)</a></li>
+<li><a id="hint7" href="javascript:show('hint7')">Suggestion: Use camelCase (2)</a></li>
+<li><a id="hint8" href="javascript:show('hint8')">Suggestion: Use infix (2)</a></li>
+<li><a id="hint9" href="javascript:show('hint9')">Suggestion: Use newtype instead of data (1)</a></li>
+<li><a id="hint10" href="javascript:show('hint10')">Suggestion: Use record patterns (1)</a></li>
+<li><a id="hint11" href="javascript:show('hint11')">Suggestion: Use section (1)</a></li>
+<li><a id="hint12" href="javascript:show('hint12')">Suggestion: Use || (1)</a></li>
+</ul>
+
+<p><a class="all" href="javascript:show('')">All files</a></p>
+<ul>
+<li><a id="file0" href="javascript:show('file0')">./src/FlatCoreASTPrinter.hs (5)</a></li>
+<li><a id="file1" href="javascript:show('file1')">./src/OldStepper.hs (1)</a></li>
+<li><a id="file2" href="javascript:show('file2')">./src/OriginalCoreAST/CoreInformationExtractorFunctions.hs (4)</a></li>
+<li><a id="file3" href="javascript:show('file3')">./src/OriginalCoreAST/CoreMakerFunctions.hs (4)</a></li>
+<li><a id="file4" href="javascript:show('file4')">./src/OriginalCoreAST/CoreStepper.hs (11)</a></li>
+<li><a id="file5" href="javascript:show('file5')">./src/OriginalCoreAST/CoreStepperHelpers/CoreEvaluator.hs (1)</a></li>
+<li><a id="file6" href="javascript:show('file6')">./src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs (11)</a></li>
+<li><a id="file7" href="javascript:show('file7')">./src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs (7)</a></li>
+<li><a id="file8" href="javascript:show('file8')">./src/OriginalCoreAST/CoreStepperPrinter.hs (2)</a></li>
+<li><a id="file9" href="javascript:show('file9')">./src/OriginalCoreAST/CoreTypeClassInstances.hs (4)</a></li>
+<li><a id="file10" href="javascript:show('file10')">./src/SimplifiedAST/TypedStepperProofOfConcept.hs (69)</a></li>
+<li><a id="file11" href="javascript:show('file11')">./src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs (17)</a></li>
+<li><a id="file12" href="javascript:show('file12')">./src/SimplifiedCoreAST/SimplifiedCoreAST.hs (2)</a></li>
+<li><a id="file13" href="javascript:show('file13')">./src/SimplifiedCoreAST/SimplifiedCoreASTConverter.hs (2)</a></li>
+<li><a id="file14" href="javascript:show('file14')">./src/SimplifiedCoreAST/SimplifiedCoreASTPrinter.hs (1)</a></li>
+<li><a id="file15" href="javascript:show('file15')">./src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs (6)</a></li>
+<li><a id="file16" href="javascript:show('file16')">./src/Source2.hs (2)</a></li>
+<li><a id="file17" href="javascript:show('file17')">./src/TraverseAST.hs (9)</a></li>
+</ul>
+
+</div>
+<div id="content" valign="top" width="100%">
+<p>
+    Report generated by <a href="http://community.haskell.org/~ndm/hlint/">HLint</a>
+v3.3.4
+    - a tool to suggest improvements to your Haskell code.
+</p>
+
+<div class="hint0 file0">
+src/FlatCoreASTPrinter.hs:19:1-49: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>printFlatCoreAST</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>mapM_</span> <span class='hs-varid'>printFlatCoreBinding</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>printFlatCoreAST</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>mapM_</span> <span class='hs-varid'>printFlatCoreBinding</span></pre>
+
+</div>
+
+<div class="hint6 file0">
+src/FlatCoreASTPrinter.hs:34:16-44: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varop'>$</span> <span class='hs-varid'>varName</span> <span class='hs-varid'>id</span><span class='hs-layout'>)</span>
+   <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isPrefixOf</span> <span class='hs-str'>"$"</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span> <span class='hs-varid'>putStr</span> <span class='hs-str'>""</span> <span class='hs-keyword'>else</span> <span class='hs-varid'>putStr</span> <span class='hs-varid'>name</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>showOutputable</span> <span class='hs-varop'>$</span> <span class='hs-varid'>varName</span> <span class='hs-varid'>id</span>
+   <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isPrefixOf</span> <span class='hs-str'>"$"</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span> <span class='hs-varid'>putStr</span> <span class='hs-str'>""</span> <span class='hs-keyword'>else</span> <span class='hs-varid'>putStr</span> <span class='hs-varid'>name</span></pre>
+
+</div>
+
+<div class="hint6 file0">
+src/FlatCoreASTPrinter.hs:35:8-28: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isPrefixOf</span> <span class='hs-str'>"$"</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span> <span class='hs-varid'>putStr</span> <span class='hs-str'>""</span> <span class='hs-keyword'>else</span> <span class='hs-varid'>putStr</span> <span class='hs-varid'>name</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>isPrefixOf</span> <span class='hs-str'>"$"</span> <span class='hs-varid'>name</span> <span class='hs-keyword'>then</span> <span class='hs-varid'>putStr</span> <span class='hs-str'>""</span> <span class='hs-keyword'>else</span> <span class='hs-varid'>putStr</span> <span class='hs-varid'>name</span></pre>
+
+</div>
+
+<div class="hint8 file0">
+src/FlatCoreASTPrinter.hs:35:9-27: Suggestion: Use infix<br/>
+Found<br/>
+<pre><span class='hs-definition'>isPrefixOf</span> <span class='hs-str'>"$"</span> <span class='hs-varid'>name</span></pre>
+Perhaps<br/>
+<pre><span class='hs-str'>"$"</span> <span class='hs-varop'>`isPrefixOf`</span> <span class='hs-varid'>name</span></pre>
+
+</div>
+
+<div class="hint6 file0">
+src/FlatCoreASTPrinter.hs:80:23-44: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>showOutputable</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>showOutputable</span> <span class='hs-varid'>b</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint9 file1">
+src/OldStepper.hs:104:1-61: Suggestion: Use newtype instead of data<br/>
+Found<br/>
+<pre><span class='hs-keyword'>data</span> <span class='hs-conid'>StepState</span>
+  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>StepState</span> <span class='hs-layout'>{</span><span class='hs-varid'>depth</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Integer</span><span class='hs-layout'>}</span>
+  <span class='hs-keyword'>deriving</span> <span class='hs-conid'>Show</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>newtype</span> <span class='hs-conid'>StepState</span>
+  <span class='hs-keyglyph'>=</span> <span class='hs-conid'>StepState</span> <span class='hs-layout'>{</span><span class='hs-varid'>depth</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>Integer</span><span class='hs-layout'>}</span>
+  <span class='hs-keyword'>deriving</span> <span class='hs-conid'>Show</span></pre>
+<span class='note'>Note: decreases laziness</span>
+</div>
+
+<div class="hint3 file16">
+src/Source2.hs:21:1-25: Warning: Redundant lambda<br/>
+Found<br/>
+<pre><span class='hs-definition'>lamdaDemo</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-varop'>+</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>lamdaDemo</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>x</span> <span class='hs-varop'>+</span> <span class='hs-varid'>x</span></pre>
+
+</div>
+
+<div class="hint6 file16">
+src/Source2.hs:21:13-25: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-keyglyph'>\</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-varop'>+</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyglyph'>\</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>x</span> <span class='hs-varop'>+</span> <span class='hs-varid'>x</span></pre>
+
+</div>
+
+<div class="hint6 file17">
+src/TraverseAST.hs:(74,30)-(76,45): Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-definition'>char</span> <span class='hs-chr'>' '</span> <span class='hs-conid'>GHC.Utils.Outputable</span><span class='hs-varop'>.&lt;&gt;</span> <span class='hs-layout'>(</span><span class='hs-varid'>hang</span> <span class='hs-layout'>(</span><span class='hs-varid'>ppr</span> <span class='hs-varid'>ss</span><span class='hs-layout'>)</span> <span class='hs-num'>1</span> <span class='hs-layout'>(</span><span class='hs-varid'>text</span> <span class='hs-str'>""</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>char</span> <span class='hs-chr'>' '</span> <span class='hs-conid'>GHC.Utils.Outputable</span><span class='hs-varop'>.&lt;&gt;</span> <span class='hs-varid'>hang</span> <span class='hs-layout'>(</span><span class='hs-varid'>ppr</span> <span class='hs-varid'>ss</span><span class='hs-layout'>)</span> <span class='hs-num'>1</span> <span class='hs-layout'>(</span><span class='hs-varid'>text</span> <span class='hs-str'>""</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint7 file17">
+src/TraverseAST.hs:94:1-38: Suggestion: Use camelCase<br/>
+Found<br/>
+<pre><span class='hs-definition'>normalize_newlines</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>normalizeNewlines</span> <span class='hs-keyglyph'>::</span> <span class='hs-conid'>String</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-conid'>String</span></pre>
+
+</div>
+
+<div class="hint7 file17">
+src/TraverseAST.hs:(95,1)-(97,46): Suggestion: Use camelCase<br/>
+Found<br/>
+<pre><span class='hs-definition'>normalize_newlines</span> <span class='hs-layout'>(</span><span class='hs-chr'>'\\'</span> <span class='hs-conop'>:</span> <span class='hs-chr'>'r'</span> <span class='hs-conop'>:</span> <span class='hs-chr'>'\\'</span> <span class='hs-conop'>:</span> <span class='hs-chr'>'n'</span> <span class='hs-conop'>:</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varop'>...</span>
+<span class='hs-definition'>normalize_newlines</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-conop'>:</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varop'>...</span>
+<span class='hs-definition'>normalize_newlines</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-varop'>...</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>normalizeNewlines</span> <span class='hs-layout'>(</span><span class='hs-chr'>'\\'</span> <span class='hs-conop'>:</span> <span class='hs-chr'>'r'</span> <span class='hs-conop'>:</span> <span class='hs-chr'>'\\'</span> <span class='hs-conop'>:</span> <span class='hs-chr'>'n'</span> <span class='hs-conop'>:</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varop'>...</span>
+<span class='hs-definition'>normalizeNewlines</span> <span class='hs-layout'>(</span><span class='hs-varid'>x</span> <span class='hs-conop'>:</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varop'>...</span>
+<span class='hs-definition'>normalizeNewlines</span> <span class='hs-conid'>[]</span> <span class='hs-keyglyph'>=</span> <span class='hs-varop'>...</span></pre>
+
+</div>
+
+<div class="hint6 file17">
+src/TraverseAST.hs:121:22-28: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span><span class='hs-layout'>)</span> <span class='hs-varop'>`ext1`</span> <span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span> <span class='hs-varop'>`ext1`</span> <span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file17">
+src/TraverseAST.hs:121:37-43: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span><span class='hs-layout'>)</span> <span class='hs-varop'>`ext1`</span> <span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span><span class='hs-layout'>)</span> <span class='hs-varop'>`ext1`</span> <span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span></pre>
+
+</div>
+
+<div class="hint6 file17">
+src/TraverseAST.hs:129:22-28: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span><span class='hs-layout'>)</span> <span class='hs-varop'>`ext2`</span> <span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span> <span class='hs-varop'>`ext2`</span> <span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file17">
+src/TraverseAST.hs:129:37-43: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span><span class='hs-layout'>)</span> <span class='hs-varop'>`ext2`</span> <span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Q</span> <span class='hs-varid'>def</span><span class='hs-layout'>)</span> <span class='hs-varop'>`ext2`</span> <span class='hs-conid'>Q</span> <span class='hs-varid'>ext</span></pre>
+
+</div>
+
+<div class="hint5 file17">
+src/TraverseAST.hs:136:16-27: Warning: Use fromMaybe<br/>
+Found<br/>
+<pre><span class='hs-definition'>maybe</span> <span class='hs-varid'>def</span> <span class='hs-varid'>id</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>Data.Maybe.fromMaybe</span> <span class='hs-varid'>def</span></pre>
+
+</div>
+
+<div class="hint5 file17">
+src/TraverseAST.hs:145:16-27: Warning: Use fromMaybe<br/>
+Found<br/>
+<pre><span class='hs-definition'>maybe</span> <span class='hs-varid'>def</span> <span class='hs-varid'>id</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>Data.Maybe.fromMaybe</span> <span class='hs-varid'>def</span></pre>
+
+</div>
+
+<div class="hint6 file2">
+src/OriginalCoreAST/CoreInformationExtractorFunctions.hs:30:49-66: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-str'>"$"</span> <span class='hs-varop'>`isPrefixOf`</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-str'>"$"</span> <span class='hs-varop'>`isPrefixOf`</span> <span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span></pre>
+
+</div>
+
+<div class="hint12 file2">
+src/OriginalCoreAST/CoreInformationExtractorFunctions.hs:40:24-89: Suggestion: Use ||<br/>
+Found<br/>
+<pre><span class='hs-definition'>or</span> <span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"True"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"False"</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"True"</span> <span class='hs-varop'>||</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"False"</span></pre>
+
+</div>
+
+<div class="hint6 file2">
+src/OriginalCoreAST/CoreInformationExtractorFunctions.hs:40:28-56: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"True"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"False"</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"True"</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"False"</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span></pre>
+
+</div>
+
+<div class="hint6 file2">
+src/OriginalCoreAST/CoreInformationExtractorFunctions.hs:40:59-88: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"True"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"False"</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"True"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-str'>"False"</span><span class='hs-keyglyph'>]</span></pre>
+
+</div>
+
+<div class="hint0 file3">
+src/OriginalCoreAST/CoreMakerFunctions.hs:15:1-45: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>integerToCoreLiteral</span> <span class='hs-varid'>value</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>mkLitInt64</span> <span class='hs-varid'>value</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>integerToCoreLiteral</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>mkLitInt64</span></pre>
+
+</div>
+
+<div class="hint6 file3">
+src/OriginalCoreAST/CoreMakerFunctions.hs:18:33-62: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>LitDouble</span> <span class='hs-layout'>(</span><span class='hs-varid'>toRational</span> <span class='hs-varid'>value</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>LitDouble</span> <span class='hs-layout'>(</span><span class='hs-varid'>toRational</span> <span class='hs-varid'>value</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint1 file3">
+src/OriginalCoreAST/CoreMakerFunctions.hs:30:95-102: Warning: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"True"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-str'>"True"</span></pre>
+
+</div>
+
+<div class="hint1 file3">
+src/OriginalCoreAST/CoreMakerFunctions.hs:31:96-104: Warning: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"False"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-str'>"False"</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:37:13-70: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-varid'>foundBinding</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+ <span class='hs-varid'>foundBinding</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:37:29-46: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>varToString</span> <span class='hs-varid'>name</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:47:35-52: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>varToString</span> <span class='hs-varid'>name</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:47:78-113: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromJust</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>App</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromJust</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:49:8-32: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedExpression</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                             <span class='hs-varid'>bindings</span> <span class='hs-varid'>expression</span>
+       <span class='hs-varid'>return</span>
+         <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+          <span class='hs-layout'>(</span><span class='hs-conid'>Case</span> <span class='hs-varid'>reducedExpression</span> <span class='hs-varid'>binding</span> <span class='hs-varid'>caseType</span> <span class='hs-varid'>alternatives</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-keyword'>do</span> <span class='hs-varid'>matchingPattern</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>findMatchingPattern</span> <span class='hs-varid'>expression</span> <span class='hs-varid'>alternatives</span>
+       <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Replace with matching pattern"</span><span class='hs-layout'>,</span> <span class='hs-varid'>matchingPattern</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>expression</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedExpression</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                             <span class='hs-varid'>bindings</span> <span class='hs-varid'>expression</span>
+       <span class='hs-varid'>return</span>
+         <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+          <span class='hs-layout'>(</span><span class='hs-conid'>Case</span> <span class='hs-varid'>reducedExpression</span> <span class='hs-varid'>binding</span> <span class='hs-varid'>caseType</span> <span class='hs-varid'>alternatives</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-keyword'>do</span> <span class='hs-varid'>matchingPattern</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>findMatchingPattern</span> <span class='hs-varid'>expression</span> <span class='hs-varid'>alternatives</span>
+       <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Replace with matching pattern"</span><span class='hs-layout'>,</span> <span class='hs-varid'>matchingPattern</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:52:34-87: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-conid'>Case</span> <span class='hs-varid'>reducedExpression</span> <span class='hs-varid'>binding</span> <span class='hs-varid'>caseType</span> <span class='hs-varid'>alternatives</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-conid'>Case</span> <span class='hs-varid'>reducedExpression</span> <span class='hs-varid'>binding</span> <span class='hs-varid'>caseType</span> <span class='hs-varid'>alternatives</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:62:33-69: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>function</span><span class='hs-layout'>,</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>convertToMultiArgumentFunction</span> <span class='hs-varid'>expr</span><span class='hs-layout'>)</span>
+   <span class='hs-keyword'>case</span> <span class='hs-varid'>function</span> <span class='hs-keyword'>of</span>
+     <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>var</span><span class='hs-layout'>)</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isNothing</span> <span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>var</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+              <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>any</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+                  <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+                      <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                                                 <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+                     <span class='hs-varid'>return</span>
+                       <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+                        <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                          <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span>
+              <span class='hs-keyword'>else</span>
+                  <span class='hs-keyword'>do</span> <span class='hs-varid'>appliedFunction</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>evaluateFunctionWithArguments</span>
+                                          <span class='hs-varid'>function</span> <span class='hs-varid'>arguments</span>
+                     <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>appliedFunction</span><span class='hs-layout'>)</span>
+          <span class='hs-keyword'>else</span>
+              <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedFunction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                                     <span class='hs-varid'>bindings</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>head</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+                 <span class='hs-varid'>return</span>
+                   <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+                    <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                      <span class='hs-varid'>reducedFunction</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-conid'>Lam</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedFunction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                                 <span class='hs-varid'>bindings</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>head</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+             <span class='hs-varid'>return</span>
+               <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+                <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                  <span class='hs-varid'>reducedFunction</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>function</span><span class='hs-layout'>,</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>convertToMultiArgumentFunction</span> <span class='hs-varid'>expr</span>
+   <span class='hs-keyword'>case</span> <span class='hs-varid'>function</span> <span class='hs-keyword'>of</span>
+     <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>var</span><span class='hs-layout'>)</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isNothing</span> <span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>var</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+              <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>any</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+                  <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+                      <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                                                 <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+                     <span class='hs-varid'>return</span>
+                       <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+                        <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                          <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span>
+              <span class='hs-keyword'>else</span>
+                  <span class='hs-keyword'>do</span> <span class='hs-varid'>appliedFunction</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>evaluateFunctionWithArguments</span>
+                                          <span class='hs-varid'>function</span> <span class='hs-varid'>arguments</span>
+                     <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>appliedFunction</span><span class='hs-layout'>)</span>
+          <span class='hs-keyword'>else</span>
+              <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedFunction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                                     <span class='hs-varid'>bindings</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>head</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+                 <span class='hs-varid'>return</span>
+                   <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+                    <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                      <span class='hs-varid'>reducedFunction</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-conid'>Lam</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span><span class='hs-layout'>)</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedFunction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                                 <span class='hs-varid'>bindings</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>head</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+             <span class='hs-varid'>return</span>
+               <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+                <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                  <span class='hs-varid'>reducedFunction</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:64:25-65: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isNothing</span> <span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>var</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>any</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+        <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+            <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                                       <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+           <span class='hs-varid'>return</span>
+             <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+              <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span>
+    <span class='hs-keyword'>else</span>
+        <span class='hs-keyword'>do</span> <span class='hs-varid'>appliedFunction</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>evaluateFunctionWithArguments</span>
+                                <span class='hs-varid'>function</span> <span class='hs-varid'>arguments</span>
+           <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>appliedFunction</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedFunction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                           <span class='hs-varid'>bindings</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>head</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+       <span class='hs-varid'>return</span>
+         <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+          <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+            <span class='hs-varid'>reducedFunction</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>isNothing</span> <span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>var</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>any</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+        <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+            <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                                       <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+           <span class='hs-varid'>return</span>
+             <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+              <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+                <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span>
+    <span class='hs-keyword'>else</span>
+        <span class='hs-keyword'>do</span> <span class='hs-varid'>appliedFunction</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>evaluateFunctionWithArguments</span>
+                                <span class='hs-varid'>function</span> <span class='hs-varid'>arguments</span>
+           <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>appliedFunction</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedFunction</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStep</span>
+                                           <span class='hs-varid'>bindings</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>head</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+       <span class='hs-varid'>return</span>
+         <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+          <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+            <span class='hs-varid'>reducedFunction</span> <span class='hs-layout'>(</span><span class='hs-varid'>tail</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:65:33-60: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>any</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+        <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                                   <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+       <span class='hs-varid'>return</span>
+         <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+          <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+            <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-keyword'>do</span> <span class='hs-varid'>appliedFunction</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>evaluateFunctionWithArguments</span>
+                            <span class='hs-varid'>function</span> <span class='hs-varid'>arguments</span>
+       <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>appliedFunction</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>any</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>arguments</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+        <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                                   <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+       <span class='hs-varid'>return</span>
+         <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+          <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+            <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-keyword'>do</span> <span class='hs-varid'>appliedFunction</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>evaluateFunctionWithArguments</span>
+                            <span class='hs-varid'>function</span> <span class='hs-varid'>arguments</span>
+       <span class='hs-varid'>return</span> <span class='hs-layout'>(</span><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>appliedFunction</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:67:71-122: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+    <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                               <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span>
+   <span class='hs-varid'>return</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+      <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+        <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span>
+    <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span> <span class='hs-keyglyph'>&lt;-</span> <span class='hs-varid'>applyStepToOneOfTheArguments</span>
+                              <span class='hs-varid'>bindings</span> <span class='hs-conid'>[]</span> <span class='hs-varid'>arguments</span>
+   <span class='hs-varid'>return</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+      <span class='hs-varid'>convertFunctionApplicationWithArgumentListToNestedFunctionApplication</span>
+        <span class='hs-varid'>function</span> <span class='hs-varid'>simplifiedArguments</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file4">
+src/OriginalCoreAST/CoreStepper.hs:71:53-77: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-str'>"Apply "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>showOutputable</span> <span class='hs-varid'>function</span></pre>
+
+</div>
+
+<div class="hint6 file8">
+src/OriginalCoreAST/CoreStepperPrinter.hs:34:93-123: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-varid'>reduction</span> <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+   <span class='hs-keyword'>case</span> <span class='hs-varid'>reduction</span> <span class='hs-keyword'>of</span>
+     <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStepDescription</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedExpression</span><span class='hs-layout'>)</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span> <span class='hs-varid'>putStrLn</span> <span class='hs-layout'>(</span><span class='hs-str'>"\n{-"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reductionStepDescription</span> <span class='hs-varop'>++</span> <span class='hs-str'>"-}"</span><span class='hs-layout'>)</span>
+             <span class='hs-varid'>prettyPrint</span> <span class='hs-varid'>reducedExpression</span>
+             <span class='hs-varid'>printCoreStepByStepReductionForSingleExpression</span>
+               <span class='hs-varid'>bindings</span> <span class='hs-varid'>reducedExpression</span>
+     <span class='hs-conid'>Nothing</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>putStrLn</span>
+            <span class='hs-str'>"\n{-no reduction rule implemented for this expression-}"</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-varid'>reduction</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>expression</span>
+   <span class='hs-keyword'>case</span> <span class='hs-varid'>reduction</span> <span class='hs-keyword'>of</span>
+     <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStepDescription</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedExpression</span><span class='hs-layout'>)</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-keyword'>do</span> <span class='hs-varid'>putStrLn</span> <span class='hs-layout'>(</span><span class='hs-str'>"\n{-"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reductionStepDescription</span> <span class='hs-varop'>++</span> <span class='hs-str'>"-}"</span><span class='hs-layout'>)</span>
+             <span class='hs-varid'>prettyPrint</span> <span class='hs-varid'>reducedExpression</span>
+             <span class='hs-varid'>printCoreStepByStepReductionForSingleExpression</span>
+               <span class='hs-varid'>bindings</span> <span class='hs-varid'>reducedExpression</span>
+     <span class='hs-conid'>Nothing</span>
+       <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>putStrLn</span>
+            <span class='hs-str'>"\n{-no reduction rule implemented for this expression-}"</span></pre>
+
+</div>
+
+<div class="hint4 file8">
+src/OriginalCoreAST/CoreStepperPrinter.hs:45:34-86: Warning: Use concatMap<br/>
+Found<br/>
+<pre><span class='hs-definition'>concat</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>convertCoreBindingToBindingList</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>concatMap</span> <span class='hs-varid'>convertCoreBindingToBindingList</span> <span class='hs-varid'>bindings</span></pre>
+
+</div>
+
+<div class="hint0 file9">
+src/OriginalCoreAST/CoreTypeClassInstances.hs:17:3-43: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>fromInteger</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>integerToCoreExpression</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>fromInteger</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>integerToCoreExpression</span></pre>
+
+</div>
+
+<div class="hint0 file9">
+src/OriginalCoreAST/CoreTypeClassInstances.hs:26:3-45: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>fromRational</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rationalToCoreExpression</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>fromRational</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>rationalToCoreExpression</span></pre>
+
+</div>
+
+<div class="hint0 file9">
+src/OriginalCoreAST/CoreTypeClassInstances.hs:79:3-40: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>fromInteger</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>integerToCoreLiteral</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>fromInteger</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>integerToCoreLiteral</span></pre>
+
+</div>
+
+<div class="hint6 file9">
+src/OriginalCoreAST/CoreTypeClassInstances.hs:97:20-32: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>LitDouble</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>LitDouble</span> <span class='hs-varid'>x</span></pre>
+
+</div>
+
+<div class="hint6 file5">
+src/OriginalCoreAST/CoreStepperHelpers/CoreEvaluator.hs:33:52-72: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyglyph'>[</span><span class='hs-layout'>(</span><span class='hs-conid'>Lit</span> <span class='hs-layout'>(</span><span class='hs-conid'>LitNumber</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyglyph'>[</span><span class='hs-conid'>Lit</span> <span class='hs-layout'>(</span><span class='hs-conid'>LitNumber</span> <span class='hs-keyword'>_</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-keyglyph'>]</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:19:41-82: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>var</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>key</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>exp</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>key</span> <span class='hs-varid'>xs</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>var</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>key</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-layout'>(</span><span class='hs-varid'>exp</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>key</span> <span class='hs-varid'>xs</span></pre>
+
+</div>
+
+<div class="hint1 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:20:63-67: Warning: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>exp</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>exp</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:26:34-50: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>DataAlt</span> <span class='hs-varid'>dataCon</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>DataAlt</span> <span class='hs-varid'>dataCon</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:26:77-126: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>dataCon</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>dataCon</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:28:86-120: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>dataCon</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>dataCon</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:29:37-59: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>LitAlt</span> <span class='hs-varid'>patternLiteral</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>LitAlt</span> <span class='hs-varid'>patternLiteral</span><span class='hs-layout'>,</span> <span class='hs-keyword'>_</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:29:86-114: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-varid'>literal</span> <span class='hs-varid'>patternLiteral</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Lit</span> <span class='hs-varid'>literal</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-varid'>literal</span> <span class='hs-varid'>patternLiteral</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Lit</span> <span class='hs-varid'>literal</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:31:99-136: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-varid'>literal</span> <span class='hs-varid'>patternLiteral</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Lit</span> <span class='hs-varid'>literal</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-varid'>literal</span> <span class='hs-varid'>patternLiteral</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span> <span class='hs-varid'>expression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>Lit</span> <span class='hs-varid'>literal</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:32:43-74: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>DataAlt</span> <span class='hs-varid'>patternConstructorName</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>boundNames</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>DataAlt</span> <span class='hs-varid'>patternConstructorName</span><span class='hs-layout'>,</span> <span class='hs-varid'>boundNames</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:34:8-86: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>varExpressionToString</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>patternConstructorName</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceMultipleVarWithinExpression</span>
+         <span class='hs-varid'>boundNames</span> <span class='hs-layout'>(</span><span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>not</span> <span class='hs-varop'>.</span> <span class='hs-varid'>isTypeInformation</span><span class='hs-layout'>)</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>expr</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>varExpressionToString</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>patternConstructorName</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceMultipleVarWithinExpression</span>
+         <span class='hs-varid'>boundNames</span> <span class='hs-layout'>(</span><span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>not</span> <span class='hs-varop'>.</span> <span class='hs-varid'>isTypeInformation</span><span class='hs-layout'>)</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>expr</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file6">
+src/OriginalCoreAST/CoreStepperHelpers/CoreLookup.hs:36:14-57: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>varExpressionToString</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>patternConstructorName</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceMultipleVarWithinExpression</span>
+         <span class='hs-varid'>boundNames</span> <span class='hs-layout'>(</span><span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>not</span> <span class='hs-varop'>.</span> <span class='hs-varid'>isTypeInformation</span><span class='hs-layout'>)</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>expr</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>varExpressionToString</span> <span class='hs-varid'>function</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>showOutputable</span> <span class='hs-varid'>patternConstructorName</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-conid'>Just</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceMultipleVarWithinExpression</span>
+         <span class='hs-varid'>boundNames</span> <span class='hs-layout'>(</span><span class='hs-varid'>filter</span> <span class='hs-layout'>(</span><span class='hs-varid'>not</span> <span class='hs-varop'>.</span> <span class='hs-varid'>isTypeInformation</span><span class='hs-layout'>)</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-varid'>findMatchingPattern</span> <span class='hs-layout'>(</span><span class='hs-conid'>App</span> <span class='hs-varid'>expr</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span> <span class='hs-varid'>xs</span></pre>
+
+</div>
+
+<div class="hint6 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:20:148-160: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>varName</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-varid'>replaceExpression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-conid'>Var</span> <span class='hs-varid'>varName</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>varName</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-varid'>replaceExpression</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-conid'>Var</span> <span class='hs-varid'>varName</span></pre>
+
+</div>
+
+<div class="hint6 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:23:6-28: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>parameter</span><span class='hs-layout'>)</span> <span class='hs-varop'>==</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>varToString</span> <span class='hs-varid'>parameter</span> <span class='hs-varop'>==</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:23:33-50: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>parameter</span><span class='hs-layout'>)</span> <span class='hs-varop'>==</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>parameter</span><span class='hs-layout'>)</span> <span class='hs-varop'>==</span> <span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span></pre>
+
+</div>
+
+<div class="hint6 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:30:98-155: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>elem</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>varToString</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>altCon</span><span class='hs-layout'>,</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>altCon</span><span class='hs-layout'>,</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>,</span> 
+     <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceVarWithinExpression</span> <span class='hs-varid'>name</span> <span class='hs-varid'>replaceExpression</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>elem</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>varToString</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>altCon</span><span class='hs-layout'>,</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>,</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-varid'>altCon</span><span class='hs-layout'>,</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>,</span> 
+     <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceVarWithinExpression</span> <span class='hs-varid'>name</span> <span class='hs-varid'>replaceExpression</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint8 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:30:99-154: Suggestion: Use infix<br/>
+Found<br/>
+<pre><span class='hs-definition'>elem</span> <span class='hs-layout'>(</span><span class='hs-varid'>varToString</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>varToString</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>varToString</span> <span class='hs-varid'>name</span> <span class='hs-varop'>`elem`</span> <span class='hs-varid'>map</span> <span class='hs-varid'>varToString</span> <span class='hs-varid'>localBoundVars</span></pre>
+
+</div>
+
+<div class="hint6 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:32:128-193: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>altCon</span><span class='hs-layout'>,</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>deepReplaceVarWithinExpression</span> <span class='hs-varid'>name</span> <span class='hs-varid'>replaceExpression</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>altCon</span><span class='hs-layout'>,</span> <span class='hs-varid'>localBoundVars</span><span class='hs-layout'>,</span> 
+ <span class='hs-varid'>deepReplaceVarWithinExpression</span> <span class='hs-varid'>name</span> <span class='hs-varid'>replaceExpression</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint0 file7">
+src/OriginalCoreAST/CoreStepperHelpers/CoreTransformator.hs:40:1-54: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>convertToMultiArgumentFunction</span> <span class='hs-varid'>expr</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>collectArgs</span> <span class='hs-varid'>expr</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>convertToMultiArgumentFunction</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>collectArgs</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:13:28-44: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Expression</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-conid'>Expression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Expression</span> <span class='hs-keyglyph'>-&gt;</span> <span class='hs-varid'>a</span><span class='hs-layout'>,</span> <span class='hs-conid'>Expression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:47:31-68: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>DoubleValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>signum</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>DoubleValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>signum</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:48:30-53: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>DoubleValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>signum</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>DoubleValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>signum</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:50:21-36: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>IntegerValue</span> <span class='hs-varid'>x</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:51:28-49: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>abs</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>IntegerValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>abs</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:52:27-47: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>DoubleValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>abs</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>DoubleValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>abs</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:65:47-64: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:66:45-62: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:67:46-77: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:68:46-77: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:69:44-61: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:70:40-57: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:71:40-57: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint11 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:72:44-62: Suggestion: Use section<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span> <span class='hs-conid'>True</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>True</span> <span class='hs-conid'>Prelude</span><span class='hs-varop'>.==</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:73:42-63: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varop'>&amp;&amp;</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span> <span class='hs-varop'>&amp;&amp;</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:73:68-89: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varop'>&amp;&amp;</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fst</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-varop'>&amp;&amp;</span> <span class='hs-layout'>(</span><span class='hs-varop'>==</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>snd</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:82:47-64: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:83:45-62: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:84:46-77: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:85:46-77: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromInteger</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:86:44-61: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:87:40-57: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:88:40-57: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:89:40-57: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:90:42-59: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>Prelude</span><span class='hs-varop'>.&lt;=</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span> <span class='hs-varid'>y</span></pre>
+
+</div>
+
+<div class="hint1 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:106:29-44: Warning: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>leftExpression</span></pre>
+
+</div>
+
+<div class="hint1 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:106:55-71: Warning: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>rightExpression</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:117:50-79: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>unwrap</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>function</span> <span class='hs-layout'>(</span><span class='hs-varid'>unwrap</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint0 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:120:1-132: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>applyTwoArguments</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span> <span class='hs-varid'>secondArgument</span>
+  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyOneArgument</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>applyOneArgument</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span><span class='hs-layout'>)</span> <span class='hs-varid'>secondArgument</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>applyTwoArguments</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span>
+  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyOneArgument</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyOneArgument</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint0 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:123:1-162: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>applyThreeArguments</span>
+  <span class='hs-varid'>function</span>
+  <span class='hs-varid'>firstArgument</span>
+  <span class='hs-varid'>secondArgument</span>
+  <span class='hs-varid'>thirdArgument</span>
+  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyOneArgument</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>applyTwoArguments</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span> <span class='hs-varid'>secondArgument</span><span class='hs-layout'>)</span>
+      <span class='hs-varid'>thirdArgument</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>applyThreeArguments</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span> <span class='hs-varid'>secondArgument</span>
+  <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyOneArgument</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>applyTwoArguments</span> <span class='hs-varid'>function</span> <span class='hs-varid'>firstArgument</span> <span class='hs-varid'>secondArgument</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:127:32-67: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>ListValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>ListValue</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:128:38-89: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>TupleValue</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>TupleValue</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:128:51-68: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:128:70-87: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> <span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:130:80-143: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>applyOperator</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>applyOperator</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>rightExpression</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:134:67-83: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"+"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"+"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:135:67-83: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"-"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"-"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:136:67-83: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"*"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"*"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:137:67-83: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"/"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"/"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:138:67-83: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&lt;"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&lt;"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:138:87-168: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:139:67-84: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&lt;="</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&lt;="</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:139:88-170: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;=</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&lt;=</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:140:67-83: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&gt;"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&gt;"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:140:87-168: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:141:67-84: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&gt;="</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&gt;="</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:141:88-170: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;=</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;=</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:142:67-84: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"=="</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"=="</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:142:88-170: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;=</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-varop'>&gt;=</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:143:67-84: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"||"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"||"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:143:89-229: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-varid'>applyTwoArguments</span>
+      <span class='hs-layout'>(</span><span class='hs-varop'>||</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-varid'>applyTwoArguments</span>
+     <span class='hs-layout'>(</span><span class='hs-varop'>||</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:143:143-173: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:143:195-226: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:144:67-84: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&amp;&amp;"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>operator</span> <span class='hs-varop'>==</span> <span class='hs-str'>"&amp;&amp;"</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:144:89-229: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BoolValue</span>
+   <span class='hs-layout'>(</span><span class='hs-varid'>applyTwoArguments</span>
+      <span class='hs-layout'>(</span><span class='hs-varop'>&amp;&amp;</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+      <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>BoolValue</span>
+  <span class='hs-layout'>(</span><span class='hs-varid'>applyTwoArguments</span>
+     <span class='hs-layout'>(</span><span class='hs-varop'>&amp;&amp;</span><span class='hs-layout'>)</span> <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+     <span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:144:143-173: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:144:195-226: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>expressionToBool</span><span class='hs-layout'>,</span> <span class='hs-varid'>solve</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:148:28-56: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>key</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span>
+  <span class='hs-varop'>??</span> <span class='hs-layout'>(</span><span class='hs-conid'>InvalidExpression</span> <span class='hs-str'>"Binding not Found"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>tryFindBinding</span> <span class='hs-varid'>key</span> <span class='hs-varid'>bindings</span>
+  <span class='hs-varop'>??</span> <span class='hs-layout'>(</span><span class='hs-conid'>InvalidExpression</span> <span class='hs-str'>"Binding not Found"</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:148:61-99: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>key</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span>
+  <span class='hs-varop'>??</span> <span class='hs-layout'>(</span><span class='hs-conid'>InvalidExpression</span> <span class='hs-str'>"Binding not Found"</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>key</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span>
+  <span class='hs-varop'>??</span> <span class='hs-conid'>InvalidExpression</span> <span class='hs-str'>"Binding not Found"</span></pre>
+
+</div>
+
+<div class="hint10 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:163:15-39: Suggestion: Use record patterns<br/>
+Found<br/>
+<pre><span class='hs-conid'>OperatorApplication</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span> <span class='hs-keyword'>_</span></pre>
+Perhaps<br/>
+<pre><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>{</span><span class='hs-layout'>}</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:168:52-100: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reference</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>findBinding</span> <span class='hs-varid'>reference</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reference</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>findBinding</span> <span class='hs-varid'>reference</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:168:102-133: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reference</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>findBinding</span> <span class='hs-varid'>reference</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reference</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-varid'>findBinding</span> <span class='hs-varid'>reference</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:170:134-169: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedLeftExpression</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span><span class='hs-layout'>)</span>
+   <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+    <span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span>
+       <span class='hs-varid'>reducedLeftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedLeftExpression</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>leftExpression</span>
+   <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+    <span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span>
+       <span class='hs-varid'>reducedLeftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:171:174-241: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span>
+    <span class='hs-varid'>reducedLeftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>OperatorApplication</span> <span class='hs-varid'>reducedLeftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:173:135-171: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedRightExpression</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span>
+   <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+    <span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span>
+       <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>reducedRightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedRightExpression</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>rightExpression</span>
+   <span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+    <span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span>
+       <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>reducedRightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:174:175-242: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span>
+    <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>reducedRightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>reductionStep</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>OperatorApplication</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>reducedRightExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:175:100-130: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Apply Operator "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>operator</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>applyOperator</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Apply Operator "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>operator</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>applyOperator</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:175:132-195: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Apply Operator "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>operator</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>applyOperator</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-str'>"Apply Operator "</span> <span class='hs-varop'>++</span> <span class='hs-varid'>operator</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-varid'>applyOperator</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>operator</span> <span class='hs-varid'>leftExpression</span> <span class='hs-varid'>rightExpression</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file10">
+src/SimplifiedAST/TypedStepperProofOfConcept.hs:191:105-135: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-varid'>print</span> <span class='hs-varid'>expression</span>
+   <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStepDescription</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedExpression</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-layout'>(</span><span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>expression</span><span class='hs-layout'>)</span>
+   <span class='hs-varid'>putStrLn</span> <span class='hs-layout'>(</span><span class='hs-str'>"{-"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reductionStepDescription</span> <span class='hs-varop'>++</span> <span class='hs-str'>"-}"</span><span class='hs-layout'>)</span>
+   <span class='hs-varid'>printStepByStepReduction</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>reducedExpression</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>do</span> <span class='hs-varid'>print</span> <span class='hs-varid'>expression</span>
+   <span class='hs-keyword'>let</span> <span class='hs-layout'>(</span><span class='hs-varid'>reductionStepDescription</span><span class='hs-layout'>,</span> <span class='hs-varid'>reducedExpression</span><span class='hs-layout'>)</span>
+         <span class='hs-keyglyph'>=</span> <span class='hs-varid'>applyStep</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>expression</span>
+   <span class='hs-varid'>putStrLn</span> <span class='hs-layout'>(</span><span class='hs-str'>"{-"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>reductionStepDescription</span> <span class='hs-varop'>++</span> <span class='hs-str'>"-}"</span><span class='hs-layout'>)</span>
+   <span class='hs-varid'>printStepByStepReduction</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>reducedExpression</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:11:12-26: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"w"</span><span class='hs-layout'>,</span> <span class='hs-layout'>(</span><span class='hs-conid'>DoubleValue</span> <span class='hs-num'>6</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"w"</span><span class='hs-layout'>,</span> <span class='hs-conid'>DoubleValue</span> <span class='hs-num'>6</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:12:34-49: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:12:58-122: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"*"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>3</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"*"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>3</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:12:81-96: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:12:105-120: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>3</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>3</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:13:34-49: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>3</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>3</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:13:58-73: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>4</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>4</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:14:34-55: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>BindingReference</span> <span class='hs-str'>"x"</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BindingReference</span> <span class='hs-str'>"x"</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:14:64-85: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>BindingReference</span> <span class='hs-str'>"y"</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>BindingReference</span> <span class='hs-str'>"y"</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:55-70: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:73-140: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:98-113: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:122-137: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:162-177: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:180-247: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>OperatorApplication</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span> <span class='hs-str'>"+"</span> <span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:205-220: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>2</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file11">
+src/SimplifiedAST/TypedStepperProofOfConceptExamples.hs:18:229-244: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-conid'>IntegerValue</span> <span class='hs-num'>1</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint0 file12">
+src/SimplifiedCoreAST/SimplifiedCoreAST.hs:71:3-30: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>fromInteger</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>LitNumberS</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>fromInteger</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>LitNumberS</span></pre>
+
+</div>
+
+<div class="hint0 file12">
+src/SimplifiedCoreAST/SimplifiedCoreAST.hs:90:3-31: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>fromRational</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>LitDoubleS</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>fromRational</span> <span class='hs-keyglyph'>=</span> <span class='hs-conid'>LitDoubleS</span></pre>
+
+</div>
+
+<div class="hint4 file13">
+src/SimplifiedCoreAST/SimplifiedCoreASTConverter.hs:23:22-51: Warning: Use concatMap<br/>
+Found<br/>
+<pre><span class='hs-definition'>concat</span> <span class='hs-layout'>(</span><span class='hs-varid'>map</span> <span class='hs-varid'>simplifyBinding</span> <span class='hs-varid'>x</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>concatMap</span> <span class='hs-varid'>simplifyBinding</span> <span class='hs-varid'>x</span></pre>
+
+</div>
+
+<div class="hint0 file13">
+src/SimplifiedCoreAST/SimplifiedCoreASTConverter.hs:78:1-39: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>nameToString</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>showOutputable</span> <span class='hs-varid'>name</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>nameToString</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>showOutputable</span></pre>
+
+</div>
+
+<div class="hint0 file14">
+src/SimplifiedCoreAST/SimplifiedCoreASTPrinter.hs:11:1-61: Warning: Eta reduce<br/>
+Found<br/>
+<pre><span class='hs-definition'>printSimplifiedCoreAST</span> <span class='hs-varid'>x</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>mapM_</span> <span class='hs-varid'>printSimplifiedCoreBinding</span> <span class='hs-varid'>x</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>printSimplifiedCoreAST</span> <span class='hs-keyglyph'>=</span> <span class='hs-varid'>mapM_</span> <span class='hs-varid'>printSimplifiedCoreBinding</span></pre>
+
+</div>
+
+<div class="hint2 file15">
+src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs:(34,3)-(36,13): Warning: Redundant if<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>isNothing</span> <span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>name</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span> <span class='hs-conid'>False</span> <span class='hs-keyword'>else</span> <span class='hs-conid'>True</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>not</span> <span class='hs-layout'>(</span><span class='hs-varid'>isNothing</span> <span class='hs-layout'>(</span><span class='hs-varid'>tryFindBinding</span> <span class='hs-varid'>name</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint2 file15">
+src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs:(39,3)-(41,13): Warning: Redundant if<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>isConstructor</span> <span class='hs-varid'>name</span> <span class='hs-keyword'>then</span> <span class='hs-conid'>False</span> <span class='hs-keyword'>else</span> <span class='hs-conid'>True</span></pre>
+Perhaps<br/>
+<pre><span class='hs-definition'>not</span> <span class='hs-layout'>(</span><span class='hs-varid'>isConstructor</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file15">
+src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs:67:79-176: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>name</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-varid'>findBinding</span> <span class='hs-varid'>name</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>name</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+ <span class='hs-varid'>findBinding</span> <span class='hs-varid'>name</span> <span class='hs-varid'>bindings</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file15">
+src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs:71:286-342: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-conid'>AppS</span> <span class='hs-layout'>(</span><span class='hs-conid'>MultiArgumentAppS</span> <span class='hs-varid'>name</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-varid'>reducedArgument</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>AppS</span> <span class='hs-layout'>(</span><span class='hs-conid'>MultiArgumentAppS</span> <span class='hs-varid'>name</span> <span class='hs-varid'>arguments</span><span class='hs-layout'>)</span> <span class='hs-varid'>reducedArgument</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file15">
+src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs:80:6-38: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-layout'>(</span><span class='hs-varid'>isNothing</span> <span class='hs-varid'>userDefinedExpression</span><span class='hs-layout'>)</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>if</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>argument</span> <span class='hs-keyword'>then</span>
+        <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-conid'>AppS</span> <span class='hs-layout'>(</span><span class='hs-conid'>VarS</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varid'>reducedArgument</span><span class='hs-layout'>)</span>
+    <span class='hs-keyword'>else</span>
+        <span class='hs-layout'>(</span><span class='hs-str'>"Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself."</span><span class='hs-layout'>,</span> 
+         <span class='hs-layout'>(</span><span class='hs-conid'>MultiArgumentAppS</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>argument</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>name</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+     <span class='hs-conid'>AppS</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromJust</span> <span class='hs-varid'>userDefinedExpression</span><span class='hs-layout'>)</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-keyword'>if</span> <span class='hs-varid'>isNothing</span> <span class='hs-varid'>userDefinedExpression</span> <span class='hs-keyword'>then</span>
+    <span class='hs-keyword'>if</span> <span class='hs-varid'>canBeReduced</span> <span class='hs-varid'>bindings</span> <span class='hs-varid'>argument</span> <span class='hs-keyword'>then</span>
+        <span class='hs-layout'>(</span><span class='hs-varid'>description</span><span class='hs-layout'>,</span> <span class='hs-conid'>AppS</span> <span class='hs-layout'>(</span><span class='hs-conid'>VarS</span> <span class='hs-varid'>name</span><span class='hs-layout'>)</span> <span class='hs-varid'>reducedArgument</span><span class='hs-layout'>)</span>
+    <span class='hs-keyword'>else</span>
+        <span class='hs-layout'>(</span><span class='hs-str'>"Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself."</span><span class='hs-layout'>,</span> 
+         <span class='hs-layout'>(</span><span class='hs-conid'>MultiArgumentAppS</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>argument</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span>
+<span class='hs-keyword'>else</span>
+    <span class='hs-layout'>(</span><span class='hs-str'>"Replace '"</span> <span class='hs-varop'>++</span> <span class='hs-varid'>name</span> <span class='hs-varop'>++</span> <span class='hs-str'>"' with definition"</span><span class='hs-layout'>,</span> 
+     <span class='hs-conid'>AppS</span> <span class='hs-layout'>(</span><span class='hs-varid'>fromJust</span> <span class='hs-varid'>userDefinedExpression</span><span class='hs-layout'>)</span> <span class='hs-varid'>argument</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+<div class="hint6 file15">
+src/SimplifiedCoreAST/SimplifiedCoreASTReducer.hs:84:206-240: Suggestion: Redundant bracket<br/>
+Found<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself."</span><span class='hs-layout'>,</span> 
+ <span class='hs-layout'>(</span><span class='hs-conid'>MultiArgumentAppS</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>argument</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span><span class='hs-layout'>)</span></pre>
+Perhaps<br/>
+<pre><span class='hs-layout'>(</span><span class='hs-str'>"Convert to built-in multi-argument function. Please note that multi-argument-functions are not pure Haskell Core but used here to reduce functions that are not defined by the user itself."</span><span class='hs-layout'>,</span> 
+ <span class='hs-conid'>MultiArgumentAppS</span> <span class='hs-varid'>name</span> <span class='hs-keyglyph'>[</span><span class='hs-varid'>argument</span><span class='hs-keyglyph'>]</span><span class='hs-layout'>)</span></pre>
+
+</div>
+
+</div>
+<script type='text/javascript'>
+show(window.location.hash.slice(1), true);
+</script>
+</body>
+</html>

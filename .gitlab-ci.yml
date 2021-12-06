@@ -25,7 +25,11 @@ lint:
       - .stack-work/
       - .stack-root/
   script:
-    - hlint .
+    - curl -sSL https://raw.github.com/ndmitchell/hlint/master/misc/run.sh | sh -s . --report
+  artifacts:
+    paths:
+      - report.html
+
 
 test:
   cache:
@@ -44,3 +48,7 @@ haddock:
       - .stack-root/
   script:
     - stack --no-terminal haddock
+  artifacts:
+    paths:
+      - index.html
+      - substep.txt
