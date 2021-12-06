@@ -27,6 +27,7 @@ lint:
   script:
     - hlint . --report
   artifacts:
+    when: always
     paths:
       - report.html
 
