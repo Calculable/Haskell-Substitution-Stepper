@@ -43,6 +43,128 @@ instance Ord (Expr b) where
   (>) (Lit x) (Lit y) = (<=) x y
   (>) _ _ = error "> not supported by this type"
 
+instance Enum (Expr b) where
+  succ (Lit x) = Lit (succ x)
+  succ _ = error "succ not supported for this type"
+
+  fromEnum (Lit x) = (fromEnum x)
+  fromEnum _ = error "fromEnum not supported for this type"
+
+  enumFrom _ = error "enumFrom not supported for this type" 
+  enumFromThen _ = error "enumFromThen not supported for this type" 
+  enumFromTo _ = error "enumFromTo not supported for this type" 
+  enumFromThenTo _ = error "enumFromThenTo not supported for this type"
+  
+  toEnum x = Lit (integerToCoreLiteral (toInteger x))
+
+instance Floating (Expr b) where
+  pi = Lit (fractionalToCoreLiteral Prelude.pi)
+  
+  exp (Lit x) = Lit (exp x)
+  exp _ = error "exp not supported for this type"
+
+  log (Lit x) = Lit (log x)
+  log _ = error "log not supported for this type"
+  
+  sqrt (Lit x) = Lit (sqrt x)
+  sqrt _ = error "sqrt not supported for this type"
+
+  (**) (Lit x) (Lit y) = Lit ((**) x y)
+  (**) _ _ = error "(**) not supported for this type"
+
+  logBase (Lit x) (Lit y) = Lit (logBase x y)
+  logBase _ _ = error "logBase not supported for this type"
+
+  sin (Lit x) = Lit (sin x)
+  sin _ = error "sin not supported for this type"
+
+  cos (Lit x) = Lit (cos x)
+  cos _ = error "cos not supported for this type"
+
+  tan (Lit x) = Lit (tan x)
+  tan _ = error "tan not supported for this type"
+
+  asin (Lit x) = Lit (asin x)
+  asin _ = error "asin not supported for this type"
+
+  acos (Lit x) = Lit (acos x)
+  acos _ = error "acos not supported for this type"
+
+  atan (Lit x) = Lit (atan x)
+  atan _ = error "atan not supported for this type"
+
+  sinh (Lit x) = Lit (sinh x)
+  sinh _ = error "sinh not supported for this type"
+
+  cosh (Lit x) = Lit (cosh x)
+  cosh _ = error "cosh not supported for this type"
+
+  tanh (Lit x) = Lit (tanh x)
+  tanh _ = error "tanh not supported for this type"
+
+  asinh (Lit x) = Lit (asinh x)
+  asinh _ = error "asinh not supported for this type"
+
+  acosh (Lit x) = Lit (acosh x)
+  acosh _ = error "acosh not supported for this type"
+
+  atanh (Lit x) = Lit (atanh x)
+  atanh _ = error "atanh not supported for this type"
+
+instance Integral (Expr b) where
+  quot (Lit x) (Lit y) = Lit (quot x y)
+  quot _ _ = error "quot not supported for this type"
+
+  rem (Lit x) (Lit y) = Lit (rem x y)
+  rem _ _ = error "rem not supported for this type"
+
+  div (Lit x) (Lit y) = Lit (div x y)
+  div _ _ = error "div not supported for this type"
+
+  mod (Lit x) (Lit y) = Lit (mod x y)
+  mod _ _ = error "mod not supported for this type"
+
+  quotRem _ _ = error "quotRem not supported" 
+  divMod _ _ = error "divMod not supported"
+
+  toInteger (Lit x) = toInteger x
+  toInteger _ = error "toInteger not supported for this type"
+ 
+instance Real (Expr b) where
+  toRational (Lit x) = toRational x
+  toRational _ = error "toRational not supported for this type"
+
+instance RealFrac (Expr b) where
+  properFraction = error "properFraction not supported"
+  
+  truncate (Lit x) = truncate x
+  truncate _ = error "truncate is not supported for this type"
+
+  round (Lit x) = round x
+  round _ = error "round is not supported for this type"
+
+  ceiling (Lit x) = ceiling x
+  ceiling _ = error "ceiling is not supported for this type"
+
+  floor (Lit x) = floor x
+  floor _ = error "floor is not supported for this type"
+
+instance RealFloat (Expr b) where
+  floatRadix (Lit x) = floatRadix x
+  floatDigits (Lit x) = floatDigits x
+  floatRange _ = error "float range is not supported for this type"
+  decodeFloat _ = error "decode float is not supported for this type"
+  encodeFloat x y = Lit (encodeFloat x y)
+  exponent (Lit x) = exponent x
+  significand (Lit x) = Lit (significand x)
+  scaleFloat x (Lit y) = Lit (scaleFloat x y)
+  isNaN (Lit x) = isNaN x
+  isInfinite (Lit x) = isInfinite x
+  isDenormalized (Lit x) = isDenormalized x
+  isNegativeZero (Lit x) = isNegativeZero x
+  isIEEE (Lit x) = isIEEE x
+  atan2 (Lit x) (Lit y) = Lit (atan2 x y)  
+
 instance Num Literal where
   (+) (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral ((Prelude.+) x y)
   (+) (LitDouble x) (LitDouble y) = fractionalToCoreLiteral ((Prelude.+) (fromRational x) (fromRational y))
