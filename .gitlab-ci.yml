@@ -2,7 +2,9 @@ image: fpco/stack-build-small:lts-18.12
 
 stages:
   - build
+  - lint
   - test
+  - haddock
 
 variables:
     STACK_ROOT: "${CI_PROJECT_DIR}/.stack-root"
@@ -16,6 +18,21 @@ build:
   script:
     - stack --no-terminal build
 
+lint:
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - .stack-work/
+      - .stack-root/
+  script:
+    - hlint . --report
+  artifacts:
+    when: always
+    paths:
+      - report.html
+  allow_failure: true
+
+
 test:
   cache:
     key: "$CI_JOB_NAME"
@@ -24,3 +41,16 @@ test:
       - .stack-root/
   script:
     - stack --no-terminal test
+
+haddock:
+  cache:
+    key: "$CI_JOB_NAME"
+    paths:
+      - .stack-work/
+      - .stack-root/
+  script:
+    - stack --no-terminal haddock
+  artifacts:
+    paths:
+      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/index.html
+      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/substep.txt

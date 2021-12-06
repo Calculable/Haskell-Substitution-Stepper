@@ -30,6 +30,7 @@ isTypeInformation (Type _) = True
 isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
 isTypeInformation x = False
 
+-- | The "canBeReducedFunction" checks if a Core expression can be reduced.
 canBeReduced exp
   | isTypeInformation exp = False
   | isBooleanVar exp = False
