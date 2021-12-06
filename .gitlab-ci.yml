@@ -30,6 +30,7 @@ lint:
     when: always
     paths:
       - report.html
+  allow_failure: true
 
 
 test:
