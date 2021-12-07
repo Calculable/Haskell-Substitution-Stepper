@@ -2,7 +2,7 @@ module OriginalCoreAST.CoreInformationExtractorFunctionsSpec where
     
 import Test.Hspec
 import Test.Hspec.QuickCheck
-import DataProvider.DataProvider(exampleExpression)
+import DataProvider.DataProvider(coreBindings, findBinding, bindingFinder)
 
 import OriginalCoreAST.CoreInformationExtractorFunctions()
 import Utils (showOutputable)
@@ -15,12 +15,11 @@ type Binding = (Var, Expr Var)
 
 
 
-
 spec :: Spec
-spec = before exampleExpression $ do
+spec = before bindingFinder $ do
     describe "demo tests" $ do
-        it "can load example core expressions" $ \example -> do
-            putStr (showOutputable example)
+        it "can load example core expressions" $ \bindingFinder -> do
+            putStr (showOutputable (bindingFinder "a"))
             --isTypeInformation TypeS `shouldBe` True
 
        -- it "defaults to false" $ do

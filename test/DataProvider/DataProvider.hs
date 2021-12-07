@@ -1,4 +1,4 @@
-module DataProvider.DataProvider(exampleExpression, coreBindings) where
+module DataProvider.DataProvider(exampleExpression, coreBindings, findBinding, bindingFinder) where
 
 import Compiler (compileToCore, writeDump, getCoreProgram)
 import OriginalCoreAST.CoreStepperPrinter
@@ -14,8 +14,15 @@ exampleExpression = findBinding "a"
 findBinding :: String -> IO (Expr Var)
 findBinding name = do findBindingForString name <$> coreBindings
 
+bindingFinder :: IO (String -> Expr Var)
+bindingFinder = do
+  bindings <- coreBindings
+  return (\x -> findBindingForString x bindings)
+
 compiledCore = compileToCore "src/TestBindings.hs"
 
+coreProgram :: IO CoreProgram
 coreProgram = do getCoreProgram <$> compiledCore
 
 coreBindings = do convertToBindingsList <$> coreProgram
+
