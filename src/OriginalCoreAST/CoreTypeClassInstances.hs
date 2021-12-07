@@ -36,11 +36,11 @@ instance Eq (Expr b) where
 instance Ord (Expr b) where
   (<=) (Lit x) (Lit y) = (<=) x y
   (<=) _ _ = error "<= not supported by this type"
-  (<) (Lit x) (Lit y) = (<=) x y
+  (<) (Lit x) (Lit y) = (<) x y
   (<) _ _ = error "< not supported by this type"
-  (>=) (Lit x) (Lit y) = (<=) x y
+  (>=) (Lit x) (Lit y) = (>=) x y
   (>=) _ _ = error ">= not supported by this type"
-  (>) (Lit x) (Lit y) = (<=) x y
+  (>) (Lit x) (Lit y) = (>) x y
   (>) _ _ = error "> not supported by this type"
 
 instance Enum (Expr b) where
@@ -360,7 +360,6 @@ instance Floating Literal where
 
   x ** y = exp (log x * y)
   logBase x y = log y / log x
-
 
 instance Real Literal where
   toRational (LitNumber _ x) = fromInteger x

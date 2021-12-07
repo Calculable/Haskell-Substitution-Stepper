@@ -9,7 +9,6 @@ import GHC.Types.Var (Var)
 import Debug.Trace(trace)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
 import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
-import FlatCoreASTPrinter(printFlatCoreAST, coreExpressionToFlatString)
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var)
 evaluateFunctionWithArguments (Var functionOrOperatorName) arguments = do
