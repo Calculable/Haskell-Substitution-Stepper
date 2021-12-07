@@ -52,3 +52,6 @@ double :: Num a => a -> a
 double x = x + x
 
 doubleTest = double 1
+
+doubleValueTest = 0.5
+cosinusTest = cos 0.5
