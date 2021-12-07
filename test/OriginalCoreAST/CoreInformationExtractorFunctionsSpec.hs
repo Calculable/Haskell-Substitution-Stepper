@@ -7,12 +7,20 @@ import DataProvider.DataProvider(exampleExpression)
 import OriginalCoreAST.CoreInformationExtractorFunctions()
 import Utils (showOutputable)
 import GHC.Plugins (liftIO )
+import GHC.Core (Bind (NonRec), CoreProgram, Expr)
+import GHC.Types.Var (Var (varName, varType))
+import OriginalCoreAST.CoreStepperHelpers.CoreLookup(findBindingForString)
+
+type Binding = (Var, Expr Var)
+
+
+
+
 spec :: Spec
-spec = do
+spec = before exampleExpression $ do
     describe "demo tests" $ do
-        it "can load example core expressions" $ do
-            unwrappExpression <- exampleExpression
-            putStr (showOutputable unwrappExpression)
+        it "can load example core expressions" $ \example -> do
+            putStr (showOutputable example)
             --isTypeInformation TypeS `shouldBe` True
 
        -- it "defaults to false" $ do

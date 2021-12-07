@@ -1,4 +1,4 @@
-module DataProvider.DataProvider(exampleExpression) where
+module DataProvider.DataProvider(exampleExpression, coreBindings) where
 
 import Compiler (compileToCore, writeDump, getCoreProgram)
 import OriginalCoreAST.CoreStepperPrinter
