@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
+module OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral)
 where
 
 import GHC.Core (Expr (..))
@@ -17,11 +17,18 @@ integerToCoreLiteral = mkLitInt64
 fractionalToCoreLiteral :: Real a => a -> Literal
 fractionalToCoreLiteral value = (LitDouble (toRational value))
 
+charToCoreLiteral :: Char -> Literal
+charToCoreLiteral = LitChar
+
 rationalToCoreExpression :: Rational -> Expr b
-rationalToCoreExpression value = Lit (LitDouble value)
+rationalToCoreExpression value = Lit (rationalToCoreLiteral value)
+
+rationalToCoreLiteral :: Rational -> Literal
+rationalToCoreLiteral = LitDouble
+
 
 integerToCoreExpression :: Integer -> Expr b
-integerToCoreExpression value = Lit (mkLitInt64 value)
+integerToCoreExpression value = Lit (integerToCoreLiteral value)
 
 stringToCoreExpression :: String -> Expr Var
 stringToCoreExpression value = Lit (mkLitString value)
