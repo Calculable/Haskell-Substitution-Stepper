@@ -1,5 +1,5 @@
 module OriginalCoreAST.CoreStepperPrinter
-  (printCoreStepByStepReductionForBinding, printCoreStepByStepReductionForEveryBinding
+  (printCoreStepByStepReductionForBinding, printCoreStepByStepReductionForEveryBinding, convertToBindingsList
   )
 where
 
@@ -42,7 +42,7 @@ printCoreStepByStepReductionForSingleExpression bindings expression     | canBeR
 
 
 convertToBindingsList :: [CoreBind] -> [Binding]
-convertToBindingsList bindings = concat (map convertCoreBindingToBindingList bindings)
+convertToBindingsList bindings = concatMap convertCoreBindingToBindingList bindings
 
 convertCoreBindingToBindingList :: CoreBind -> [Binding]
 convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
