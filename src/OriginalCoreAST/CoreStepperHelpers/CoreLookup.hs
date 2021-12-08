@@ -11,7 +11,7 @@ import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
 import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
 import Utils (showOutputable)
-
+import Debug.Trace(trace)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
 
@@ -25,13 +25,13 @@ findBindingForString name bindings = do
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key [] = Nothing
+tryFindBindingForString key [] = trace "no binding found" Nothing
 tryFindBindingForString key ((var, exp):xs) = if ((==) (varToString var) key)
                                                     then Just (exp)
                                                     else tryFindBindingForString key xs
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
-findMatchingPattern expression [] = Nothing
+findMatchingPattern expression [] = trace "no matching pattern found" Nothing
 findMatchingPattern _ ((DEFAULT, _, expression):_) = Just expression
 findMatchingPattern (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
                                                                                 then Just expression

@@ -8,6 +8,7 @@ import GHC.Float (rationalToDouble)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 import GHC.Utils.Outputable(OutputableBndr(..))
+import OriginalCoreAST.CoreInformationExtractorFunctions (varToString)
 instance (OutputableBndr b)  => Show (Expr b) where
   show x = showOutputable x
 
@@ -32,10 +33,10 @@ instance Fractional (Expr b) where
   fromRational x = rationalToCoreExpression x
 
 instance Eq (Expr b) where
-  (/=) (Lit x) (Lit y) = (/=) x y
-  (/=) _ _ = error "/= not supported by this type"
+  (/=) x y = not ((==) x y)
   (==) (Lit x) (Lit y) = weakEquals x y
-  (==) _ _ = error "== not supported by this type"
+  (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
+  (==) x y = error "== and /= not supported by this type"
 
 weakEquals :: Literal -> Literal -> Bool
 weakEquals (LitChar first) (LitChar second) = ((==) first second) 
