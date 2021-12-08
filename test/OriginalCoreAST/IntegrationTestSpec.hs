@@ -130,9 +130,46 @@ spec = before getBindingFinderWithCoreBindings $ do
             expectationForExpression "integerDivision" bindingFinder coreBindings
         it "modulo works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "modulo" bindingFinder coreBindings
-    describe "Support for RealFrac Type" $ do  
-        it "floor works" $ \(bindingFinder, coreBindings) -> do
-            expectationForExpression "floor" bindingFinder coreBindings
+    describe "Polymorphism" $ do  
+        it "polymorphic functions work" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "polymorphicFunction" bindingFinder coreBindings
+        it "polymorphic functions with type constraints work" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "polymorphicFunctionWithTypeConstraint" bindingFinder coreBindings
+        it "functions with polymorphic result work" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "functionWithPolymorphicResult" bindingFinder coreBindings
+    describe "Non-Strictness" $ do  
+        it "function arguments are evaluated non-strict" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "nonStrictness" bindingFinder coreBindings
+    describe "Pattern Matching" $ do 
+        it "pattern matching on integer works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "integerPatternMatching" bindingFinder coreBindings
+        it "pattern matching on string works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "stringPatternMatching" bindingFinder coreBindings
+        it "pattern matching on boolean works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "booleanPatternMatching" bindingFinder coreBindings
+        it "pattern matching on multiple arguments works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "multiArgumentPatternMatching" bindingFinder coreBindings
+        it "pattern matching on list of integer works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "patternMatchingOnIntegerList" bindingFinder coreBindings
+        it "pattern matching on list of empty list works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "patternMatchingOnEmptyList" bindingFinder coreBindings
+        it "pattern matching on list of any type works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "patternMatchingOnPolymorphicList" bindingFinder coreBindings
+        it "pattern matching on any constructor works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "patternMatchingOnAnyConstructor" bindingFinder coreBindings
+        it "pattern matching works on unsupported type" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "patternMatchingOnUnsupportedType" bindingFinder coreBindings
+    describe "Recursion" $ do 
+        it "recursion works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "recursion" bindingFinder coreBindings
+    describe "List Operations" $ do 
+        it "list operations work" $ \(bindingFinder, coreBindings) -> do
+            --expectationForExpression "listOperations" bindingFinder coreBindings
+            pendingWith "not all list operations are supported yet"
+    describe "Let/Where Bindings" $ do
+        it "expressions with where/let syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "where" bindingFinder coreBindings
+       
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do

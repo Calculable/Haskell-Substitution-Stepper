@@ -87,6 +87,9 @@ evaluateUnsteppableFunctionWithArguments "truncate" [x] = Just (integerToCoreExp
 evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpression (toInteger (round x)))
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
+evaluateUnsteppableFunctionWithArguments "eqString" [x, y] = Just (boolToCoreExpression (x == y))
+
+
 
 evaluateUnsteppableFunctionWithArguments name _ = trace "function not supported" Nothing --function not supported
 --toDo: Implement more operators and functions

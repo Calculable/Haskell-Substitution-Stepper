@@ -202,12 +202,83 @@ moduloExpectedOutput = 0
 floorInput = floor 5.9
 floorExpectedOutput = 5
 
-{-Support for RealFloat Type Instance-}
+{-Polymorphism-}
 
-isNaNInput = isNaN (1.0 / 0.0)
-isNaNExpectedOutput = True
+
+polymorphicFunctionInput = polymorphicFunction 1 "Test"
+polymorphicFunctionExpectedOutput = 42
+
+
+polymorphicFunctionWithTypeConstraintInput = polymorphicFunctionWithTypeConstraint 1 "Test"
+polymorphicFunctionWithTypeConstraintExpectedOutput = 42
+
+
+functionWithPolymorphicResultInput = polymorphicResult (1 :: Integer)
+functionWithPolymorphicResultExpectedOutput = 42
+
+{-NonStrictness-}
+
+
+nonStrictnessInput = ignoreParameter (1.0 / 0.0)
+nonStrictnessExpectedOutput = 42
+
+{-Pattern Matching-}
+
+
+integerPatternMatchingInput = integerPatternMatching 2 
+integerPatternMatchingExpectedOutput = "Two!"
+
+
+stringPatternMatchingInput = stringPatternMatching "42"
+stringPatternMatchingExpectedOutput = True
+
+
+booleanPatternMatchingInput = booleanPatternMatching False
+booleanPatternMatchingExpectedOutput = True
+
+
+multiArgumentPatternMatchingInput = multiArgumentPatternMatching True True
+multiArgumentPatternMatchingExpectedOutput = True
+
+
+patternMatchingOnEmptyListInput = patternMatchingOnIntegerList []
+patternMatchingOnEmptyListExpectedOutput = 42
+
+
+patternMatchingOnIntegerListInput = patternMatchingOnIntegerList [1, 2, 3, 4, 5]
+patternMatchingOnIntegerListExpectedOutput = 1
+
+
+patternMatchingOnPolymorphicListInput = patternMatchingOnPolymorphicList ["Hallo", "Welt"]
+patternMatchingOnPolymorphicListExpectedOutput = "Hallo"
+
+
+patternMatchingOnAnyConstructorInput = patternMatchingOnAnyConstructor (Just 5)
+patternMatchingOnAnyConstructorExpectedOutput = 5
+
+
+patternMatchingOnUnsupportedTypeInput = customIsNothing (Just 5)
+patternMatchingOnUnsupportedTypeExpectedOutput = False
+
+{-Recursion-}
+
+
+recursionInput = findMaximum [1, 2, 3, 4, 42, 5]
+recursionExpectedOutput = 42
+
+{-List handling-}
+
+
+listOperationsInput = reverseList [1, 2, 3]
+listOperationsExpectedOutput = [3, 2, 1]
+
+{-where / let-}
+whereInput = functionWithWhere 1
+whereExpectedOutput = 16
 
 {-error handling-}
+{-support for list and tuple with steppable functions-}
+
 {-Helper Functions-}
 
 add :: Int -> Int -> Int 
@@ -225,3 +296,59 @@ twice function number = function (function number)
 multiplicator :: Int -> (Int -> Int)
 multiplicator x = (\y -> x*y)
 
+ignoreParameter :: a -> Int
+ignoreParameter _ = 42
+
+polymorphicFunction :: a -> b -> Int
+polymorphicFunction _ _ = 42
+
+polymorphicFunctionWithTypeConstraint :: (Num a, Ord b) => a -> b -> Int
+polymorphicFunctionWithTypeConstraint _ _ = 42
+
+polymorphicResult :: (Num a, Num b) => a -> b
+polymorphicResult a = fromInteger 42
+
+
+integerPatternMatching :: Integer -> String
+integerPatternMatching 1 = "One!"
+integerPatternMatching 2 = "Two!"
+integerPatternMatching x = "Not between 1 and 3"
+
+stringPatternMatching :: String -> Bool
+stringPatternMatching "42" = True
+stringPatternMatching _ = False
+
+booleanPatternMatching :: Bool -> Bool
+booleanPatternMatching True = False
+booleanPatternMatching False = True
+
+multiArgumentPatternMatching :: Bool -> Bool -> Bool
+multiArgumentPatternMatching True True = True
+multiArgumentPatternMatching _ _ = False
+
+patternMatchingOnIntegerList :: [Integer] -> Integer
+patternMatchingOnIntegerList [] = 42
+patternMatchingOnIntegerList (a:bc) = a
+
+patternMatchingOnPolymorphicList :: [a] -> a
+patternMatchingOnPolymorphicList (a:bc) = a
+
+patternMatchingOnAnyConstructor :: Maybe Int -> Int
+patternMatchingOnAnyConstructor (Just x) = x
+patternMatchingOnAnyConstructor Nothing = 42
+
+customIsNothing :: Maybe a -> Bool
+customIsNothing (Just _) = False
+customIsNothing Nothing = True
+
+findMaximum :: (Ord a) => [a] -> a  
+findMaximum [x] = x  
+findMaximum (x:xs) = max x (findMaximum xs)  
+
+reverseList :: [Integer] -> [Integer]
+reverseList [] = []
+reverseList (a:bc) = reverseList bc ++ [a]
+
+functionWithWhere :: Integer -> Integer
+functionWithWhere n = x * x
+    where x = (n + 1) * 2
