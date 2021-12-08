@@ -5,7 +5,11 @@ import GHC.Core (Expr (..))
 import GHC.Types.Literal(Literal (..))
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral)
 import GHC.Float (rationalToDouble)
-import Refact.Compat (xFlags)
+import Utils (showOutputable)
+import Debug.Trace(trace)
+import GHC.Utils.Outputable(OutputableBndr(..))
+instance (OutputableBndr b)  => Show (Expr b) where
+  show x = showOutputable x
 
 instance Num (Expr b) where
   (+) (Lit x) (Lit y) = Lit ((+) x y)
@@ -30,8 +34,26 @@ instance Fractional (Expr b) where
 instance Eq (Expr b) where
   (/=) (Lit x) (Lit y) = (/=) x y
   (/=) _ _ = error "/= not supported by this type"
-  (==) (Lit x) (Lit y) = (==) x y
+  (==) (Lit x) (Lit y) = weakEquals x y
   (==) _ _ = error "== not supported by this type"
+
+weakEquals :: Literal -> Literal -> Bool
+weakEquals (LitChar first) (LitChar second) = ((==) first second) 
+weakEquals (LitNumber _ first) (LitNumber _ second) = ((==) first second) 
+weakEquals (LitString first) (LitString second) = ((==) first second) 
+weakEquals (LitNullAddr) (LitNullAddr) = True
+weakEquals (LitRubbish) (LitRubbish) = True
+weakEquals (LitFloat first) (LitFloat second) = ((==) first second) 
+weakEquals (LitDouble first) (LitFloat second) = ((==) first second) 
+weakEquals (LitFloat first) (LitDouble second) = ((==) first second) 
+weakEquals (LitDouble first) (LitDouble second) = ((==) first second) 
+weakEquals (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ) = ((==) (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ)) 
+weakEquals (LitNumber _ first) (LitFloat second) = ((==) (fromInteger first) (fromRational second))
+weakEquals (LitNumber _ first) (LitDouble second) = ((==) (fromInteger first) (fromRational second)) 
+weakEquals (LitFloat first) (LitNumber _ second) = ((==) (fromRational first) (fromInteger second)) 
+weakEquals (LitDouble first) (LitNumber _ second) = ((==) (fromRational first) (fromInteger second)) 
+
+weakEquals _ _ = False
 
 instance Ord (Expr b) where
   (<=) (Lit x) (Lit y) = (<=) x y

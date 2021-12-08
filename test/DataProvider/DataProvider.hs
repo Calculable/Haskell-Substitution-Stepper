@@ -1,4 +1,4 @@
-module DataProvider.DataProvider(exampleExpression, coreBindings, findBinding, bindingFinder) where
+module DataProvider.DataProvider(getBindingFinderWithCoreBindings) where
 
 import Compiler (compileToCore, writeDump, getCoreProgram)
 import OriginalCoreAST.CoreStepperPrinter
@@ -8,9 +8,6 @@ import GHC.Core (Bind (NonRec), CoreProgram, Expr)
 import GHC.Types.Var (Var (varName, varType))
 import GHC.Plugins (liftIO)
 
-exampleExpression :: IO (Expr Var)
-exampleExpression = findBinding "a"
-
 findBinding :: String -> IO (Expr Var)
 findBinding name = do findBindingForString name <$> coreBindings
 
@@ -19,10 +16,15 @@ bindingFinder = do
   bindings <- coreBindings
   return (\x -> findBindingForString x bindings)
 
-compiledCore = compileToCore "src/TestBindings.hs"
+compiledCore = compileToCore "src/IntegrationTestBindings.hs"
 
 coreProgram :: IO CoreProgram
 coreProgram = do getCoreProgram <$> compiledCore
 
 coreBindings = do convertToBindingsList <$> coreProgram
 
+getBindingFinderWithCoreBindings :: IO ((String -> Expr Var, [(Var, Expr Var)]))
+getBindingFinderWithCoreBindings = do
+  finder <- bindingFinder
+  bindings <- coreBindings
+  return ((\x -> findBindingForString x bindings), bindings)

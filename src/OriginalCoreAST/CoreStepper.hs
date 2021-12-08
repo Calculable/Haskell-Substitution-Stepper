@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepper(applyStep)
+module OriginalCoreAST.CoreStepper(applyStep, reduceToHeadNormalForm)
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
@@ -30,6 +30,16 @@ import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchin
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (Var, Expr Var)
+
+
+reduceToHeadNormalForm :: [Binding] -> Expr Var -> Expr Var
+reduceToHeadNormalForm bindings expression  | canBeReduced expression = do
+                                                let reduction = applyStep bindings expression
+                                                case reduction of
+                                                    Just (reductionStepDescription, reducedExpression) -> reduceToHeadNormalForm bindings reducedExpression
+                                                    Nothing -> error "cannot reduce to Head Normal Form, reduction rule not implemented"
+                                            | otherwise = expression
+
 
 applyStep :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStep bindings (Var name) = do
