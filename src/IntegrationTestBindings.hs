@@ -272,12 +272,37 @@ recursionExpectedOutput = 42
 listOperationsInput = reverseList [1, 2, 3]
 listOperationsExpectedOutput = [3, 2, 1]
 
-{-where / let-}
+{-where-}
 whereInput = functionWithWhere 1
 whereExpectedOutput = 16
 
-{-error handling-}
-{-support for list and tuple with steppable functions-}
+multipleWhereInput = functionWithMultipleWhere 1
+multipleWhereExpectedOutput = 1
+
+
+{-do notation / let bindings-}
+functionWithDoAndLetInput = functionWithDoAndLet 1
+functionWithDoAndLetExpectedOutput = 8
+
+{-Tuples-}
+tupleAsParameterInput = second (1, 2)
+tupleAsParameterExpectedOutput = 2
+
+equalsOnTupleInput = (1, 2) == (1, 3)
+equalsOnTupleExpectedOutput = False
+
+{-infinite lists-}
+infinitListInput = sumOfTheFirstThreeElements [1..]
+infinitListExpectedOutput = 5
+
+
+{-custom types-}
+
+functionOnCustomTypeInput = getData (Top 5)
+functionOnCustomTypeExpectedOutput = 5
+
+equalityOnCustomTypeInput = changeDirection (Top 5)
+equalityOnCustomTypeExpectedOutput = Down 5
 
 {-Helper Functions-}
 
@@ -352,3 +377,34 @@ reverseList (a:bc) = reverseList bc ++ [a]
 functionWithWhere :: Integer -> Integer
 functionWithWhere n = x * x
     where x = (n + 1) * 2
+
+
+functionWithDoAndLet :: Integer -> Integer
+functionWithDoAndLet x = do
+    let y = x+x
+    let z = y+y
+    z + z    
+
+
+functionWithMultipleWhere :: Integer -> Integer
+functionWithMultipleWhere x = (y * z)
+    where
+        y = x
+        z = 1
+
+
+data Direction a = Top a | Down a deriving (Eq, Ord, Show, Read)
+
+changeDirection :: Direction a -> Direction a
+changeDirection (Top a) = Down a
+changeDirection (Down a) = Top a
+
+getData :: Direction a -> a
+getData (Top a) = a
+getData (Down a) = a
+
+second :: (a, b) -> b
+second (x, y) = y
+
+sumOfTheFirstThreeElements :: (Num a) => [a] -> a
+sumOfTheFirstThreeElements [x, y, z, _] = (x+y)+z

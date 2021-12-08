@@ -166,10 +166,30 @@ spec = before getBindingFinderWithCoreBindings $ do
         it "list operations work" $ \(bindingFinder, coreBindings) -> do
             --expectationForExpression "listOperations" bindingFinder coreBindings
             pendingWith "not all list operations are supported yet"
-    describe "Let/Where Bindings" $ do
-        it "expressions with where/let syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
+    describe "Where Bindings" $ do
+        it "expressions with where syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "where" bindingFinder coreBindings
-       
+        it "expressions with multiple where-bindings syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "multipleWhere" bindingFinder coreBindings
+    describe "Do / Let Syntax" $ do
+        it "expressions with do/let syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "functionWithDoAndLet" bindingFinder coreBindings
+    describe "Tuples" $ do
+        it "Tuples as parameter work" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "tupleAsParameter" bindingFinder coreBindings
+        it "Equality on Tuple works" $ \(bindingFinder, coreBindings) -> do
+            pendingWith "tuples are not fully supported yet"
+            --expectationForExpression "equalsOnTuple" bindingFinder coreBindings               
+    describe "Infinite List" $ do
+        it "Infinite lists works as function parameter" $ \(bindingFinder, coreBindings) -> do
+            pendingWith "lists are not fully supported yet"
+            --expectationForExpression "infinitList" bindingFinder coreBindings
+    describe "Custom Types" $ do
+        it "function on custom type works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "functionOnCustomType" bindingFinder coreBindings
+        it "equality on custom type works" $ \(bindingFinder, coreBindings) -> do
+            pendingWith "custom data types are not fully supported yet"
+            --expectationForExpression "equalityOnCustomType" bindingFinder coreBindings
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
