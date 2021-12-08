@@ -12,6 +12,8 @@ import GHC.Types.Var (Var (varName, varType))
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup(findBindingForString)
 import OriginalCoreAST.CoreStepper(reduceToHeadNormalForm)
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(prepareExpressionArgumentForEvaluation)
+import Control.Exception (evaluate)
+import Control.DeepSeq (force)
 
 type Binding = (Var, Expr Var)
 
@@ -70,7 +72,67 @@ spec = before getBindingFinderWithCoreBindings $ do
         it "can reduce basic operation on Tuple" $ \(bindingFinder, coreBindings) -> do
             --expectationForExpression "basicOperationOnTuple" bindingFinder coreBindings
             pendingWith "Tuple type not fully supported"
+    describe "Support for Num Type" $ do        
 
+        it "abs works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "abs" bindingFinder coreBindings
+        it "signum works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "signum" bindingFinder coreBindings
+        it "signum with double works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "signumWithDouble" bindingFinder coreBindings
+    describe "Support for Fractional Type" $ do        
+
+
+        it "division works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "division" bindingFinder coreBindings
+        it "recip works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "recip" bindingFinder coreBindings
+    describe "Support for EQ Type" $ do  
+        it "equals with char works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "equalsChar" bindingFinder coreBindings
+        it "equals with integer works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "equalsInteger" bindingFinder coreBindings
+        it "equals with double works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "equalsDouble" bindingFinder coreBindings
+        it "equals with string works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "equalsString" bindingFinder coreBindings
+        it "not equals works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "notEquals" bindingFinder coreBindings
+        it "equals for not equal strings works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "equalsForNotEqualString" bindingFinder coreBindings
+    describe "Support for Ord Type" $ do      
+        it "less or equal operator works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "lessOrEqual" bindingFinder coreBindings
+        it "less operator works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "less" bindingFinder coreBindings
+        it "greater or equal operator works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "greaterOrEqual" bindingFinder coreBindings
+        it "max works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "max" bindingFinder coreBindings
+    describe "Support for Enum Type" $ do      
+        it "succ with integer works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "succWithInteger" bindingFinder coreBindings
+        it "succ with double works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "succWithDouble" bindingFinder coreBindings
+    describe "Support for Floating Type" $ do      
+        it "exp works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "exp" bindingFinder coreBindings
+        it "log works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "log" bindingFinder coreBindings
+        it "sqrt works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "sqrt" bindingFinder coreBindings
+        it "power works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "power" bindingFinder coreBindings
+        it "cosinus works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "cosinus" bindingFinder coreBindings
+    describe "Support for Integral Type" $ do  
+        it "integer division works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "integerDivision" bindingFinder coreBindings
+        it "modulo works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "modulo" bindingFinder coreBindings
+    describe "Support for RealFrac Type" $ do  
+        it "floor works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "floor" bindingFinder coreBindings
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
@@ -78,5 +140,4 @@ expectationForExpression expressionBindingName bindingFinder coreBindings = do
         let expectedOutput = (bindingFinder(expressionBindingName ++ "ExpectedOutput"))
         let output = reduceToHeadNormalForm coreBindings input
         (prepareExpressionArgumentForEvaluation output) `shouldBe` (prepareExpressionArgumentForEvaluation expectedOutput)
-
 

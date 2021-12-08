@@ -41,7 +41,6 @@ reduceToHeadNormalForm bindings expression  | canBeReduced expression = do
                                                     Nothing -> trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression) error "cannot reduce to Head Normal Form, reduction rule not implemented"
                                             | otherwise = expression
 
-
 applyStep :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStep bindings (Var name) = do
     foundBinding <- tryFindBinding name bindings

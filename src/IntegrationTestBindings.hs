@@ -97,17 +97,117 @@ basicOperationOnStringExpectedOutput = True
 
 {-basic operations on List Type-}
 
-
 basicOperationOnListInput = [1, 2, 3] < [4, 5, 6]
 basicOperationOnListExpectedOutput = True
 
 {-basic operations on Tuple Type-}
 
-
-
 basicOperationOnTupleInput = (1, 2) <  (3, 4)
 basicOperationOnTupleExpectedOutput = True
 
+{-Support for Num Type Instance-}
+
+absInput = abs (-3)
+absExpectedOutput = 3
+
+signumInput = signum 5 
+signumExpectedOutput = 1
+
+signumWithDoubleInput = signum 5.3 
+signumWithDoubleExpectedOutput = 1
+
+{-Support for Fractional Type Instance-}
+
+divisionInput = 1.0 / 2.0
+divisionExpectedOutput = 0.5
+
+recipInput = recip 2.0
+recipExpectedOutput = 0.5
+
+{-Support for EQ Type Instance-}
+
+equalsCharInput = (==) 'a' 'a'
+equalsCharExpectedOutput = True
+
+equalsIntegerInput = (==) 1 1
+equalsIntegerExpectedOutput = True
+
+
+equalsDoubleInput = (==) 1.0 1.0
+equalsDoubleExpectedOutput = True
+
+
+equalsStringInput = (==) "Hello" "Hello"
+equalsStringExpectedOutput = True
+
+notEqualsInput = (/=) "Hello" "World"
+notEqualsExpectedOutput = True
+
+
+equalsForNotEqualStringInput = (==) "Hello" "World"
+equalsForNotEqualStringExpectedOutput = False
+
+{-Support for Ord Type Instance-}
+
+
+lessOrEqualInput = (<=) 'a' 'a'
+lessOrEqualExpectedOutput = True
+
+lessInput = (<) 1 1
+lessExpectedOutput = False
+
+greaterOrEqualInput = (>=) "Hello" "Hello"
+greaterOrEqualExpectedOutput = True
+
+maxInput = max "Hello" "World"
+maxExpectedOutput = "World"
+
+{-Support for Enum Type Instance-}
+
+succWithIntegerInput = succ 1
+succWithIntegerExpectedOutput = 2
+
+succWithDoubleInput = succ 2.0
+succWithDoubleExpectedOutput = 3.0
+
+{-Support for Floating Type Instance-}
+
+expInput = exp 0
+expExpectedOutput = 1
+
+logInput = log 1
+logExpectedOutput = 0
+
+sqrtInput = sqrt 4
+sqrtExpectedOutput = 2
+
+powerInput =  (abs (((**) 2.0 3.0) - 8.0)) < 0.0001
+powerExpectedOutput = True
+
+cosinusInput = cos 0
+cosinusExpectedOutput = 1
+
+{-Support for Integral Type Instance-}
+
+
+integerDivisionInput = 4 `div` 2
+integerDivisionExpectedOutput = 2
+
+
+moduloInput = 10 `mod` 2
+moduloExpectedOutput = 0
+
+{-Support for RealFrac Type Instance-}
+
+floorInput = floor 5.9
+floorExpectedOutput = 5
+
+{-Support for RealFloat Type Instance-}
+
+isNaNInput = isNaN (1.0 / 0.0)
+isNaNExpectedOutput = True
+
+{-error handling-}
 {-Helper Functions-}
 
 add :: Int -> Int -> Int 
