@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments)
+module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments, prepareExpressionArgumentForEvaluation)
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
@@ -6,19 +6,23 @@ import Data.Maybe ()
 import GHC.Core (Expr (..))
 import GHC.Types.Literal ( Literal (..))
 import GHC.Types.Var (Var)
-import Debug.Trace(trace)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
 import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import Utils (showOutputable)
+import Debug.Trace(trace)
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var)
 evaluateFunctionWithArguments (Var functionOrOperatorName) arguments = do
-    let argumentsWithoutApplications = map replaceApplicationWithArgument arguments --sometimes, arguments are of type "application". For example for a Double: "D# 0.5##". ToDo: Check if this command is dangerous
+    let argumentsWithoutApplications = (map prepareExpressionArgumentForEvaluation arguments)
     evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) argumentsWithoutApplications) --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
-evaluateFunctionWithArguments _ _ = error "function-expression has to be a 'Var'"
+evaluateFunctionWithArguments _ _ = (error "function-expression has to be a 'Var'")
 
-replaceApplicationWithArgument :: Expr Var -> Expr Var
-replaceApplicationWithArgument (App expr arg) = arg
-replaceApplicationWithArgument x = x
+prepareExpressionArgumentForEvaluation :: Expr Var -> Expr Var
+prepareExpressionArgumentForEvaluation (App (Var id) arg) = case varToString id of
+                                                                [_, '#'] ->  arg --type constructor, simply return value
+                                                                "unpackCString#" -> arg --argument is simply a String
+                                                                _ -> App (Var id) arg
+prepareExpressionArgumentForEvaluation x = x
 
 
 
@@ -84,5 +88,5 @@ evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpres
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
 
-evaluateUnsteppableFunctionWithArguments name _ = Nothing --function not supported
+evaluateUnsteppableFunctionWithArguments name _ = trace "function not supported" Nothing --function not supported
 --toDo: Implement more operators and functions

@@ -28,6 +28,7 @@ library
       Compiler
       DynFlags
       FlatCoreASTPrinter
+      IntegrationTestBindings
       OldStepper
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
@@ -47,6 +48,7 @@ library
       Source
       Source2
       Source3
+      TestBindings
       TraverseAST
       Utils
   other-modules:
@@ -103,6 +105,8 @@ test-suite substep-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      DataProvider.DataProvider
+      OriginalCoreAST.IntegrationTestSpec
       SimplifiedCoreAST.SimplifiedCoreASTConverterSpec
       Paths_substep
   hs-source-dirs:

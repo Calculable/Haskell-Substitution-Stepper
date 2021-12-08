@@ -1,5 +1,5 @@
 module OriginalCoreAST.CoreStepperPrinter
-  (printCoreStepByStepReductionForBinding, printCoreStepByStepReductionForEveryBinding
+  (printCoreStepByStepReductionForBinding, printCoreStepByStepReductionForEveryBinding, convertToBindingsList, printCoreStepByStepReductionForSingleExpression
   )
 where
 
@@ -20,7 +20,7 @@ printCoreStepByStepReductionForEveryBinding bindings = do
     let allBindings = convertToBindingsList bindings
     mapM_ (printCoreStepByStepReductionForBinding allBindings) allBindings
 
-printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO ()
+printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO (Expr Var)
 printCoreStepByStepReductionForBinding bindings (var, exp) = do
     putStr "\n**Reduction of "
     putStr (varToString var)
@@ -29,7 +29,7 @@ printCoreStepByStepReductionForBinding bindings (var, exp) = do
     prettyPrint exp
     printCoreStepByStepReductionForSingleExpression bindings exp
 
-printCoreStepByStepReductionForSingleExpression :: [Binding] -> Expr Var -> IO()
+printCoreStepByStepReductionForSingleExpression :: [Binding] -> Expr Var -> IO(Expr Var)
 printCoreStepByStepReductionForSingleExpression bindings expression     | canBeReduced expression = do
                                                                             let reduction = (applyStep bindings expression)
                                                                             case reduction of
@@ -37,12 +37,16 @@ printCoreStepByStepReductionForSingleExpression bindings expression     | canBeR
                                                                                     putStrLn ("\n{-" ++ reductionStepDescription ++ "-}")
                                                                                     prettyPrint reducedExpression
                                                                                     printCoreStepByStepReductionForSingleExpression bindings reducedExpression
-                                                                                Nothing -> putStrLn "\n{-no reduction rule implemented for this expression-}"
-                                                                        | otherwise = putStrLn "\n{-reduction complete-}"
+                                                                                Nothing -> do
+                                                                                    putStrLn "\n{-no reduction rule implemented for this expression-}"
+                                                                                    return expression
+                                                                        | otherwise = do
+                                                                            putStrLn "\n{-reduction complete-}"
+                                                                            return expression
 
 
 convertToBindingsList :: [CoreBind] -> [Binding]
-convertToBindingsList bindings = concat (map convertCoreBindingToBindingList bindings)
+convertToBindingsList bindings = concatMap convertCoreBindingToBindingList bindings
 
 convertCoreBindingToBindingList :: CoreBind -> [Binding]
 convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]

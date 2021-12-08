@@ -7,6 +7,8 @@ import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
 import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString)
 import GHC.Core.Utils (exprIsHNF)
 import Data.List(isPrefixOf)
+import Debug.Trace(trace)
+import Utils (showOutputable)
 
 varExpressionToString :: Expr Var -> String
 varExpressionToString (Var var) = varToString var
@@ -28,6 +30,7 @@ isInHeadNormalForm = exprIsHNF
 isTypeInformation :: Expr Var -> Bool
 isTypeInformation (Type _) = True
 isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
+isTypeInformation (App expr arg) =  isTypeInformation expr
 isTypeInformation x = False
 
 -- | The "canBeReducedFunction" checks if a Core expression can be reduced.
