@@ -2,21 +2,27 @@ module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArgu
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
-import Data.Maybe ()
+import Data.Maybe (isNothing)
 import GHC.Core (Expr (..))
 import GHC.Types.Literal ( Literal (..))
 import GHC.Types.Var (Var)
-import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, expressionListToCoreList, expressionTupleToCoreTuple)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, expressionListToCoreList, expressionTupleToCoreTuple, maybeToCoreExpression)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isJustMaybe, isNothingMaybe)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 import Data.Bifunctor (bimap)
 import Control.Monad  (join)
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertToMultiArgumentFunction, convertFunctionApplicationWithArgumentListToNestedFunctionApplication)
+import GHC.Core.TyCo.Rep (Type)
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var)
 evaluateFunctionWithArguments (Var functionOrOperatorName) arguments = do
+
     let argumentsWithoutApplications = (map prepareExpressionArgumentForEvaluation arguments)
-    evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) argumentsWithoutApplications) --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
+    let evaluatedWithTypes = evaluateUnsteppableFunctionWithArgumentsAndTypes (varToString functionOrOperatorName) argumentsWithoutApplications
+    if (isNothing evaluatedWithTypes) 
+        then evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) argumentsWithoutApplications) --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
+        else evaluatedWithTypes
 evaluateFunctionWithArguments _ _ = (error "function-expression has to be a 'Var'")
 
 prepareExpressionArgumentForEvaluation :: Expr Var -> Expr Var
@@ -93,5 +99,33 @@ evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpres
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
 evaluateUnsteppableFunctionWithArguments "eqString" [x, y] = Just (boolToCoreExpression (x == y))
+evaluateUnsteppableFunctionWithArguments "fmap" [x, y] = Just (customFmap x y)
+
 evaluateUnsteppableFunctionWithArguments name _ = trace "function not supported" Nothing --function not supported
---toDo: Implement more operators and functions
+
+customFmap :: Expr Var -> Expr Var -> Expr Var
+customFmap function (App constructor argument)
+    | isNothingMaybe (App constructor argument) = App constructor argument
+    | isJustMaybe (App constructor argument) = App constructor (App function argument)
+customFmap _ _ = error "fmap not supported for this type"
+
+
+evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> Maybe (Expr Var)
+evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [_, _, (Type ty), value] = Just (customReturn ty value)
+evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [_, _, (Type ty), _] = Just (customFail ty)
+evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, _, argument, function] = Just (customMonadOperator argument function)
+
+evaluateUnsteppableFunctionWithArgumentsAndTypes name _ = trace "function not supported" Nothing --function not supported
+
+
+customMonadOperator :: Expr Var -> Expr Var -> Expr Var
+customMonadOperator (App constructor argument) function
+    | isNothingMaybe (App constructor argument) = App constructor argument
+    | isJustMaybe (App constructor argument) = App function argument
+customMonadOperator _ _ = error ">>= not supported for this type"
+
+customReturn :: Type -> Expr Var -> Expr Var
+customReturn ty expression = maybeToCoreExpression (Just expression) ty
+
+customFail :: Type -> Expr Var
+customFail ty = maybeToCoreExpression Nothing ty

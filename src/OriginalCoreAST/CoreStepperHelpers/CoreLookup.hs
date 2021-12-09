@@ -9,19 +9,21 @@ import GHC.Types.Literal
   )
 import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isListType)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
-
-
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBinding name bindings = do
-  let normalBinding = tryFindBindingForString (varToString name) bindings
+tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions (varToString name) bindings
+
+tryFindBindingForStringIncludingOverrideFunctions :: String -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForStringIncludingOverrideFunctions name bindings = do
+  let normalBinding = tryFindBindingForString name bindings
   if (isNothing normalBinding)
-    then (tryFindBindingForString ("overwrite'" ++ (varToString name)) bindings)
+    then (tryFindBindingForString ("override'" ++ name) bindings)
     else normalBinding
+
 
 findBindingForString :: String -> [Binding] -> Expr Var
 findBindingForString name bindings = do

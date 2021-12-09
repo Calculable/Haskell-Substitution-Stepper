@@ -8,7 +8,9 @@ import GHC.Float (rationalToDouble)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 import GHC.Utils.Outputable(OutputableBndr(..))
-import OriginalCoreAST.CoreInformationExtractorFunctions (varToString)
+import OriginalCoreAST.CoreInformationExtractorFunctions (varToString, isList, isJustMaybe, isNothingMaybe)
+import GHC.Types.Var (Var)
+
 instance (OutputableBndr b)  => Show (Expr b) where
   show x = showOutputable x
 

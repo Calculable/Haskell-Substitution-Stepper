@@ -1,7 +1,7 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType)
 where
 
-import GHC.Core (Expr (..))
+import GHC.Core (Expr (..), collectArgs)
 import GHC.Types.Literal(Literal (..), mkLitInt64, mkLitString)
 import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
 import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString)
@@ -49,3 +49,32 @@ varToSimpleString var = nameToString (varName var)
 
 nameToString :: Name -> String
 nameToString = getOccString
+
+isNonEmptyList :: Expr a -> Bool --can this be checked more elegant?
+isNonEmptyList expr = isConstructorApplicationOfType expr ":"
+
+isEmptyList :: Expr a -> Bool
+isEmptyList expr = isConstructorApplicationOfType expr "[]"
+
+isList :: Expr a -> Bool
+isList expr = (||) (isNonEmptyList expr) (isEmptyList expr)
+
+isNothingMaybe :: Expr a -> Bool --can this be checked more elegant?
+isNothingMaybe expr = isConstructorApplicationOfType expr "Nothing"
+
+isJustMaybe :: Expr a -> Bool
+isJustMaybe expr = isConstructorApplicationOfType expr "Just"
+
+isMaybe :: Expr a -> Bool
+isMaybe expr = (||) (isNothingMaybe expr) (isJustMaybe expr)
+
+isConstructorApplicationOfType :: Expr a -> String -> Bool 
+isConstructorApplicationOfType (App expr arg) name = do
+  let (function, arguments) = collectArgs (App expr arg)
+  case function of {
+    (Var var) -> (==) (varToString var) name
+  } 
+isConstructorApplicationOfType _ _ = False 
+
+isListType :: Expr a -> Bool --is there a more elegant solution?
+isListType (Type ty) = ((showOutputable ty) == "[]")

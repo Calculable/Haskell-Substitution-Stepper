@@ -78,5 +78,24 @@ sumOfTheFirstXElements [] _ = 0
 sumOfTheFirstXElements (x:xs) amountOfElements = x + (sumOfTheFirstXElements xs (amountOfElements - 1))
 
 
-overwrite'enumFrom :: Enum a => a -> [a]
-overwrite'enumFrom x = x: (overwrite'enumFrom (succ x))
+override'enumFrom :: Enum a => a -> [a]
+override'enumFrom x = x: (override'enumFrom (succ x))
+
+override'map :: (a -> b) -> [a] -> [b]
+override'map f []     = []
+override'map f (x:xs) = f x : map f xs
+
+mapExample = first (map (+1) [1, 2, 3, 4, 5])
+
+first :: [a] -> a
+first (x:xs) = x
+
+fmapOnJustTest = fmap (+1) (Just (5 :: Integer))
+fmapOnNothingTest = fmap (+1) Nothing
+
+monadTest = monadicFunction (Just 4)
+
+monadicFunction :: Maybe Int -> Maybe String
+monadicFunction maybeValue = do
+    value <- maybeValue
+    return "Hallo"
