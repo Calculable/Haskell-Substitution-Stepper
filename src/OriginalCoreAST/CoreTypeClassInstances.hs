@@ -8,7 +8,9 @@ import GHC.Float (rationalToDouble)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 import GHC.Utils.Outputable(OutputableBndr(..))
-import OriginalCoreAST.CoreInformationExtractorFunctions (varToString)
+import OriginalCoreAST.CoreInformationExtractorFunctions (varToString, isList, isJustMaybe, isNothingMaybe)
+import GHC.Types.Var (Var)
+
 instance (OutputableBndr b)  => Show (Expr b) where
   show x = showOutputable x
 
@@ -257,6 +259,7 @@ instance RealFloat (Expr b) where
   
   atan2 (Lit x) (Lit y) = Lit (atan2 x y)  
   atan2 _ _ = error "atan2 is not supported for this type"
+
 
 instance Num Literal where
   (+) (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral ((Prelude.+) x y)

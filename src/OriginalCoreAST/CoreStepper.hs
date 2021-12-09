@@ -26,7 +26,7 @@ import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCore
 import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
-import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern)
+import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern, tryFindBindingForFunctionApplication)
 import Debug.Trace(trace)
 
 type ReductionStepDescription = String --for example: "replace x with definition"
@@ -47,10 +47,13 @@ applyStep bindings (Var name) = do
     return (("Replace '" ++ (varToString name) ++ "' with definition"),foundBinding) {-replace binding reference with actual expression (Delta Reduction)-}
 applyStep bindings (App (Lam parameter expression) argument) = do
     Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression)
+applyStep bindings (App (Let binding expression) argument) = do
+    (description, reducedLet) <- applyStep bindings (Let binding expression) 
+    return (description, App reducedLet argument)
 applyStep bindings (App (App first second) third) = do
     (applyStepToNestedApp bindings (App (App first second) third)) --nested app
 applyStep bindings (App (Var name) argument) = do
-    let expression = tryFindBinding name bindings
+    let expression = tryFindBindingForFunctionApplication name bindings argument
     if isNothing expression
         then do
             (applyStepToNestedApp bindings (App (Var name) argument))
@@ -64,15 +67,19 @@ applyStep bindings (Case expression binding caseType alternatives) = do
             matchingPattern <- findMatchingPattern expression alternatives
             return ("Replace with matching pattern", matchingPattern)
 applyStep bindings (Let (NonRec b expr) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression)
-applyStep _ _ = do
-    trace "no applicable step found" Nothing
+
+applyStep bindings (Cast _ _) = trace "no applicable step found: tick is not yet" Nothing
+applyStep bindings (Tick _ _) = trace "no applicable step found: tick is not supported" Nothing
+applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not yet" Nothing
+
+applyStep _ _ = trace "no applicable step found" Nothing
 
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStepToNestedApp bindings expr = do
     let (function, arguments) = (convertToMultiArgumentFunction expr)
     case function of
-        (Var var) -> if (isNothing (tryFindBinding var bindings))
+        (Var var) -> if (isNothing (tryFindBindingForFunctionApplication var bindings (head arguments)))
                         then (if (any canBeReduced arguments)
                             then do
                                 

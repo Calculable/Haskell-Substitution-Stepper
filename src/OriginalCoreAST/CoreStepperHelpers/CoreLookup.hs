@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern, findBindingForString)
+module OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern, findBindingForString, tryFindBindingForFunctionApplication)
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
@@ -9,19 +9,29 @@ import GHC.Types.Literal
   )
 import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isListType)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
 
+tryFindBindingForFunctionApplication :: Var -> [Binding] -> Expr Var -> Maybe (Expr Var)
+tryFindBindingForFunctionApplication name bindings argument  = 
+  if ((==) (varToString name) "fmap") && (isListType argument) --special case: fmap for lists 
+    then tryFindBindingForStringIncludingOverrideFunctions "map" bindings 
+    else tryFindBinding name bindings
+
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBinding name bindings = do
-  let normalBinding = tryFindBindingForString (varToString name) bindings
+tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions (varToString name) bindings
+
+tryFindBindingForStringIncludingOverrideFunctions :: String -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForStringIncludingOverrideFunctions name bindings = do
+  let normalBinding = tryFindBindingForString name bindings
   if (isNothing normalBinding)
-    then (tryFindBindingForString ("overwrite'" ++ (varToString name)) bindings)
+    then (tryFindBindingForString ("override'" ++ name) bindings)
     else normalBinding
+
 
 findBindingForString :: String -> [Binding] -> Expr Var
 findBindingForString name bindings = do

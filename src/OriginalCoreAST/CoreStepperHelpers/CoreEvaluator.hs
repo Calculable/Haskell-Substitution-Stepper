@@ -7,14 +7,16 @@ import GHC.Core (Expr (..))
 import GHC.Types.Literal ( Literal (..))
 import GHC.Types.Var (Var)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, expressionListToCoreList, expressionTupleToCoreTuple)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isJustMaybe, isNothingMaybe)
 import Utils (showOutputable)
 import Debug.Trace(trace)
 import Data.Bifunctor (bimap)
 import Control.Monad  (join)
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertToMultiArgumentFunction, convertFunctionApplicationWithArgumentListToNestedFunctionApplication)
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var)
 evaluateFunctionWithArguments (Var functionOrOperatorName) arguments = do
+
     let argumentsWithoutApplications = (map prepareExpressionArgumentForEvaluation arguments)
     evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) argumentsWithoutApplications) --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
 evaluateFunctionWithArguments _ _ = (error "function-expression has to be a 'Var'")
@@ -93,5 +95,18 @@ evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpres
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
 evaluateUnsteppableFunctionWithArguments "eqString" [x, y] = Just (boolToCoreExpression (x == y))
+--evaluateUnsteppableFunctionWithArguments "fmap" [x, y] = Just (customFmap x y)
+
 evaluateUnsteppableFunctionWithArguments name _ = trace "function not supported" Nothing --function not supported
 --toDo: Implement more operators and functions
+
+
+customFmap :: Expr Var -> Expr Var -> Expr Var
+customFmap function (App constructor argument)
+    | isNothingMaybe (App constructor argument) = App constructor argument
+    | isJustMaybe (App constructor argument) = App constructor (App function argument)
+    | isList (App constructor argument) = do
+        let (extractedConstructor, arguments) = convertToMultiArgumentFunction (App constructor argument)
+        let transformedArguments = map (App function) arguments
+        convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedConstructor transformedArguments --note: type information is lost during this conversion
+customFmap _ _ = error "fmap not supported for this type"

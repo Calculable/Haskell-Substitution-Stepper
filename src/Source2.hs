@@ -78,5 +78,9 @@ sumOfTheFirstXElements [] _ = 0
 sumOfTheFirstXElements (x:xs) amountOfElements = x + (sumOfTheFirstXElements xs (amountOfElements - 1))
 
 
-overwrite'enumFrom :: Enum a => a -> [a]
-overwrite'enumFrom x = x: (overwrite'enumFrom (succ x))
+override'enumFrom :: Enum a => a -> [a]
+override'enumFrom x = x: (override'enumFrom (succ x))
+
+override'map :: (a -> b) -> [a] -> [b]
+override'map f []     = []
+override'map f (x:xs) = f x : map f xs

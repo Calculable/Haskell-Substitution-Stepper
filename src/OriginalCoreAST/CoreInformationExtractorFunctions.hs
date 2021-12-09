@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe)
+module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType)
 where
 
 import GHC.Core (Expr (..), collectArgs)
@@ -50,28 +50,31 @@ varToSimpleString var = nameToString (varName var)
 nameToString :: Name -> String
 nameToString = getOccString
 
-isNonEmptyList :: Expr Var -> Bool --can this be checked more elegant?
+isNonEmptyList :: Expr a -> Bool --can this be checked more elegant?
 isNonEmptyList expr = isConstructorApplicationOfType expr ":"
 
-isEmptyList :: Expr Var -> Bool
+isEmptyList :: Expr a -> Bool
 isEmptyList expr = isConstructorApplicationOfType expr "[]"
 
-isList :: Expr Var -> Bool
+isList :: Expr a -> Bool
 isList expr = (||) (isNonEmptyList expr) (isEmptyList expr)
 
-isNothingMaybe :: Expr Var -> Bool --can this be checked more elegant?
+isNothingMaybe :: Expr a -> Bool --can this be checked more elegant?
 isNothingMaybe expr = isConstructorApplicationOfType expr "Nothing"
 
-isJustMaybe :: Expr Var -> Bool
+isJustMaybe :: Expr a -> Bool
 isJustMaybe expr = isConstructorApplicationOfType expr "Just"
 
-isMaybe :: Expr Var -> Bool
+isMaybe :: Expr a -> Bool
 isMaybe expr = (||) (isNothingMaybe expr) (isJustMaybe expr)
 
-isConstructorApplicationOfType :: Expr Var -> String -> Bool 
+isConstructorApplicationOfType :: Expr a -> String -> Bool 
 isConstructorApplicationOfType (App expr arg) name = do
   let (function, arguments) = collectArgs (App expr arg)
   case function of {
     (Var var) -> (==) (varToString var) name
   } 
 isConstructorApplicationOfType _ _ = False 
+
+isListType :: Expr a -> Bool --is there a more elegant solution?
+isListType (Type ty) = trace ("is list type: " ++ (showOutputable ty)) ((showOutputable ty) == "[]")
