@@ -34,3 +34,10 @@ sumOfTheFirstXElements (x:xs) amountOfElements = x + (sumOfTheFirstXElements xs 
 --(this is a good example for recursive let bindings)
 --z = [(i,j) | i <- [1,2],
 --         j <- [1..4] ]
+
+monadTest = monadicFunction (Just 5)
+
+monadicFunction :: Maybe Int -> Maybe String
+monadicFunction maybeValue = do
+    a <- maybeValue
+    return "Hallo"

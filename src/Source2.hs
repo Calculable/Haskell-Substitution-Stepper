@@ -89,3 +89,13 @@ mapExample = first (map (+1) [1, 2, 3, 4, 5])
 
 first :: [a] -> a
 first (x:xs) = x
+
+fmapOnJustTest = fmap (+1) (Just (5 :: Integer))
+fmapOnNothingTest = fmap (+1) Nothing
+
+monadTest = monadicFunction (Just 4)
+
+monadicFunction :: Maybe Int -> Maybe String
+monadicFunction maybeValue = do
+    value <- maybeValue
+    return "Hallo"
