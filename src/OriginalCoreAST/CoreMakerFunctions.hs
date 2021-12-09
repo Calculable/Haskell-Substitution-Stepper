@@ -11,9 +11,10 @@ import GHC.Core.TyCo.Rep (Type(..), TyLit(..))
 import GHC.Types.Id.Info ( vanillaIdInfo, IdDetails(..))
 import GHC.Types.Name.Occurrence (mkOccName, mkVarOcc)
 import GHC.Core.Make(mkCoreTup, mkListExpr, mkFloatExpr, mkDoubleExpr, mkCharExpr, mkNothingExpr, mkJustExpr, mkCoreConApps)
-import GHC.Builtin.Types (intTy, anyTy, anyTyCon, anyTypeOfKind)
+import GHC.Builtin.Types (intTy, anyTy, anyTyCon, anyTypeOfKind, charTy, stringTy, floatTy, doubleTy)
 import GHC.Core.DataCon  ( DataCon, dataConWorkId )
 import Data.Maybe
+import Debug.Trace(trace)
 
 integerToCoreLiteral :: Integer -> Literal
 integerToCoreLiteral = mkLitInt64
@@ -57,8 +58,17 @@ boolToCoreExpression False = Var (mkGlobalVar VanillaId (mkSystemName minLocalUn
 expressionListToCoreTuple :: [Expr Var] -> Expr Var
 expressionListToCoreTuple expressions = mkCoreTup expressions
 
-expressionListToCoreList :: Type -> [Expr Var] -> Expr Var
-expressionListToCoreList listTyle expressions = mkListExpr listTyle expressions
+expressionListToCoreListWithType :: Type -> [Expr Var] -> Expr Var
+expressionListToCoreListWithType listTyle expressions = mkListExpr listTyle expressions
+
+expressionListToCoreList :: [Expr Var] -> Maybe (Expr Var)
+expressionListToCoreList (Lit (LitChar x):xs) = Just $ expressionListToCoreListWithType charTy (Lit (LitChar x):xs)
+expressionListToCoreList (Lit (LitNumber x y):xs) = Just $ expressionListToCoreListWithType intTy (Lit (LitNumber x y):xs) 
+expressionListToCoreList (Lit (LitString x):xs) = Just $ expressionListToCoreListWithType stringTy (Lit (LitString x):xs)
+expressionListToCoreList (Lit (LitFloat x):xs) = Just $ expressionListToCoreListWithType floatTy (Lit (LitFloat x):xs)
+expressionListToCoreList (Lit (LitDouble x):xs) = Just $ expressionListToCoreListWithType doubleTy (Lit (LitDouble x):xs)
+expressionListToCoreList _ = trace "this type cannot be converted to list" Nothing
+
 
 customConstructorapplicationToCoreExpression :: DataCon -> [Expr Var] -> Expr Var
 customConstructorapplicationToCoreExpression constructor arguments = mkCoreConApps constructor arguments
