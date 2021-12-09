@@ -26,7 +26,7 @@ import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCore
 import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
-import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern, tryFindBindingForFunctionApplication)
+import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern)
 import Debug.Trace(trace)
 
 type ReductionStepDescription = String --for example: "replace x with definition"
@@ -53,7 +53,7 @@ applyStep bindings (App (Let binding expression) argument) = do
 applyStep bindings (App (App first second) third) = do
     (applyStepToNestedApp bindings (App (App first second) third)) --nested app
 applyStep bindings (App (Var name) argument) = do
-    let expression = tryFindBindingForFunctionApplication name bindings argument
+    let expression = tryFindBinding name bindings
     if isNothing expression
         then do
             (applyStepToNestedApp bindings (App (Var name) argument))
@@ -79,7 +79,7 @@ applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription
 applyStepToNestedApp bindings expr = do
     let (function, arguments) = (convertToMultiArgumentFunction expr)
     case function of
-        (Var var) -> if (isNothing (tryFindBindingForFunctionApplication var bindings (head arguments)))
+        (Var var) -> if (isNothing (tryFindBinding var bindings))
                         then (if (any canBeReduced arguments)
                             then do
                                 

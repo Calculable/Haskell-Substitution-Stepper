@@ -260,7 +260,6 @@ instance RealFloat (Expr b) where
   atan2 (Lit x) (Lit y) = Lit (atan2 x y)  
   atan2 _ _ = error "atan2 is not supported for this type"
 
-
 instance Num Literal where
   (+) (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral ((Prelude.+) x y)
   (+) (LitDouble x) (LitDouble y) = fractionalToCoreLiteral ((Prelude.+) (fromRational x) (fromRational y))

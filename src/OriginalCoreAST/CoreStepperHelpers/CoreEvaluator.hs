@@ -95,8 +95,7 @@ evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpres
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
 evaluateUnsteppableFunctionWithArguments "eqString" [x, y] = Just (boolToCoreExpression (x == y))
---evaluateUnsteppableFunctionWithArguments "fmap" [x, y] = Just (customFmap x y)
-
+evaluateUnsteppableFunctionWithArguments "fmap" [x, y] = Just (customFmap x y)
 evaluateUnsteppableFunctionWithArguments name _ = trace "function not supported" Nothing --function not supported
 --toDo: Implement more operators and functions
 
@@ -105,8 +104,5 @@ customFmap :: Expr Var -> Expr Var -> Expr Var
 customFmap function (App constructor argument)
     | isNothingMaybe (App constructor argument) = App constructor argument
     | isJustMaybe (App constructor argument) = App constructor (App function argument)
-    | isList (App constructor argument) = do
-        let (extractedConstructor, arguments) = convertToMultiArgumentFunction (App constructor argument)
-        let transformedArguments = map (App function) arguments
-        convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedConstructor transformedArguments --note: type information is lost during this conversion
 customFmap _ _ = error "fmap not supported for this type"
+

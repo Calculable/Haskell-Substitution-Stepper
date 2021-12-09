@@ -77,4 +77,4 @@ isConstructorApplicationOfType (App expr arg) name = do
 isConstructorApplicationOfType _ _ = False 
 
 isListType :: Expr a -> Bool --is there a more elegant solution?
-isListType (Type ty) = trace ("is list type: " ++ (showOutputable ty)) ((showOutputable ty) == "[]")
+isListType (Type ty) = ((showOutputable ty) == "[]")

@@ -84,3 +84,8 @@ override'enumFrom x = x: (override'enumFrom (succ x))
 override'map :: (a -> b) -> [a] -> [b]
 override'map f []     = []
 override'map f (x:xs) = f x : map f xs
+
+mapExample = first (map (+1) [1, 2, 3, 4, 5])
+
+first :: [a] -> a
+first (x:xs) = x

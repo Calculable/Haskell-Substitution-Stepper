@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern, findBindingForString, tryFindBindingForFunctionApplication)
+module OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern, findBindingForString)
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
@@ -13,14 +13,6 @@ import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, 
 import Utils (showOutputable)
 import Debug.Trace(trace)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
-
-
-tryFindBindingForFunctionApplication :: Var -> [Binding] -> Expr Var -> Maybe (Expr Var)
-tryFindBindingForFunctionApplication name bindings argument  = 
-  if ((==) (varToString name) "fmap") && (isListType argument) --special case: fmap for lists 
-    then tryFindBindingForStringIncludingOverrideFunctions "map" bindings 
-    else tryFindBinding name bindings
-
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
 tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions (varToString name) bindings
