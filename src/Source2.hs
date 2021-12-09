@@ -69,3 +69,14 @@ multiArgumentPatternMatching True True = True
 multiArgumentPatternMatching _ _ = False
 
 multiArgumentPatternMatchingTest = multiArgumentPatternMatching True True
+
+infiniteListInput = sumOfTheFirstXElements [1..] 3
+
+sumOfTheFirstXElements :: (Num a) => [a] -> Integer -> a
+sumOfTheFirstXElements _ 0 = 0
+sumOfTheFirstXElements [] _ = 0
+sumOfTheFirstXElements (x:xs) amountOfElements = x + (sumOfTheFirstXElements xs (amountOfElements - 1))
+
+
+overwrite'enumFrom :: Enum a => a -> [a]
+overwrite'enumFrom x = x: (overwrite'enumFrom (succ x))
