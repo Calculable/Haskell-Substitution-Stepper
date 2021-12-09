@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral, expressionListToCoreList)
+module OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral, expressionListToCoreList, expressionTupleToCoreTuple)
 where
 
 import GHC.Core (Expr (..))
@@ -57,6 +57,9 @@ boolToCoreExpression False = Var (mkGlobalVar VanillaId (mkSystemName minLocalUn
 
 expressionListToCoreTuple :: [Expr Var] -> Expr Var
 expressionListToCoreTuple expressions = mkCoreTup expressions
+
+expressionTupleToCoreTuple :: (Expr Var, Expr Var) -> Expr Var
+expressionTupleToCoreTuple (first, second) = expressionListToCoreTuple [first, second]
 
 expressionListToCoreListWithType :: Type -> [Expr Var] -> Expr Var
 expressionListToCoreListWithType listTyle expressions = mkListExpr listTyle expressions

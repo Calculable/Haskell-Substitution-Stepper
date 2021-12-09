@@ -432,13 +432,10 @@ instance Integral Literal where
   div _ _ = error "div not supported for this type"
   mod (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (mod x y) 
   mod _ _ = error "mod not supported for this type"
- 
   quotRem (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = quotRem x y
   quotRem _ _ = error "quotRem not supported for this type"
- 
   divMod (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = divMod x y
   divMod _ _ = error "divMod not supported for this type"
- 
   toInteger (LitNumber _ x) = x
   toInteger _ = error "toInteger not supported for this type"
 
