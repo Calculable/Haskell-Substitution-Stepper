@@ -36,6 +36,7 @@ dependencies:
 - optparse-applicative
 - optparse-generic
 - hspec
+- deepseq
 
 library:
   source-dirs: src
@@ -62,3 +63,4 @@ tests:
     dependencies:
     - substep
     - hspec
+    - deepseq

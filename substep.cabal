@@ -48,6 +48,7 @@ library
       Source
       Source2
       Source3
+      Source4
       TestBindings
       TraverseAST
       Utils
@@ -60,6 +61,7 @@ library
     , base >=4.7 && <5
     , bytestring
     , containers
+    , deepseq
     , directory
     , exceptions
     , filepath
@@ -86,6 +88,7 @@ executable substep-exe
     , base >=4.7 && <5
     , bytestring
     , containers
+    , deepseq
     , directory
     , exceptions
     , filepath
@@ -117,6 +120,7 @@ test-suite substep-test
     , base >=4.7 && <5
     , bytestring
     , containers
+    , deepseq
     , directory
     , exceptions
     , filepath

@@ -25,23 +25,36 @@ findBindingForString name bindings = do
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key [] = trace "no binding found" Nothing
+tryFindBindingForString key [] = {-trace "no binding found"-} Nothing
 tryFindBindingForString key ((var, exp):xs) = if ((==) (varToString var) key)
                                                     then Just (exp)
                                                     else tryFindBindingForString key xs
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
-findMatchingPattern expression [] = trace "no matching pattern found" Nothing
-findMatchingPattern _ ((DEFAULT, _, expression):_) = Just expression
-findMatchingPattern (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
+findMatchingPattern expression patterns = do
+  let foundPattern = findMatchingPatternIgnoreDefault expression patterns
+  case foundPattern of {
+    (Just x) -> Just x;
+    Nothing -> findMatchingDefaultPattern  expression patterns
+  }
+
+findMatchingPatternIgnoreDefault :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
+findMatchingPatternIgnoreDefault expression [] = {-trace "no matching pattern found" -}Nothing
+findMatchingPatternIgnoreDefault (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
                                                                                 then Just expression
-                                                                                else (findMatchingPattern (Var name) xs)
-findMatchingPattern (Lit literal) (((LitAlt patternLiteral), _, expression):xs) = if ((==) literal patternLiteral) --can we compare two literals like this?
+                                                                                else (findMatchingPatternIgnoreDefault (Var name) xs)
+findMatchingPatternIgnoreDefault (Lit literal) (((LitAlt patternLiteral), _, expression):xs) = if ((==) literal patternLiteral) --can we compare two literals like this?
                                                                                              then Just expression
-                                                                                             else (findMatchingPattern (Lit literal) xs)
-findMatchingPattern (App expr argument) (((DataAlt patternConstructorName), boundNames, expression):xs) = do
+                                                                                             else (findMatchingPatternIgnoreDefault (Lit literal) xs)
+findMatchingPatternIgnoreDefault (App expr argument) (((DataAlt patternConstructorName), boundNames, expression):xs) = do
     let (function, arguments) = convertToMultiArgumentFunction (App expr argument)
     if ((==) (varExpressionToString function) (showOutputable patternConstructorName)) --check: is there a more elegant way than "show outputable"
         then Just (deepReplaceMultipleVarWithinExpression boundNames (filter (not.isTypeInformation) arguments) expression)
-        else (findMatchingPattern (App expr argument) xs)
-findMatchingPattern expression (x:xs) = findMatchingPattern expression xs
+        else (findMatchingPatternIgnoreDefault (App expr argument) xs)
+findMatchingPatternIgnoreDefault expression (x:xs) = findMatchingPatternIgnoreDefault expression xs
+
+
+findMatchingDefaultPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
+findMatchingDefaultPattern expression [] = {-trace "no matching pattern found"-} Nothing
+findMatchingDefaultPattern _ ((DEFAULT, _, expression):_) = Just expression
+findMatchingDefaultPattern expression (x:xs) = findMatchingDefaultPattern expression xs

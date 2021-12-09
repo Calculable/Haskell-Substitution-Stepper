@@ -62,3 +62,10 @@ functionWithWhere n = x * x
     where x = (n + 1) * 2
 
 letBindingTest = functionWithWhere 1
+
+
+multiArgumentPatternMatching :: Bool -> Bool -> Bool
+multiArgumentPatternMatching True True = True
+multiArgumentPatternMatching _ _ = False
+
+multiArgumentPatternMatchingTest = multiArgumentPatternMatching True True
