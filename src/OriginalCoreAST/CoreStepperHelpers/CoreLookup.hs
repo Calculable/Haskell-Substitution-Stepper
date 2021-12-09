@@ -25,7 +25,7 @@ findBindingForString name bindings = do
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key [] = trace "no binding found" Nothing
+tryFindBindingForString key [] = {-trace "no binding found"-} Nothing
 tryFindBindingForString key ((var, exp):xs) = if ((==) (varToString var) key)
                                                     then Just (exp)
                                                     else tryFindBindingForString key xs
@@ -39,7 +39,7 @@ findMatchingPattern expression patterns = do
   }
 
 findMatchingPatternIgnoreDefault :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
-findMatchingPatternIgnoreDefault expression [] = trace "no matching pattern found" Nothing
+findMatchingPatternIgnoreDefault expression [] = {-trace "no matching pattern found" -}Nothing
 findMatchingPatternIgnoreDefault (Var name) (((DataAlt dataCon), _, expression):xs) = if ((==) (varToString name) (showOutputable dataCon)) --check: is there a more elegant way than "show outputable"
                                                                                 then Just expression
                                                                                 else (findMatchingPatternIgnoreDefault (Var name) xs)
@@ -55,6 +55,6 @@ findMatchingPatternIgnoreDefault expression (x:xs) = findMatchingPatternIgnoreDe
 
 
 findMatchingDefaultPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
-findMatchingDefaultPattern expression [] = trace "no matching pattern found" Nothing
+findMatchingDefaultPattern expression [] = {-trace "no matching pattern found"-} Nothing
 findMatchingDefaultPattern _ ((DEFAULT, _, expression):_) = Just expression
 findMatchingDefaultPattern expression (x:xs) = findMatchingDefaultPattern expression xs

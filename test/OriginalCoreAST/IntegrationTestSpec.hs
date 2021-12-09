@@ -21,7 +21,7 @@ type Binding = (Var, Expr Var)
 
 spec :: Spec
 spec = before getBindingFinderWithCoreBindings $ do
-    describe "Arithmetic" $ do
+    describe "Arithmetic Operators" $ do
         it "can reduce adition" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "addition" bindingFinder coreBindings
         it "can reduce adition with application syntax" $ \(bindingFinder, coreBindings) -> do
