@@ -15,10 +15,11 @@ varExpressionToString (Var var) = varToString var
 varExpressionToString _ = error "Expression is no var"
 
 varToString :: Var -> String
-varToString var = nameToString (varName var)
+varToString var = 
+  if (isBooleanVar (Var var)) --find better solution for boolean workaround
+    then varToSimpleString var
+    else (showOutputable var)
 
-nameToString :: Name -> String
-nameToString = getOccString
 
 coreLiteralToFractional :: Fractional a => Literal -> a
 coreLiteralToFractional (LitFloat value) = fromRational value
@@ -40,5 +41,11 @@ canBeReduced exp
   | otherwise = not (exprIsHNF exp)
 
 isBooleanVar :: Expr Var -> Bool
-isBooleanVar (Var x) = or [((==) (varToString x) "True"), ((==) (varToString x) "False")]
+isBooleanVar (Var x) = or [((==) (varToSimpleString x) "True"), ((==) (varToSimpleString x) "False")]
 isBooleanVar _ = False
+
+varToSimpleString :: Var -> String
+varToSimpleString var = nameToString (varName var) 
+
+nameToString :: Name -> String
+nameToString = getOccString

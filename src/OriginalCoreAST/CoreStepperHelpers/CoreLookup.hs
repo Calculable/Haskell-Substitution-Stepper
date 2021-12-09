@@ -17,7 +17,11 @@ type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBinding name = tryFindBindingForString (varToString name)
+tryFindBinding name bindings = do
+  let normalBinding = tryFindBindingForString (varToString name) bindings
+  if (isNothing normalBinding)
+    then (tryFindBindingForString ("overwrite'" ++ (varToString name)) bindings)
+    else normalBinding
 
 findBindingForString :: String -> [Binding] -> Expr Var
 findBindingForString name bindings = do

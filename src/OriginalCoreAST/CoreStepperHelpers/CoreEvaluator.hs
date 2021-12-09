@@ -6,10 +6,12 @@ import Data.Maybe ()
 import GHC.Core (Expr (..))
 import GHC.Types.Literal ( Literal (..))
 import GHC.Types.Var (Var)
-import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
+import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, expressionListToCoreList, expressionTupleToCoreTuple)
 import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
 import Utils (showOutputable)
 import Debug.Trace(trace)
+import Data.Bifunctor (bimap)
+import Control.Monad  (join)
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var)
 evaluateFunctionWithArguments (Var functionOrOperatorName) arguments = do
@@ -23,8 +25,6 @@ prepareExpressionArgumentForEvaluation (App (Var id) arg) = case varToString id 
                                                                 "unpackCString#" -> arg --argument is simply a String
                                                                 _ -> App (Var id) arg
 prepareExpressionArgumentForEvaluation x = x
-
-
 
 evaluateUnsteppableFunctionWithArguments :: String -> [Expr Var] -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArguments "+" [x, y] = Just ((+) x y)
@@ -48,6 +48,10 @@ evaluateUnsteppableFunctionWithArguments "unpackCString#" [x] = Just x
 evaluateUnsteppableFunctionWithArguments "succ" [x] = Just $ succ x
 evaluateUnsteppableFunctionWithArguments "pred" [x] = Just $ pred x
 evaluateUnsteppableFunctionWithArguments "fromEnum" [x] = Just $ integerToCoreExpression  (toInteger (fromEnum x))
+--evaluateUnsteppableFunctionWithArguments "enumFrom" [x] = trace "evaluate enum from" expressionListToCoreList (enumFrom x)
+evaluateUnsteppableFunctionWithArguments "enumFromThen" [x, y] = expressionListToCoreList (enumFromThen x y)
+evaluateUnsteppableFunctionWithArguments "enumFromTo" [x, y] = expressionListToCoreList (enumFromTo x y)
+evaluateUnsteppableFunctionWithArguments "enumFromThenTo" [x, y, z] = expressionListToCoreList (enumFromThenTo x y z)
 evaluateUnsteppableFunctionWithArguments "exp" [x] = Just (exp x)
 evaluateUnsteppableFunctionWithArguments "log" [x] = Just (log x)
 evaluateUnsteppableFunctionWithArguments "sqrt" [x] = Just (sqrt x)
@@ -66,6 +70,8 @@ evaluateUnsteppableFunctionWithArguments "atanh" [x] = Just (atanh x)
 evaluateUnsteppableFunctionWithArguments "**" [x, y] = Just ((**) x y)
 evaluateUnsteppableFunctionWithArguments "logBase" [x, y] = Just (logBase x y)
 evaluateUnsteppableFunctionWithArguments "quot" [x, y] = Just (quot x y)
+evaluateUnsteppableFunctionWithArguments "quotRem" [x, y] = Just $ expressionTupleToCoreTuple (quotRem x y)
+evaluateUnsteppableFunctionWithArguments "divMod" [x, y] = Just $ expressionTupleToCoreTuple (divMod x y)
 evaluateUnsteppableFunctionWithArguments "rem" [x, y] = Just (rem x y)
 evaluateUnsteppableFunctionWithArguments "div" [x, y] = Just (div x y)
 evaluateUnsteppableFunctionWithArguments "mod" [x, y] = Just (mod x y)
@@ -73,6 +79,8 @@ evaluateUnsteppableFunctionWithArguments "toInteger" [x] = Just (integerToCoreEx
 evaluateUnsteppableFunctionWithArguments "toRational" [x] = Just (rationalToCoreExpression (toRational x))
 evaluateUnsteppableFunctionWithArguments "floatRadix" [x] = Just $ integerToCoreExpression (floatRadix x)
 evaluateUnsteppableFunctionWithArguments "floatDigits" [x] = Just $ integerToCoreExpression (toInteger (floatDigits x))
+evaluateUnsteppableFunctionWithArguments "floatRange" [x] = Just $ expressionTupleToCoreTuple (join bimap integerToCoreExpression (join bimap toInteger (floatRange x)))
+evaluateUnsteppableFunctionWithArguments "decodeFloat" [x] = Just $ expressionTupleToCoreTuple (integerToCoreExpression (fst res), integerToCoreExpression (toInteger (snd res))) where res = decodeFloat x
 evaluateUnsteppableFunctionWithArguments "encodeFloat" [(Lit (LitNumber _ x)), (Lit (LitNumber _ y))] = Just (encodeFloat x (fromIntegral y))
 evaluateUnsteppableFunctionWithArguments "exponent" [x] = Just (integerToCoreExpression (toInteger (exponent x)))
 evaluateUnsteppableFunctionWithArguments "significand" [x] = Just (significand x)
@@ -83,13 +91,11 @@ evaluateUnsteppableFunctionWithArguments "isDenormalized" [x] = Just (boolToCore
 evaluateUnsteppableFunctionWithArguments "isNegativeZero" [x] = Just (boolToCoreExpression (isNegativeZero x))
 evaluateUnsteppableFunctionWithArguments "isIEEE" [x] = Just (boolToCoreExpression (isIEEE x))
 evaluateUnsteppableFunctionWithArguments "atan2" [x, y] = Just (atan2 x y)
+evaluateUnsteppableFunctionWithArguments "properFraction" [x] = Just $ expressionTupleToCoreTuple (properFraction x)
 evaluateUnsteppableFunctionWithArguments "truncate" [x] = Just (integerToCoreExpression (toInteger (truncate x)))
 evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpression (toInteger (round x)))
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
 evaluateUnsteppableFunctionWithArguments "eqString" [x, y] = Just (boolToCoreExpression (x == y))
-
-
-
 evaluateUnsteppableFunctionWithArguments name _ = trace "function not supported" Nothing --function not supported
 --toDo: Implement more operators and functions
