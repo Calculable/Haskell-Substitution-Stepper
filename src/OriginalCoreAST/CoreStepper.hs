@@ -74,7 +74,6 @@ applyStep bindings (Coercion _) = trace "no applicable step found: coercion is n
 
 applyStep _ _ = trace "no applicable step found" Nothing
 
-
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe (ReductionStepDescription, Expr Var)
 applyStepToNestedApp bindings expr = do
     let (function, arguments) = (convertToMultiArgumentFunction expr)
