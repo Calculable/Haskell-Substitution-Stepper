@@ -115,7 +115,7 @@ evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [_, _, (Type ty), _] red
 evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, (Type newType), argument, function] reducer = customMonadOperator newType argument function reducer
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, (Type newType), function, argument] reducer = (customFmapForList newType function argument)
 
-evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = trace (((("typed function not supported: '" ++ name) ++ "'") ++ "with argument-lenght: ") ++ show (length arguments))  Nothing --function not supported
+evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
 
 
 customMonadOperator :: Type -> Expr Var -> Expr Var -> (Expr Var -> Expr Var) -> Maybe (Expr Var)
