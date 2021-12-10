@@ -111,11 +111,12 @@ customFmapForMaybe _ _ = trace "fmap not supported for this type" Nothing
 
 evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> (Expr Var -> Expr Var) -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [(Type monadType), _, (Type ty), value] reducer = Just (customReturn monadType ty value)
-evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [_, _, (Type ty), _] reducer = Just (customFail ty)
+evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [(Type monadType), _, (Type ty), _] reducer = Just (customFail monadType ty)
 evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, (Type newType), argument, function] reducer = customMonadOperator newType argument function reducer
+evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, (Type newType), argument, function] reducer = customMonadOperator2 newType argument function reducer
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, (Type newType), function, argument] reducer = (customFmapForList newType function argument)
 
-evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = trace (((("typed function not supported: '" ++ name) ++ "'") ++ "with argument-lenght: ") ++ show (length arguments))  Nothing --function not supported
+evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
 
 
 customMonadOperator :: Type -> Expr Var -> Expr Var -> (Expr Var -> Expr Var) -> Maybe (Expr Var)
@@ -127,14 +128,35 @@ customMonadOperator newType (App constructor argument) function reducer
         return (customConcatForList newType fmappedList reducer)
 customMonadOperator _ _ _ _ = trace ">>= not supported for this type" Nothing
 
+customMonadOperator2 :: Type -> Expr Var -> Expr Var -> (Expr Var -> Expr Var) -> Maybe (Expr Var)
+customMonadOperator2 newType (App constructor argument) function reducer
+    | isNothingMaybe (App constructor argument) = Just (App constructor argument)
+    | isJustMaybe (App constructor argument) = Just function
+    | isList (App constructor argument) = do
+        fmappedList <- repalceAllListItemsWithFunction newType function (App constructor argument)
+        return (customConcatForList newType fmappedList reducer)
+customMonadOperator2 _ _ _ _ = trace ">> not supported for this type" Nothing
+
 customReturn :: Type -> Type -> Expr Var -> Expr Var
 customReturn monadType ty expression = do
     if isListType (Type monadType)
         then expressionListToCoreListWithType ty [expression]
         else maybeToCoreExpression (Just expression) ty --is maybe type (could be checked again)    
 
-customFail :: Type -> Expr Var
-customFail ty = maybeToCoreExpression Nothing ty
+customFail :: Type -> Type -> Expr Var
+customFail monadType ty =
+    if isListType (Type monadType)
+        then expressionListToCoreListWithType ty []
+        else maybeToCoreExpression Nothing ty --is maybe type (could be checked again)   
+
+repalceAllListItemsWithFunction :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
+repalceAllListItemsWithFunction newType element functorArgument
+    | isList functorArgument = do
+        let (_, listItems) = convertToMultiArgumentFunction functorArgument
+        let listItemsWithoutTypes = (filter (not.isTypeInformation) listItems)
+        let mappedListItems = replicate (length listItemsWithoutTypes) element
+        Just (expressionListToCoreListWithType newType mappedListItems)
+    | otherwise = Nothing
 
 customFmapForList :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
 customFmapForList newType function functorArgument

@@ -335,6 +335,10 @@ generatorExpectedOutput = 8
 monadMaybeInput = (getMaybeValue (monadicFunction (Just 4)))
 monadMaybeExpectedOutput = "Hallo"
 
+{-Monad list-}
+
+monadListInput = (first monadicListFunction) == 3
+monadListExpectedOutput = True
 
 {-Helper Functions-}
 
@@ -480,3 +484,9 @@ override'length (_:l)     =  1 + length l
 
 convertToString :: Int -> String
 convertToString x = "Hallo"
+
+monadicListFunction :: [Int]
+monadicListFunction = do
+    a <- [1, 2, 3]
+    b <- [3, 2, 1]
+    return (a * b)

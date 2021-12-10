@@ -202,9 +202,11 @@ spec = before getBindingFinderWithCoreBindings $ do
             expectationForExpression "fmapOnNothing" bindingFinder coreBindings
         it "fmap on List works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "fmapOnList" bindingFinder coreBindings            
-    describe "Maybe Monad works" $ do
+    describe "Some Monads are supported" $ do
         it "maybe monad works (success case)" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "monadMaybe" bindingFinder coreBindings
+        it "list monad works (success case)" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "monadList" bindingFinder coreBindings
     describe "List generator works" $ do
         it "nested list generator works" $ \(bindingFinder, coreBindings) -> do
             pendingWith "list generation not supported yet (requires nested let-bindings)"
