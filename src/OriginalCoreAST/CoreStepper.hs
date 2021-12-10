@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepper(applyStep, reduceToHeadNormalForm)
+module OriginalCoreAST.CoreStepper(applyStep, reduceToHeadNormalForm, reduceToNormalForm, canBeReducedToNormalForm)
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
@@ -31,6 +31,16 @@ import Debug.Trace(trace)
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (Var, Expr Var)
+
+
+reduceToNormalForm :: [Binding] -> Expr Var -> Expr Var
+reduceToNormalForm bindings expression = do
+    let expressionInHeadNormalForm = reduceToHeadNormalForm bindings expression
+    if canBeReducedToNormalForm expressionInHeadNormalForm
+        then do
+            let (function, arguments) = convertToMultiArgumentFunction expressionInHeadNormalForm
+            convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map (reduceToNormalForm bindings) arguments)
+        else expressionInHeadNormalForm
 
 
 reduceToHeadNormalForm :: [Binding] -> Expr Var -> Expr Var
@@ -103,3 +113,9 @@ applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeR
 applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no reducable argument found" --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
 
 
+-- | The "canBeReducedFunction" checks if a Core expression is not yet in normal form and can further be reduced
+canBeReducedToNormalForm :: Expr Var -> Bool
+canBeReducedToNormalForm (App expr argument) = do
+    let (function, arguments) = (convertToMultiArgumentFunction (App expr argument))
+    (any canBeReduced arguments) || (any canBeReducedToNormalForm arguments)  
+canBeReducedToNormalForm _ = False

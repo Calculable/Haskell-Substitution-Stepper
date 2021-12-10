@@ -10,7 +10,7 @@ import GHC.Plugins (liftIO )
 import GHC.Core (Bind (NonRec), CoreProgram, Expr)
 import GHC.Types.Var (Var (varName, varType))
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup(findBindingForString)
-import OriginalCoreAST.CoreStepper(reduceToHeadNormalForm)
+import OriginalCoreAST.CoreStepper(reduceToHeadNormalForm, reduceToNormalForm)
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(prepareExpressionArgumentForEvaluation)
 import Control.Exception (evaluate)
 import Control.DeepSeq (force)
@@ -22,9 +22,9 @@ type Binding = (Var, Expr Var)
 spec :: Spec
 spec = before getBindingFinderWithCoreBindings $ do
     describe "Arithmetic Operators" $ do
-        it "can reduce adition" $ \(bindingFinder, coreBindings) -> do
+        it "can reduce addition" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "addition" bindingFinder coreBindings
-        it "can reduce adition with application syntax" $ \(bindingFinder, coreBindings) -> do
+        it "can reduce addition with application syntax" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "additionWithApplicationSyntax" bindingFinder coreBindings
         it "can reduce substraction" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "substraction" bindingFinder coreBindings
@@ -216,6 +216,6 @@ expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expec
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
         let input = (bindingFinder (expressionBindingName ++ "Input"))
         let expectedOutput = (bindingFinder(expressionBindingName ++ "ExpectedOutput"))
-        let output = reduceToHeadNormalForm coreBindings input
+        let output = reduceToNormalForm coreBindings input
         (prepareExpressionArgumentForEvaluation output) `shouldBe` (prepareExpressionArgumentForEvaluation expectedOutput)
 

@@ -6,7 +6,7 @@ where
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertToMultiArgumentFunction, convertFunctionApplicationWithArgumentListToNestedFunctionApplication)
 
 import OriginalCoreAST.CoreInformationExtractorFunctions(varToString, canBeReduced)
-import OriginalCoreAST.CoreStepper(applyStep, reduceToHeadNormalForm)
+import OriginalCoreAST.CoreStepper(applyStep, reduceToHeadNormalForm, reduceToNormalForm, canBeReducedToNormalForm)
 import Data.Maybe
 import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..), CoreBind, collectArgs)
 import GHC.Types.Literal( Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString), mkLitInt64, mkLitString)
@@ -43,21 +43,18 @@ printCoreStepByStepReductionForSingleExpression bindings expression     | canBeR
                                                                                     putStrLn "\n{-no reduction rule implemented for this expression-}"
                                                                                     return expression
                                                                         | otherwise = do
-                                                                            putStrLn "\n{-reduction complete (Head Normal Form)-}"
-                                                                            --check if it can be reduced even more to wnormal form
-                                                                            case expression of {
-                                                                                (App expr argument) -> (do
+                                                                            --check if it can be reduced even more to normal form
+                                                                            if (canBeReducedToNormalForm expression)
+                                                                                then do
+                                                                                    putStrLn "\n{-reduction complete in Head Normal Form. Reduce to Normal Form-}"
                                                                                     let (function, arguments) = (convertToMultiArgumentFunction expression)
-                                                                                    if (any canBeReduced arguments) 
-                                                                                        then do
-                                                                                            putStrLn "\n{-reduce to normal form-}"
-                                                                                            let result = (convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map (reduceToHeadNormalForm bindings) arguments))
-                                                                                            prettyPrint result
-                                                                                            putStrLn "\n{-reduction complete (Normal Form)-}"
-                                                                                            return result
-                                                                                        else return expression);
-                                                                                _ -> return expression
-                                                                            }
+                                                                                    let result = (convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map (reduceToNormalForm bindings) arguments))
+                                                                                    prettyPrint result
+                                                                                    putStrLn "\n{-reduction complete (Normal Form)-}"
+                                                                                    return result    
+                                                                                else do
+                                                                                    putStrLn "\n{-reduction complete (Normal Form)-}"
+                                                                                    return expression                                                                                
                                                                             
 
 

@@ -34,7 +34,7 @@ isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
 isTypeInformation (App expr arg) =  isTypeInformation expr
 isTypeInformation x = False
 
--- | The "canBeReducedFunction" checks if a Core expression can be reduced.
+-- | The "canBeReducedFunction" checks if a Core expression is not yet in head normal form and can further be reduced
 canBeReduced exp
   | isTypeInformation exp = False
   | isBooleanVar exp = False
