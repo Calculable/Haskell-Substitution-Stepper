@@ -12,7 +12,7 @@ import Utils (showOutputable)
 import Debug.Trace(trace)
 import Data.Bifunctor (bimap)
 import Control.Monad  (join)
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertToMultiArgumentFunction, convertFunctionApplicationWithArgumentListToNestedFunctionApplication)
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertToMultiArgumentFunction, convertFunctionApplicationWithArgumentListToNestedFunctionApplication, getIndividualElementsOfList)
 import GHC.Core.TyCo.Rep (Type)
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> (Expr Var -> Expr Var) -> Maybe (Expr Var)
@@ -152,16 +152,17 @@ customFail monadType ty =
 repalceAllListItemsWithFunction :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
 repalceAllListItemsWithFunction newType element functorArgument
     | isList functorArgument = do
-        let (_, listItems) = convertToMultiArgumentFunction functorArgument
+        let listItems = getIndividualElementsOfList functorArgument
         let listItemsWithoutTypes = (filter (not.isTypeInformation) listItems)
         let mappedListItems = replicate (length listItemsWithoutTypes) element
         Just (expressionListToCoreListWithType newType mappedListItems)
     | otherwise = Nothing
 
+
 customFmapForList :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
 customFmapForList newType function functorArgument
     | isList functorArgument = do
-        let (_, listItems) = convertToMultiArgumentFunction functorArgument
+        let listItems = getIndividualElementsOfList functorArgument
         let listItemsWithoutTypes = (filter (not.isTypeInformation) listItems)
         let mappedListItems = map (App function) listItemsWithoutTypes
         Just (expressionListToCoreListWithType newType mappedListItems)

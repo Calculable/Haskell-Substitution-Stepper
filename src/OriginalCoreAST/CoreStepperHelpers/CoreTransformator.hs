@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
+module OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction, getIndividualElementsOfList)
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
@@ -9,7 +9,7 @@ import GHC.Types.Literal
   )
 import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isEmptyList, isList)
 import Debug.Trace(trace)
 
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Expr Var -> [Expr Var] -> Expr Var
@@ -51,3 +51,14 @@ convertToMultiArgumentFunction :: Expr Var -> (Expr Var, [Expr Var])
 convertToMultiArgumentFunction = collectArgs
 
 
+getIndividualElementsOfList :: Expr Var -> [Expr Var]
+getIndividualElementsOfList expr
+  | isEmptyList expr = []
+  | isList expr = do
+      let (constructor, elements) = convertToMultiArgumentFunction expr
+      if ((length elements) /= 3)
+        then error ("unexpected number of arguments to cons operator: " ++ (show (length elements)))
+        else do
+          let [ty, first, nestedList] = take 3 elements
+          [ty, first] ++ getIndividualElementsOfList nestedList
+  | otherwise = []

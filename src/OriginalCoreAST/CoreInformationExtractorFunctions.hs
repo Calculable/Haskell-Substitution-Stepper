@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType)
+module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList)
 where
 
 import GHC.Core (Expr (..), collectArgs)
@@ -84,3 +84,4 @@ isConstructorApplicationOfType _ _ = False
 
 isListType :: Expr a -> Bool --is there a more elegant solution?
 isListType (Type ty) = ((showOutputable ty) == "[]")
+
