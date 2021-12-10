@@ -209,8 +209,8 @@ spec = before getBindingFinderWithCoreBindings $ do
             expectationForExpression "monadList" bindingFinder coreBindings
     describe "List generator works" $ do
         it "nested list generator works" $ \(bindingFinder, coreBindings) -> do
-            pendingWith "list generation not supported yet (requires nested let-bindings)"
-            --expectationForExpression "generator" bindingFinder coreBindings
+            --pendingWith "list generation not supported yet (requires nested let-bindings)"
+            expectationForExpression "generator" bindingFinder coreBindings
  
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
