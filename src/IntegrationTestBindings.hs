@@ -324,11 +324,11 @@ fmapOnListExpectedOutput = "Hallo"
 
 {-generator-}
 
-generatorInput = length [(i,j) |    i <- [1,2],
-                                    j <- [1..4] ]
+generatedList = [(i,j) |   i <- [1,2, 3],
+                            j <- [1,4, 3] ]
 
-generatorExpectedOutput :: Integer
-generatorExpectedOutput = 8
+generatorInput = count generatedList
+generatorExpectedOutput = 9 
 
 {-Monad maybe-}
 
@@ -490,3 +490,8 @@ monadicListFunction = do
     a <- [1, 2, 3]
     b <- [3, 2, 1]
     return (a * b)
+
+
+count          :: [a] -> Int
+count  []       =  0
+count  (_:l)    =  1 + count  l
