@@ -50,7 +50,6 @@ library
       Source3
       Source4
       Source5
-      TestBindings
       TraverseAST
       Utils
   other-modules:
