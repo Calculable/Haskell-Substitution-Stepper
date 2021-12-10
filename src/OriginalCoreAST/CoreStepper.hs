@@ -95,7 +95,7 @@ applyStepToNestedApp bindings expr = do
                                 (description, simplifiedArguments) <- ((applyStepToOneOfTheArguments bindings [] arguments))
                                 return ((description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments))
                             else do
-                                appliedFunction <- (evaluateFunctionWithArguments function arguments (reduceToHeadNormalForm bindings)) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
+                                appliedFunction <- (evaluateFunctionWithArguments function arguments (reduceToNormalForm bindings)) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
                                 return ("Apply " ++ (showOutputable function), appliedFunction))
                         else do
                             (description, reducedFunction) <- applyStep bindings (App function (head arguments))
