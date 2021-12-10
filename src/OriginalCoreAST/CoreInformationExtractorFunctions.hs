@@ -38,7 +38,10 @@ isTypeInformation x = False
 canBeReduced exp
   | isTypeInformation exp = False
   | isBooleanVar exp = False
-  | otherwise = not (exprIsHNF exp)
+  | otherwise = case exp of {
+      (App (Lam _ _) x) -> True;
+      _ -> not (exprIsHNF exp)
+  }
 
 isBooleanVar :: Expr Var -> Bool
 isBooleanVar (Var x) = or [((==) (varToSimpleString x) "True"), ((==) (varToSimpleString x) "False")]
