@@ -40,6 +40,9 @@ canBeReduced exp
   | isBooleanVar exp = False
   | otherwise = case exp of {
       (App (Lam _ _) x) -> True;
+      (App (Let _ _) x) -> True;
+      (Case _ _ _ _) -> True;
+      (Let _ _) -> True;
       _ -> not (exprIsHNF exp)
   }
 
