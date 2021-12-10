@@ -195,11 +195,13 @@ spec = before getBindingFinderWithCoreBindings $ do
     describe "Map works" $ do
         it "map on lists works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "map" bindingFinder coreBindings
-    describe "Fmap on maybe works" $ do
+    describe "fmap works" $ do
         it "fmap on Just-Maybe works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "fmapOnJust" bindingFinder coreBindings
         it "fmap on Nothing-Maybe works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "fmapOnNothing" bindingFinder coreBindings
+        it "fmap on List works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "fmapOnList" bindingFinder coreBindings            
     describe "Maybe Monad works" $ do
         it "maybe monad works (success case)" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "monadMaybe" bindingFinder coreBindings

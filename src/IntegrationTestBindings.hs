@@ -319,6 +319,9 @@ fmapOnJustExpectedOutput = 6
 fmapOnNothingInput = isNothing (fmap (+1) Nothing)
 fmapOnNothingExpectedOutput = True
 
+fmapOnListInput = (first (fmap convertToString [1, 2, 3, 4, 5]))
+fmapOnListExpectedOutput = "Hallo"
+
 {-generator-}
 
 generatorInput = length [(i,j) |    i <- [1,2],
@@ -473,3 +476,7 @@ override'isNothing _ = False
 override'length           :: [a] -> Int
 override'length []        =  0
 override'length (_:l)     =  1 + length l
+
+
+convertToString :: Int -> String
+convertToString x = "Hallo"
