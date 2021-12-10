@@ -211,7 +211,10 @@ spec = before getBindingFinderWithCoreBindings $ do
         it "nested list generator works" $ \(bindingFinder, coreBindings) -> do
             --pendingWith "list generation not supported yet (requires nested let-bindings)"
             expectationForExpression "generator" bindingFinder coreBindings
- 
+    describe "Functions that might throw an error are supported" $ do
+        it "functions that might throw an error can be called" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "functionThatMightThrowError" bindingFinder coreBindings
+
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
         let input = (bindingFinder (expressionBindingName ++ "Input"))

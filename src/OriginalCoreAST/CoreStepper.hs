@@ -94,9 +94,9 @@ applyStep bindings (Case expression binding caseType alternatives) = do
 applyStep bindings (Let (NonRec b expr) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, bindings)
 applyStep bindings (Let (Rec [(b, expr)]) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, ((b, expr) : bindings))
 
-applyStep bindings (Cast _ _) = trace "no applicable step found: tick is not yet" Nothing
+applyStep bindings (Cast _ _) = trace "no applicable step found: cast is not yet supported" Nothing
 applyStep bindings (Tick _ _) = trace "no applicable step found: tick is not supported" Nothing
-applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not yet" Nothing
+applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not yet supported" Nothing
 applyStep _ _ = trace "no applicable step found" Nothing
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe StepResult

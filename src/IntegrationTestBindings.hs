@@ -340,6 +340,10 @@ monadMaybeExpectedOutput = "Hallo"
 monadListInput = (first monadicListFunction) == 3
 monadListExpectedOutput = True
 
+{-Functions that can throw errors-}
+functionThatMightThrowErrorInput = findMaximum [1, 2, 3]
+functionThatMightThrowErrorExpectedOutput = 3
+
 {-Helper Functions-}
 
 add :: Int -> Int -> Int 
@@ -401,10 +405,6 @@ patternMatchingOnAnyConstructor Nothing = 42
 customIsNothing :: Maybe a -> Bool
 customIsNothing (Just _) = False
 customIsNothing Nothing = True
-
-findMaximum :: (Ord a) => [a] -> a  
-findMaximum [x] = x  
-findMaximum (x:xs) = max x (findMaximum xs)  
 
 reverseList :: [Integer] -> [Integer]
 reverseList [] = []
@@ -495,3 +495,8 @@ monadicListFunction = do
 count          :: [a] -> Int
 count  []       =  0
 count  (_:l)    =  1 + count  l
+
+findMaximum :: (Ord a) => [a] -> a  
+findMaximum [] = error "maximum of empty list"  
+findMaximum [x] = x  
+findMaximum (x:xs) = max x (findMaximum xs)  
