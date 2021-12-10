@@ -291,10 +291,6 @@ tupleAsParameterExpectedOutput = 2
 equalsOnTupleInput = (1, 2) == (1, 3)
 equalsOnTupleExpectedOutput = False
 
-{-infinite lists-}
-infinitListInput = sumOfTheFirstThreeElements [1..]
-infinitListExpectedOutput = 5
-
 
 {-custom types-}
 
@@ -303,6 +299,35 @@ functionOnCustomTypeExpectedOutput = 5
 
 equalityOnCustomTypeInput = changeDirection (Top 5)
 equalityOnCustomTypeExpectedOutput = Down 5
+
+{-infinite lists-}
+infiniteListInput = sumOfTheFirstXElements [1..] 3
+infiniteListExpectedOutput = 6
+
+{-map-}
+mapInput = first (map (+1) [1, 2, 3, 4, 5])
+mapExpectedOutput = 2
+
+{-fmap on maybe-}
+fmapOnJustInput = getMaybeValue (fmap (+1) (Just (5 :: Integer)))
+fmapOnJustExpectedOutput = 6
+
+fmapOnNothingInput = isNothing (fmap (+1) Nothing)
+fmapOnNothingExpectedOutput = True
+
+{-generator-}
+
+generatorInput = length [(i,j) |    i <- [1,2],
+                                    j <- [1..4] ]
+
+generatorExpectedOutput :: Integer
+generatorExpectedOutput = 8
+
+{-Monad maybe-}
+
+monadMaybeInput = (getMaybeValue (monadicFunction (Just 4)))
+monadMaybeExpectedOutput = "Hallo"
+
 
 {-Helper Functions-}
 
@@ -385,7 +410,6 @@ functionWithDoAndLet x = do
     let z = y+y
     z + z    
 
-
 functionWithMultipleWhere :: Integer -> Integer
 functionWithMultipleWhere x = (y * z)
     where
@@ -406,5 +430,42 @@ getData (Down a) = a
 second :: (a, b) -> b
 second (x, y) = y
 
-sumOfTheFirstThreeElements :: (Num a) => [a] -> a
-sumOfTheFirstThreeElements [x, y, z, _] = (x+y)+z
+override'enumFrom :: Enum a => a -> [a]
+override'enumFrom x = x: (override'enumFrom (succ x))
+
+override'enumFromTo :: Enum a => a -> [a]
+override'enumFromTo x = x: (override'enumFrom (succ x))
+
+override'enumTo:: (Ord a, Enum a) => a -> a -> [a]
+override'enumTo x y = if (x == y)
+                        then [x]
+                        else x: (override'enumTo (succ x) y)
+
+sumOfTheFirstXElements :: (Num a) => [a] -> Integer -> a
+sumOfTheFirstXElements _ 0 = 0
+sumOfTheFirstXElements [] _ = 0
+sumOfTheFirstXElements (x:xs) amountOfElements = x + (sumOfTheFirstXElements xs (amountOfElements - 1))
+
+
+override'map :: (a -> b) -> [a] -> [b]
+override'map f []     = []
+override'map f (x:xs) = f x : map f xs
+
+first :: [a] -> a
+first (x:xs) = x
+
+monadicFunction :: Maybe Int -> Maybe String
+monadicFunction maybeValue = do
+    value <- maybeValue
+    return "Hallo"
+
+getMaybeValue :: Maybe a -> a
+getMaybeValue (Just x) = x
+
+override'isNothing :: Maybe a -> Bool
+override'isNothing Nothing = True
+override'isNothing _ = False
+
+override'length           :: [a] -> Int
+override'length []        =  0
+override'length (_:l)     =  1 + length l

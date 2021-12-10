@@ -41,3 +41,11 @@ monadicFunction :: Maybe Int -> Maybe String
 monadicFunction maybeValue = do
     a <- maybeValue
     return "Hallo"
+
+generatorInput = [(i,j) |   i <- [1,2],
+                            j <- [1..4] ]
+
+
+override'length           :: [a] -> Int
+override'length []        =  0
+override'length (_:l)     =  1 + length l

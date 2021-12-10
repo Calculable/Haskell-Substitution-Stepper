@@ -182,15 +182,29 @@ spec = before getBindingFinderWithCoreBindings $ do
             --expectationForExpression "equalsOnTuple" bindingFinder coreBindings               
     describe "Infinite List" $ do
         it "Infinite lists works as function parameter" $ \(bindingFinder, coreBindings) -> do
-            pendingWith "lists are not fully supported yet"
-            --expectationForExpression "infinitList" bindingFinder coreBindings
+            expectationForExpression "infiniteList" bindingFinder coreBindings
     describe "Custom Types" $ do
         it "function on custom type works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "functionOnCustomType" bindingFinder coreBindings
         it "equality on custom type works" $ \(bindingFinder, coreBindings) -> do
             pendingWith "custom data types are not fully supported yet"
             --expectationForExpression "equalityOnCustomType" bindingFinder coreBindings
-
+    describe "Map works" $ do
+        it "map on lists works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "map" bindingFinder coreBindings
+    describe "Fmap on maybe works" $ do
+        it "fmap on Just-Maybe works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "fmapOnJust" bindingFinder coreBindings
+        it "fmap on Nothing-Maybe works" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "fmapOnNothing" bindingFinder coreBindings
+    describe "Maybe Monad works" $ do
+        it "maybe monad works (success case)" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "monadMaybe" bindingFinder coreBindings
+    describe "List generator works" $ do
+        it "nested list generator works" $ \(bindingFinder, coreBindings) -> do
+            pendingWith "list generation not supported yet (requires nested let-bindings)"
+            --expectationForExpression "generator" bindingFinder coreBindings
+ 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
         let input = (bindingFinder (expressionBindingName ++ "Input"))

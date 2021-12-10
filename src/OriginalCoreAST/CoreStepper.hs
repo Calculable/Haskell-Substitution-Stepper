@@ -94,7 +94,7 @@ applyStepToNestedApp bindings expr = do
         (Lam _ _) -> do
             (description, reducedFunction) <- applyStep bindings (App function (head arguments))
             return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments))
-
+        _ -> trace "application with unsupported expression type" Nothing
 applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var])
 applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeReduced x
                                                                         then do
