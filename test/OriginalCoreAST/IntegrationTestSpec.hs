@@ -183,6 +183,9 @@ spec = before getBindingFinderWithCoreBindings $ do
     describe "Infinite List" $ do
         it "Infinite lists works as function parameter" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "infiniteList" bindingFinder coreBindings
+    describe "Bounded Lists" $ do
+        it "Bounded lists works as function parameter" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "boundedList" bindingFinder coreBindings            
     describe "Custom Types" $ do
         it "function on custom type works" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "functionOnCustomType" bindingFinder coreBindings

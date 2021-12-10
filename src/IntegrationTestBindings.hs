@@ -304,6 +304,10 @@ equalityOnCustomTypeExpectedOutput = Down 5
 infiniteListInput = sumOfTheFirstXElements [1..] 3
 infiniteListExpectedOutput = 6
 
+
+boundedListInput = sumOfTheFirstXElements [1..10] 3
+boundedListExpectedOutput = 6
+
 {-map-}
 mapInput = first (map (+1) [1, 2, 3, 4, 5])
 mapExpectedOutput = 2
