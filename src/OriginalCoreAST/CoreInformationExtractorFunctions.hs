@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication)
+module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression)
 where
 
 import GHC.Core (Expr (..), collectArgs)
@@ -102,3 +102,15 @@ isListType (Type ty) = ((showOutputable ty) == "[]")
 
 getFunctionOfNestedApplication :: Expr Var -> Expr Var 
 getFunctionOfNestedApplication expr = fst (collectArgs expr)
+
+typeOfExpression :: Expr Var -> String --used for tracing / debugging
+typeOfExpression (Var _) = "Var"
+typeOfExpression (Lit _) = "Lit"
+typeOfExpression (App _ _) = "App"
+typeOfExpression (Lam _ _) = "Lam"
+typeOfExpression (Let _ _) = "Let"
+typeOfExpression (Case _ _ _ _) = "Case"
+typeOfExpression (Cast _ _) = "Cast"
+typeOfExpression (Tick _ _) = "Tick"
+typeOfExpression (Type _) = "Type"
+typeOfExpression (Coercion _) = "Coercion"

@@ -164,7 +164,7 @@ extractFunctionFromClassDictionary (Var function) (Var classDictionary) bindings
     extractFunctionFromClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
 extractFunctionFromClassDictionary (Var function) (App expr args) bindings = do
     result <- reduceNestedApplicationToHeadNormalForm bindings (App expr args)
-    trace ("result has format : " ++ (showOutputable result)) extractFunctionFromClassDictionaryDefinition bindings (Var function) result
+    extractFunctionFromClassDictionaryDefinition bindings (Var function) result
 extractFunctionFromClassDictionary _ _ _ = Nothing
 
 extractFunctionFromClassDictionaryDefinition :: [Binding] -> Expr Var -> Expr Var -> Maybe (Expr Var)
@@ -188,17 +188,6 @@ functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = f
 
 functionNameMatchesFunctionFromDictionary _ _ = False
 
-getTypeOfExpression :: Expr Var -> String --used for tracing / debugging
-getTypeOfExpression (Var _) = "Var"
-getTypeOfExpression (Lit _) = "Lit"
-getTypeOfExpression (App _ _) = "App"
-getTypeOfExpression (Lam _ _) = "Lam"
-getTypeOfExpression (Let _ _) = "Let"
-getTypeOfExpression (Case _ _ _ _) = "Case"
-getTypeOfExpression (Cast _ _) = "Cast"
-getTypeOfExpression (Tick _ _) = "Tick"
-getTypeOfExpression (Type _) = "Type"
-getTypeOfExpression (Coercion _) = "Coercion"
 
 reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
 reduceNestedApplicationToHeadNormalForm bindings expr = do
@@ -211,5 +200,6 @@ reduceNestedApplication :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be re
 reduceNestedApplication bindings (App expr arg) = do
     let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
     reducedFunction <- tryFindBinding functionName bindings
-    reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+    result <- reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+    return result
 reduceNestedApplication _ _ = Nothing 
