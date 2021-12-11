@@ -101,8 +101,9 @@ applyStep _ _ = trace "no applicable step found" Nothing
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe StepResult
 applyStepToNestedApp bindings expr = do
-    if (functionCallContainsClassDictionary expr)
-        then trace "function call contains class dictionary" Nothing
+    let maybeResult = tryApplyStepToApplicationUsingClassDictionary bindings expr
+    if isJust maybeResult
+        then maybeResult
         else do
             let (function, arguments) = (convertToMultiArgumentFunction expr)
             case function of
@@ -137,6 +138,9 @@ canBeReducedToNormalForm (App expr argument) = do
     let (function, arguments) = (convertToMultiArgumentFunction (App expr argument))
     (any canBeReduced arguments) || (any canBeReducedToNormalForm arguments)  
 canBeReducedToNormalForm _ = False
+
+tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> Expr Var -> Maybe StepResult
+tryApplyStepToApplicationUsingClassDictionary _ _ = Nothing 
 
 functionCallContainsClassDictionary :: Expr Var -> Bool --example for a function call with class dictionary: == @Direction $fEqDirection Top Down
 functionCallContainsClassDictionary expr = do
