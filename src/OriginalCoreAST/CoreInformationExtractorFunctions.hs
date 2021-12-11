@@ -47,7 +47,7 @@ isVarExpression _ = False
 canBeReduced exp
   | isTypeInformation exp = False
   | isBooleanVar exp = False
-  | otherwise = case exp of {
+  | otherwise = case exp of { --check nested application
       (App (Lam _ _) x) -> True;
       (App (Let _ _) x) -> True;
       (Case _ _ _ _) -> True;

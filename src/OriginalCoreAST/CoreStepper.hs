@@ -136,7 +136,7 @@ applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no red
 canBeReducedToNormalForm :: Expr Var -> Bool
 canBeReducedToNormalForm (App expr argument) = do
     let (function, arguments) = (convertToMultiArgumentFunction (App expr argument))
-    (any canBeReduced arguments) || (any canBeReducedToNormalForm arguments)  
+    ((any canBeReduced arguments) || (any canBeReducedToNormalForm arguments)) || (canBeReduced function)
 canBeReducedToNormalForm _ = False
 
 tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> Expr Var -> Maybe StepResult
@@ -153,7 +153,7 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
                     (Var extractedFunctionNameFromClassDictionary) <- extractFunctionFromClassDictionary function classDictionaryExpression
                     extractedFunction <- tryFindBinding extractedFunctionNameFromClassDictionary bindings --check if the extracted function name exists in the bindings. 
                     let realFunctionArguments = drop 2 arguments
-                    let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication (Var extractedFunctionNameFromClassDictionary) realFunctionArguments -- we could also return extractedFunction here, this would skip one reduction step
+                    let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunction realFunctionArguments
                     return ("replace '" ++ (varToString functionName) ++"' with definition from the class dictionary", resultExpression, bindings)
                 else Nothing --function call does not contain class dictionary
         else Nothing --function call does not contain class dictionary
