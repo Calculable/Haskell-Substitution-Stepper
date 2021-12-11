@@ -16,14 +16,14 @@ import Utils (showOutputable)
 import GHC.Core.Ppr
   ( pprCoreAlt,
   )
-import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString)
+import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString, dataName)
 import GHC.Types.Unique (minLocalUnique)
 import GHC.Data.FastString (mkFastString)
 import GHC.Core.TyCo.Rep (Type(..), TyLit(..))
 import GHC.Types.Id.Info ( vanillaIdInfo, IdDetails(..))
 import GHC.Types.Name.Occurrence (mkOccName, mkVarOcc)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isVarExpression, isClassDictionary)
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern)
@@ -101,23 +101,26 @@ applyStep _ _ = trace "no applicable step found" Nothing
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe StepResult
 applyStepToNestedApp bindings expr = do
-    let (function, arguments) = (convertToMultiArgumentFunction expr)
-    case function of
-        (Var var) -> if (isNothing (tryFindBinding var bindings))
-                        then (if (any canBeReduced arguments)
-                            then do
-                                (description, simplifiedArguments, newBindings) <- (applyStepToOneOfTheArguments bindings [] arguments)
-                                return (description, (convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments), newBindings)
-                            else do
-                                appliedFunction <- (evaluateFunctionWithArguments function arguments (reduceToHeadNormalForm bindings)) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
-                                return ("Apply " ++ (showOutputable function), appliedFunction, bindings))
-                        else do
-                            (description, reducedFunction, newBindings) <- applyStep bindings (App function (head arguments))
-                            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), newBindings)
-        (Lam _ _) -> do
-            (description, reducedFunction, newBindings) <- applyStep bindings (App function (head arguments))
-            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), newBindings)
-        _ -> trace "application with unsupported expression type" Nothing
+    if (functionCallContainsClassDictionary expr)
+        then trace "function call contains class dictionary" Nothing
+        else do
+            let (function, arguments) = (convertToMultiArgumentFunction expr)
+            case function of
+                (Var var) -> if (isNothing (tryFindBinding var bindings))
+                                then (if (any canBeReduced arguments)
+                                    then do
+                                        (description, simplifiedArguments, newBindings) <- (applyStepToOneOfTheArguments bindings [] arguments)
+                                        return (description, (convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments), newBindings)
+                                    else do
+                                        appliedFunction <- (evaluateFunctionWithArguments function arguments (reduceToHeadNormalForm bindings)) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function 
+                                        return ("Apply " ++ (showOutputable function), appliedFunction, bindings))
+                                else do
+                                    (description, reducedFunction, newBindings) <- applyStep bindings (App function (head arguments))
+                                    return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), newBindings)
+                (Lam _ _) -> do
+                    (description, reducedFunction, newBindings) <- applyStep bindings (App function (head arguments))
+                    return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), newBindings)
+                _ -> trace "application with unsupported expression type" Nothing
 
 applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var], [Binding])
 applyStepToOneOfTheArguments bindings alreadyReducedArguments (x:xs) = if canBeReduced x
@@ -134,3 +137,11 @@ canBeReducedToNormalForm (App expr argument) = do
     let (function, arguments) = (convertToMultiArgumentFunction (App expr argument))
     (any canBeReduced arguments) || (any canBeReducedToNormalForm arguments)  
 canBeReducedToNormalForm _ = False
+
+functionCallContainsClassDictionary :: Expr Var -> Bool --example for a function call with class dictionary: == @Direction $fEqDirection Top Down
+functionCallContainsClassDictionary expr = do
+    let (function, arguments) = (convertToMultiArgumentFunction expr)
+    if ((length arguments) >= 2)
+        then do
+            ((isVarExpression function) && (isTypeInformation (arguments!!0))) && (isClassDictionary (arguments!!1))
+        else False 

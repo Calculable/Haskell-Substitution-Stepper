@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList)
+module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary)
 where
 
 import GHC.Core (Expr (..), collectArgs)
@@ -30,9 +30,18 @@ isInHeadNormalForm = exprIsHNF
 
 isTypeInformation :: Expr Var -> Bool
 isTypeInformation (Type _) = True
-isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
 isTypeInformation (App expr arg) =  isTypeInformation expr
-isTypeInformation x = False
+isTypeInformation x = if isClassDictionary x
+                        then True
+                        else False
+
+isClassDictionary :: Expr Var -> Bool
+isClassDictionary (Var name) = ("$" `isPrefixOf` (varToString name))
+isClassDictionary x = False
+
+isVarExpression :: Expr Var -> Bool
+isVarExpression (Var name) = True
+isVarExpression _ = False
 
 -- | The "canBeReducedFunction" checks if a Core expression is not yet in head normal form and can further be reduced
 canBeReduced exp
