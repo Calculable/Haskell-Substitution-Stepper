@@ -164,13 +164,14 @@ extractFunctionFromClassDictionary (Var function) (Var classDictionary) bindings
     extractFunctionFromClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
 extractFunctionFromClassDictionary (Var function) (App expr args) bindings = do
     result <- reduceNestedApplicationToHeadNormalForm bindings (App expr args)
-    extractFunctionFromClassDictionaryDefinition bindings (Var function) result
+    trace ("result has format : " ++ (showOutputable result)) extractFunctionFromClassDictionaryDefinition bindings (Var function) result
 extractFunctionFromClassDictionary _ _ _ = Nothing
 
 extractFunctionFromClassDictionaryDefinition :: [Binding] -> Expr Var -> Expr Var -> Maybe (Expr Var)
 extractFunctionFromClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
     let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
     findDictionaryFunctionForFunctionName bindings var dictionaryArguments
+extractFunctionFromClassDictionaryDefinition bindings (Var var) (Lam expr arg) = Just (Lam expr arg)
 extractFunctionFromClassDictionaryDefinition _ _ _ = Nothing
 
 findDictionaryFunctionForFunctionName :: [Binding] -> Var -> [Expr Var] -> Maybe (Expr Var)
@@ -201,6 +202,14 @@ getTypeOfExpression (Coercion _) = "Coercion"
 
 reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
 reduceNestedApplicationToHeadNormalForm bindings expr = do
-    let (Var functionName, arguments) = convertToMultiArgumentFunction expr
+    let result = reduceNestedApplication bindings expr
+    if (isNothing result)
+        then (Just expr)
+        else (reduceNestedApplicationToHeadNormalForm bindings (fromJust result))
+
+reduceNestedApplication :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplication bindings (App expr arg) = do
+    let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
     reducedFunction <- tryFindBinding functionName bindings
     reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+reduceNestedApplication _ _ = Nothing 

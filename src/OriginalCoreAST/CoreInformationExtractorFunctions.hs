@@ -54,6 +54,7 @@ canBeReduced exp
       (App (Lam _ _) x) -> True;
       (App (Let _ _) x) -> True;
       (Case _ _ _ _) -> True;
+      (Cast _ _) -> True;
       (Let _ _) -> True;
       (App x y) -> (canBeReduced (getFunctionOfNestedApplication (App x y))) || not (exprIsHNF exp);
       _ -> not (exprIsHNF exp)

@@ -25,7 +25,8 @@ deepReplaceVarWithinExpression name replaceExpression (Lam parameter expression)
     else Lam parameter (deepReplaceVarWithinExpression name replaceExpression expression)
 deepReplaceVarWithinExpression name replaceExpression (Case expression binding caseType alternatives) = Case (deepReplaceVarWithinExpression name replaceExpression expression) binding caseType (map (deepReplaceVarWithinAlternative name replaceExpression) alternatives)
 deepReplaceVarWithinExpression name replaceExpression (Let binding expression) = Let (deepReplaceVarWithinBinding name replaceExpression binding) (deepReplaceVarWithinExpression name replaceExpression expression)
-deepReplaceVarWithinExpression _ _ expression = expression --nothing to replace (ToDo: Cast and Coercion not implemented yet)
+deepReplaceVarWithinExpression name replaceExpression (Cast expression cohersion) = Cast (deepReplaceVarWithinExpression name replaceExpression expression) cohersion
+deepReplaceVarWithinExpression _ _ expression = expression --nothing to replace (Coercion not implemented yet)
 
 deepReplaceVarWithinAlternative :: Var -> Expr Var -> Alt Var -> Alt Var
 deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundVars, expression) = if elem (varToString name) (map varToString localBoundVars)
@@ -41,6 +42,7 @@ deepReplaceVarWithinBindingTuple :: Var -> Expr Var -> (Var, Expr Var) -> (Var, 
 deepReplaceVarWithinBindingTuple name replaceExpression (b, expression) = if (==) (varToString b) (varToString name)
                                                                                 then (b, expression) --do nothing (shadowing)
                                                                                 else (b, deepReplaceVarWithinExpression name replaceExpression expression)
+
 
 deepReplaceMultipleVarWithinExpression :: [Var] -> [Expr Var] -> Expr Var -> Expr Var
 deepReplaceMultipleVarWithinExpression [] _ expression = expression
