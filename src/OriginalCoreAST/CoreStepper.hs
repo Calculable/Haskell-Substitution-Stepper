@@ -93,10 +93,10 @@ applyStep bindings (Case expression binding caseType alternatives) = do
             return ("Replace with matching pattern", matchingPattern, bindings)
 applyStep bindings (Let (NonRec b expr) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, bindings)
 applyStep bindings (Let (Rec [(b, expr)]) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, ((b, expr) : bindings))
+applyStep bindings (Cast expression cohersion) = Just ("Remove cohersion from cast", expression, bindings)
 
-applyStep bindings (Cast _ _) = trace "no applicable step found: cast is not yet supported" Nothing
 applyStep bindings (Tick _ _) = trace "no applicable step found: tick is not supported" Nothing
-applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not yet supported" Nothing
+applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not supported" Nothing
 applyStep _ _ = trace "no applicable step found" Nothing
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe StepResult
@@ -171,6 +171,7 @@ extractFunctionFromClassDictionaryDefinition :: [Binding] -> Expr Var -> Expr Va
 extractFunctionFromClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
     let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
     findDictionaryFunctionForFunctionName bindings var dictionaryArguments
+extractFunctionFromClassDictionaryDefinition bindings (Var var) (Lam expr arg) = Just (Lam expr arg)
 extractFunctionFromClassDictionaryDefinition _ _ _ = Nothing
 
 findDictionaryFunctionForFunctionName :: [Binding] -> Var -> [Expr Var] -> Maybe (Expr Var)
@@ -187,20 +188,18 @@ functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = f
 
 functionNameMatchesFunctionFromDictionary _ _ = False
 
-getTypeOfExpression :: Expr Var -> String --used for tracing / debugging
-getTypeOfExpression (Var _) = "Var"
-getTypeOfExpression (Lit _) = "Lit"
-getTypeOfExpression (App _ _) = "App"
-getTypeOfExpression (Lam _ _) = "Lam"
-getTypeOfExpression (Let _ _) = "Let"
-getTypeOfExpression (Case _ _ _ _) = "Case"
-getTypeOfExpression (Cast _ _) = "Cast"
-getTypeOfExpression (Tick _ _) = "Tick"
-getTypeOfExpression (Type _) = "Type"
-getTypeOfExpression (Coercion _) = "Coercion"
 
 reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
 reduceNestedApplicationToHeadNormalForm bindings expr = do
-    let (Var functionName, arguments) = convertToMultiArgumentFunction expr
+    let result = reduceNestedApplication bindings expr
+    if (isNothing result)
+        then (Just expr)
+        else (reduceNestedApplicationToHeadNormalForm bindings (fromJust result))
+
+reduceNestedApplication :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplication bindings (App expr arg) = do
+    let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
     reducedFunction <- tryFindBinding functionName bindings
-    reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+    result <- reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+    return result
+reduceNestedApplication _ _ = Nothing 
