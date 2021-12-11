@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList)
+module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication)
 where
 
 import GHC.Core (Expr (..), collectArgs)
@@ -9,6 +9,7 @@ import GHC.Core.Utils (exprIsHNF)
 import Data.List(isPrefixOf)
 import Debug.Trace(trace)
 import Utils (showOutputable)
+
 
 varExpressionToString :: Expr Var -> String
 varExpressionToString (Var var) = varToString var
@@ -30,19 +31,31 @@ isInHeadNormalForm = exprIsHNF
 
 isTypeInformation :: Expr Var -> Bool
 isTypeInformation (Type _) = True
-isTypeInformation (Var name) = "$" `isPrefixOf` (varToString name)
 isTypeInformation (App expr arg) =  isTypeInformation expr
-isTypeInformation x = False
+isTypeInformation x = if isClassDictionary x
+                        then True
+                        else False
+
+isClassDictionary :: Expr Var -> Bool
+isClassDictionary (Var name) = ("$" `isPrefixOf` (varToString name))
+isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
+isClassDictionary x = False
+
+isVarExpression :: Expr Var -> Bool
+isVarExpression (Var name) = True
+isVarExpression _ = False
 
 -- | The "canBeReducedFunction" checks if a Core expression is not yet in head normal form and can further be reduced
+canBeReduced :: Expr Var -> Bool
 canBeReduced exp
   | isTypeInformation exp = False
   | isBooleanVar exp = False
-  | otherwise = case exp of {
+  | otherwise = case exp of { --check nested application
       (App (Lam _ _) x) -> True;
       (App (Let _ _) x) -> True;
       (Case _ _ _ _) -> True;
       (Let _ _) -> True;
+      (App x y) -> (canBeReduced (getFunctionOfNestedApplication (App x y))) || not (exprIsHNF exp);
       _ -> not (exprIsHNF exp)
   }
 
@@ -85,3 +98,6 @@ isConstructorApplicationOfType _ _ = False
 isListType :: Expr a -> Bool --is there a more elegant solution?
 isListType (Type ty) = ((showOutputable ty) == "[]")
 
+
+getFunctionOfNestedApplication :: Expr Var -> Expr Var 
+getFunctionOfNestedApplication expr = fst (collectArgs expr)
