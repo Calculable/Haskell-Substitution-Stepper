@@ -2,7 +2,7 @@ module OriginalCoreAST.CoreStepper(applyStep, reduceToHeadNormalForm, reduceToNo
 where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
-import Data.List ( isPrefixOf, find, isPrefixOf )
+import Data.List ( isPrefixOf, find, isSuffixOf )
 import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreExpression)
 import Data.Maybe
 import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..), CoreBind, collectArgs)
@@ -146,17 +146,41 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
         then do
             if ((isVarExpression function) && (isTypeInformation (arguments!!0))) && (isClassDictionary (arguments!!1))
                 then do
+                    let (Var functionName) = function
                     let typeInformation = (arguments!!0)
                     let (Var classDictionaryName) = (arguments!!1)
                     classDictionaryExpression <- tryFindBinding classDictionaryName bindings
-                    extractedFunctionFromClassDictionary <- extractFunctionFromClassDictionary function classDictionaryExpression
+                    (Var extractedFunctionNameFromClassDictionary) <- extractFunctionFromClassDictionary function classDictionaryExpression
+                    extractedFunction <- tryFindBinding extractedFunctionNameFromClassDictionary bindings --check if the extracted function name exists in the bindings. 
                     let realFunctionArguments = drop 2 arguments
-                    let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunctionFromClassDictionary realFunctionArguments
-                    return ("replace '" ++ "' with definition from the class dictionary", resultExpression, bindings)
+                    let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication (Var extractedFunctionNameFromClassDictionary) realFunctionArguments -- we could also return extractedFunction here, this would skip one reduction step
+                    return ("replace '" ++ (varToString functionName) ++"' with definition from the class dictionary", resultExpression, bindings)
                 else Nothing --function call does not contain class dictionary
         else Nothing --function call does not contain class dictionary
 
 
 extractFunctionFromClassDictionary :: Expr Var -> Expr Var -> Maybe (Expr Var)
---extractFunctionFromClassDictionary (Var var) _ = Just (integerToCoreExpression 42)
+extractFunctionFromClassDictionary (Var var) (App dictionaryApplication argument) = do
+    let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
+    findDictionaryFunctionForFunctionName var dictionaryArguments
 extractFunctionFromClassDictionary _ _ = trace "function not found in class dictionary" Nothing
+
+findDictionaryFunctionForFunctionName :: Var -> [Expr Var] -> Maybe (Expr Var)
+findDictionaryFunctionForFunctionName name functionVariables = do
+    find (functionNameMatchesFunctionFromDictionary name) functionVariables
+
+functionNameMatchesFunctionFromDictionary :: Var -> Expr Var -> Bool
+functionNameMatchesFunctionFromDictionary searchFunctionName (Var dictionaryFunctionName) = (varToString searchFunctionName) `isSuffixOf` (varToString dictionaryFunctionName)
+functionNameMatchesFunctionFromDictionary _ _ = False
+
+getTypeOfExpression :: Expr Var -> String --used for tracing / debugging
+getTypeOfExpression (Var _) = "Var"
+getTypeOfExpression (Lit _) = "Lit"
+getTypeOfExpression (App _ _) = "App"
+getTypeOfExpression (Lam _ _) = "Lam"
+getTypeOfExpression (Let _ _) = "Let"
+getTypeOfExpression (Case _ _ _ _) = "Case"
+getTypeOfExpression (Cast _ _) = "Cast"
+getTypeOfExpression (Tick _ _) = "Tick"
+getTypeOfExpression (Type _) = "Type"
+getTypeOfExpression (Coercion _) = "Coercion"
