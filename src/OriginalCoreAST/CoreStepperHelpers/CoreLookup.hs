@@ -19,22 +19,27 @@ tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions
 
 tryFindBindingForStringIncludingOverrideFunctions :: String -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForStringIncludingOverrideFunctions name bindings = do
-  let normalBinding = tryFindBindingForString name bindings
-  if (isNothing normalBinding)
-    then (tryFindBindingForString ("override'" ++ name) bindings)
-    else normalBinding
+  let overrideBindings = tryFindBindingForString ("override'" ++ name) bindings
+  if (isNothing overrideBindings)
+    then (tryFindBindingForString name bindings)
+    else overrideBindings
 
 
+
+--should only be used for testing
 findBindingForString :: String -> [Binding] -> Expr Var
 findBindingForString name bindings = do
   let foundBinding = tryFindBindingForString name bindings
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key [] = {-trace "no binding found"-} Nothing
-tryFindBindingForString key ((var, exp):xs) = if ((==) (varToString var) key)
-                                                    then Just (exp)
-                                                    else tryFindBindingForString key xs
+tryFindBindingForString key bindings = do
+  let foundBindings = filter (\binding -> (==) (varToString (fst binding)) key) bindings
+  if (length foundBindings) > 1 
+    then error (("more than one binding with name '" ++ key) ++ "' was found. The stepper is not (yet) able to choose the right binding by checking the signature.")
+    else if (length foundBindings) == 1
+      then Just (snd (head foundBindings))
+      else Nothing  
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingPattern expression patterns = do
