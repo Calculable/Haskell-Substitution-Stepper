@@ -15,13 +15,13 @@ import Debug.Trace(trace)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions (varToString name) bindings
+tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions name bindings
 
-tryFindBindingForStringIncludingOverrideFunctions :: String -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForStringIncludingOverrideFunctions :: Var -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForStringIncludingOverrideFunctions name bindings = do
-  let overrideBindings = tryFindBindingForString ("override'" ++ name) bindings
+  let overrideBindings = tryFindBindingForString ("override'" ++ (varToString name)) bindings
   if (isNothing overrideBindings)
-    then (tryFindBindingForString name bindings)
+    then (tryFindBindingForVar name bindings)
     else overrideBindings
 
 
@@ -31,6 +31,17 @@ findBindingForString :: String -> [Binding] -> Expr Var
 findBindingForString name bindings = do
   let foundBinding = tryFindBindingForString name bindings
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
+
+
+tryFindBindingForVar :: Var -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForVar key bindings = do
+  let foundBindings = filter (\binding -> (==) (fst binding) key) bindings
+  if ((length foundBindings) > 1 )
+    then error ("more than one binding with name '" ++ (varToString key) ++ "' was found. The stepper is not (yet) able to choose the right binding by checking the signature.")
+    else if (length foundBindings) == 1
+      then Just (snd (head foundBindings))
+      else Nothing  
+  
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForString key bindings = do
