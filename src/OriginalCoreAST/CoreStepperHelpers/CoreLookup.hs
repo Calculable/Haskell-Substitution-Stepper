@@ -34,23 +34,22 @@ findBindingForString name bindings = do
 
 
 tryFindBindingForVar :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForVar key bindings = do
-  let foundBindings = filter (\binding -> (==) (fst binding) key) bindings
-  if ((length foundBindings) > 1 )
-    then error ("more than one binding with name '" ++ (varToString key) ++ "' was found. The stepper is not (yet) able to choose the right binding by checking the signature.")
-    else if (length foundBindings) == 1
-      then Just (snd (head foundBindings))
-      else Nothing  
-  
+tryFindBindingForVar key bindings = tryFindBindingForCriteria (\binding -> (==) (fst binding) key) bindings
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key bindings = do
-  let foundBindings = filter (\binding -> (==) (varToString (fst binding)) key) bindings
+tryFindBindingForString key bindings = tryFindBindingForCriteria (\binding -> (==) (varToString (fst binding)) key) bindings
+
+
+tryFindBindingForCriteria :: (Binding -> Bool) -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForCriteria criteria bindings = do
+  let foundBindings = filter criteria  bindings
   if (length foundBindings) > 1 
-    then error (("more than one binding with name '" ++ key) ++ "' was found. The stepper is not (yet) able to choose the right binding by checking the signature.")
+    then trace ("more than one binding with the same name was found. I will return the first one (this might lead to a wrong expression)") Just (snd (head foundBindings))
     else if (length foundBindings) == 1
       then Just (snd (head foundBindings))
       else Nothing  
+
+
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingPattern expression patterns = do
