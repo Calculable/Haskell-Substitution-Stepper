@@ -15,26 +15,41 @@ import Debug.Trace(trace)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions (varToString name) bindings
+tryFindBinding name bindings = tryFindBindingForStringIncludingOverrideFunctions name bindings
 
-tryFindBindingForStringIncludingOverrideFunctions :: String -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForStringIncludingOverrideFunctions :: Var -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForStringIncludingOverrideFunctions name bindings = do
-  let normalBinding = tryFindBindingForString name bindings
-  if (isNothing normalBinding)
-    then (tryFindBindingForString ("override'" ++ name) bindings)
-    else normalBinding
+  let overrideBindings = tryFindBindingForString ("override'" ++ (varToString name)) bindings
+  if (isNothing overrideBindings)
+    then (tryFindBindingForVar name bindings)
+    else overrideBindings
 
 
+
+--should only be used for testing
 findBindingForString :: String -> [Binding] -> Expr Var
 findBindingForString name bindings = do
   let foundBinding = tryFindBindingForString name bindings
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
+
+tryFindBindingForVar :: Var -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForVar key bindings = tryFindBindingForCriteria (\binding -> (==) (fst binding) key) bindings
+
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key [] = {-trace "no binding found"-} Nothing
-tryFindBindingForString key ((var, exp):xs) = if ((==) (varToString var) key)
-                                                    then Just (exp)
-                                                    else tryFindBindingForString key xs
+tryFindBindingForString key bindings = tryFindBindingForCriteria (\binding -> (==) (varToString (fst binding)) key) bindings
+
+
+tryFindBindingForCriteria :: (Binding -> Bool) -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForCriteria criteria bindings = do
+  let foundBindings = filter criteria  bindings
+  if (length foundBindings) > 1 
+    then trace ("more than one binding with the same name was found. I will return the first one (this might lead to a wrong expression)") Just (snd (head foundBindings))
+    else if (length foundBindings) == 1
+      then Just (snd (head foundBindings))
+      else Nothing  
+
+
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingPattern expression patterns = do
