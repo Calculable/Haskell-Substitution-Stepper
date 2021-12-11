@@ -140,12 +140,23 @@ canBeReducedToNormalForm (App expr argument) = do
 canBeReducedToNormalForm _ = False
 
 tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> Expr Var -> Maybe StepResult
-tryApplyStepToApplicationUsingClassDictionary _ _ = Nothing 
-
-functionCallContainsClassDictionary :: Expr Var -> Bool --example for a function call with class dictionary: == @Direction $fEqDirection Top Down
-functionCallContainsClassDictionary expr = do
+tryApplyStepToApplicationUsingClassDictionary bindings expr = do
     let (function, arguments) = (convertToMultiArgumentFunction expr)
     if ((length arguments) >= 2)
         then do
-            ((isVarExpression function) && (isTypeInformation (arguments!!0))) && (isClassDictionary (arguments!!1))
-        else False 
+            if ((isVarExpression function) && (isTypeInformation (arguments!!0))) && (isClassDictionary (arguments!!1))
+                then do
+                    let typeInformation = (arguments!!0)
+                    let (Var classDictionaryName) = (arguments!!1)
+                    classDictionaryExpression <- tryFindBinding classDictionaryName bindings
+                    extractedFunctionFromClassDictionary <- extractFunctionFromClassDictionary function classDictionaryExpression
+                    let realFunctionArguments = drop 2 arguments
+                    let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunctionFromClassDictionary realFunctionArguments
+                    return ("replace '" ++ "' with definition from the class dictionary", resultExpression, bindings)
+                else Nothing --function call does not contain class dictionary
+        else Nothing --function call does not contain class dictionary
+
+
+extractFunctionFromClassDictionary :: Expr Var -> Expr Var -> Maybe (Expr Var)
+--extractFunctionFromClassDictionary (Var var) _ = Just (integerToCoreExpression 42)
+extractFunctionFromClassDictionary _ _ = trace "function not found in class dictionary" Nothing
