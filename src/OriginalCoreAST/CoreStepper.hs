@@ -23,7 +23,7 @@ import GHC.Core.TyCo.Rep (Type(..), TyLit(..))
 import GHC.Types.Id.Info ( vanillaIdInfo, IdDetails(..))
 import GHC.Types.Name.Occurrence (mkOccName, mkVarOcc)
 import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression)
-import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isVarExpression, isClassDictionary)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isVarExpression, isClassDictionary, getFunctionOfNestedApplication)
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments)
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator(convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction)
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup(tryFindBinding, findMatchingPattern)
@@ -148,10 +148,9 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
                 then do
                     let (Var functionName) = function
                     let typeInformation = (arguments!!0)
-                    let (Var classDictionaryName) = (arguments!!1)
-                    classDictionaryExpression <- tryFindBinding classDictionaryName bindings
-                    (Var extractedFunctionNameFromClassDictionary) <- extractFunctionFromClassDictionary function classDictionaryExpression
-                    extractedFunction <- tryFindBinding extractedFunctionNameFromClassDictionary bindings --check if the extracted function name exists in the bindings. 
+                    let classDictionaryExpression = (arguments!!1)
+                    extractedFunction <- extractFunctionFromClassDictionary function classDictionaryExpression bindings
+                    --extractedFunction <- tryFindBinding extractedFunctionNameFromClassDictionary bindings --check if the extracted function name exists in the bindings. 
                     let realFunctionArguments = drop 2 arguments
                     let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunction realFunctionArguments
                     return ("replace '" ++ (varToString functionName) ++"' with definition from the class dictionary", resultExpression, bindings)
@@ -159,18 +158,33 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
         else Nothing --function call does not contain class dictionary
 
 
-extractFunctionFromClassDictionary :: Expr Var -> Expr Var -> Maybe (Expr Var)
-extractFunctionFromClassDictionary (Var var) (App dictionaryApplication argument) = do
-    let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
-    findDictionaryFunctionForFunctionName var dictionaryArguments
-extractFunctionFromClassDictionary _ _ = trace "function not found in class dictionary" Nothing
+extractFunctionFromClassDictionary :: Expr Var -> Expr Var -> [Binding] -> Maybe (Expr Var)
+extractFunctionFromClassDictionary (Var function) (Var classDictionary) bindings = do
+    classDictionaryDefinition <- tryFindBinding classDictionary bindings
+    extractFunctionFromClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
+extractFunctionFromClassDictionary (Var function) (App expr args) bindings = do
+    result <- reduceNestedApplicationToHeadNormalForm bindings (App expr args)
+    extractFunctionFromClassDictionaryDefinition bindings (Var function) result
+extractFunctionFromClassDictionary _ _ _ = Nothing
 
-findDictionaryFunctionForFunctionName :: Var -> [Expr Var] -> Maybe (Expr Var)
-findDictionaryFunctionForFunctionName name functionVariables = do
-    find (functionNameMatchesFunctionFromDictionary name) functionVariables
+extractFunctionFromClassDictionaryDefinition :: [Binding] -> Expr Var -> Expr Var -> Maybe (Expr Var)
+extractFunctionFromClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
+    let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
+    findDictionaryFunctionForFunctionName bindings var dictionaryArguments
+extractFunctionFromClassDictionaryDefinition _ _ _ = Nothing
+
+findDictionaryFunctionForFunctionName :: [Binding] -> Var -> [Expr Var] -> Maybe (Expr Var)
+findDictionaryFunctionForFunctionName bindings name functionVariables = do
+    foundFunction <- find (functionNameMatchesFunctionFromDictionary name) functionVariables
+    case foundFunction of {
+        (Var function) -> tryFindBinding function bindings;
+        (App expr arg) -> reduceNestedApplicationToHeadNormalForm bindings (App expr arg)
+    }
 
 functionNameMatchesFunctionFromDictionary :: Var -> Expr Var -> Bool
 functionNameMatchesFunctionFromDictionary searchFunctionName (Var dictionaryFunctionName) = (varToString searchFunctionName) `isSuffixOf` (varToString dictionaryFunctionName)
+functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = functionNameMatchesFunctionFromDictionary searchFunctionName (getFunctionOfNestedApplication (App expr args))
+
 functionNameMatchesFunctionFromDictionary _ _ = False
 
 getTypeOfExpression :: Expr Var -> String --used for tracing / debugging
@@ -184,3 +198,9 @@ getTypeOfExpression (Cast _ _) = "Cast"
 getTypeOfExpression (Tick _ _) = "Tick"
 getTypeOfExpression (Type _) = "Type"
 getTypeOfExpression (Coercion _) = "Coercion"
+
+reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplicationToHeadNormalForm bindings expr = do
+    let (Var functionName, arguments) = convertToMultiArgumentFunction expr
+    reducedFunction <- tryFindBinding functionName bindings
+    reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
