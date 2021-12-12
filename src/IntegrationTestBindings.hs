@@ -2,6 +2,10 @@ module IntegrationTestBindings where
 import Data.Maybe
 import Data.Either
 
+import Prelude hiding ((&&))
+import Utils (showOutputable)
+import Debug.Trace(trace)
+
 {-Arithmetic-}
 additionInput = 1+1
 additionExpectedOutput = 2
@@ -297,7 +301,7 @@ equalsOnTupleExpectedOutput = False
 functionOnCustomTypeInput = getData (Top 5)
 functionOnCustomTypeExpectedOutput = 5
 
-equalityOnCustomTypeInput = changeDirection (Top 5)
+equalityOnCustomTypeInput = change (Top 5)
 equalityOnCustomTypeExpectedOutput = Down 5
 
 {-infinite lists-}
@@ -343,6 +347,61 @@ monadListExpectedOutput = True
 {-Functions that can throw errors-}
 functionThatMightThrowErrorInput = findMaximum [1, 2, 3]
 functionThatMightThrowErrorExpectedOutput = 3
+
+
+{-Custom Type Classes-}
+
+data Direction a = Top a | Down a deriving (Ord)
+
+instance (Eq a) => Eq (Direction a) where
+  (==) (Top x) (Top y) = x == y
+  (==) (Top x) (Down y) = False
+  (==) (Down x) (Top y) = False
+  (==) (Down x) (Down y) = x == y
+  (/=) (Top x) (Top y) = x /= y
+  (/=) (Top x) (Down y) = True
+  (/=) (Down x) (Top y) = True
+  (/=) (Down x) (Down y) = x /= y
+
+usageOfStandardTypeClassInput = (Top (5)) == (Top (5))
+usageOfStandardTypeClassExpectedOutput :: Bool
+usageOfStandardTypeClassExpectedOutput = True
+
+
+
+usageOfAutomaticDerivedTypeClassInput :: Bool
+usageOfAutomaticDerivedTypeClassInput = (Top (5)) < (Top (6))
+usageOfAutomaticDerivedTypeClassExpectedOutput = True
+
+
+class Navigatable a where
+    change :: a -> a
+    doNotChange :: a -> a
+
+instance Navigatable (Direction a) where
+  change (Top x) = Down x
+  change (Down x) = Top x
+  doNotChange x = x
+
+usageOfCustomTypeClassInput = (change (Top (5::Integer))) == Down (5::Integer)
+usageOfCustomTypeClassExpectedOutput = True
+
+data List a = Nil | Cons a (List a) deriving (Eq)
+
+instance Functor List where
+    fmap _ Nil = Nil
+    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
+
+myList :: List Integer
+myList = Cons 1 (Cons 2 (Cons 3 Nil))
+
+sumOfList :: (Num a) => List a -> a
+sumOfList Nil = 0
+sumOfList (Cons x rest) = x + (sumOfList rest)
+
+
+usageOfCustomTypeClass2Input = sumOfList (fmap (+1) myList)
+usageOfCustomTypeClass2ExpectedOutput =  9
 
 {-Helper Functions-}
 
@@ -428,16 +487,6 @@ functionWithMultipleWhere x = (y * z)
         z = 1
 
 
-data Direction a = Top a | Down a deriving (Eq, Ord, Show, Read)
-
-changeDirection :: Direction a -> Direction a
-changeDirection (Top a) = Down a
-changeDirection (Down a) = Top a
-
-getData :: Direction a -> a
-getData (Top a) = a
-getData (Down a) = a
-
 second :: (a, b) -> b
 second (x, y) = y
 
@@ -500,3 +549,13 @@ findMaximum :: (Ord a) => [a] -> a
 findMaximum [] = error "maximum of empty list"  
 findMaximum [x] = x  
 findMaximum (x:xs) = max x (findMaximum xs)  
+
+getData :: Direction a -> a
+getData (Top a) = a
+getData (Down a) = a
+
+(&&), (||)       :: Bool -> Bool -> Bool
+True  && x       =  x
+False && _       =  False
+True  || _       =  True
+False || x       =  x

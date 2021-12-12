@@ -214,6 +214,16 @@ spec = before getBindingFinderWithCoreBindings $ do
     describe "Functions that might throw an error are supported" $ do
         it "functions that might throw an error can be called" $ \(bindingFinder, coreBindings) -> do
             expectationForExpression "functionThatMightThrowError" bindingFinder coreBindings
+    describe "Custom Type Classes" $ do
+        it "standart type classes can be implemented" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "usageOfStandardTypeClass" bindingFinder coreBindings
+        it "custom type classes can be implemented" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "usageOfCustomTypeClass" bindingFinder coreBindings
+        it "automatic derived type classes work" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "usageOfAutomaticDerivedTypeClass" bindingFinder coreBindings
+        it "custom type classes work" $ \(bindingFinder, coreBindings) -> do
+            expectationForExpression "usageOfCustomTypeClass2" bindingFinder coreBindings
+
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
@@ -221,4 +231,3 @@ expectationForExpression expressionBindingName bindingFinder coreBindings = do
         let expectedOutput = (bindingFinder(expressionBindingName ++ "ExpectedOutput"))
         let output = reduceToNormalForm coreBindings input
         (prepareExpressionArgumentForEvaluation output) `shouldBe` (prepareExpressionArgumentForEvaluation expectedOutput)
-
