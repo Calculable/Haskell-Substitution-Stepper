@@ -1,6 +1,7 @@
 {-most of the source code is taken from https://www.haskell.org/onlinereport/standard-prelude.html-}
 
 {-# OPTIONS -XNoImplicitPrelude #-}
+{-# LANGUAGE RankNTypes #-}
 
 module SteppablePrelude where
 import GHC.Maybe hiding (Maybe(..), Maybe)
@@ -15,7 +16,16 @@ import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, r
     sum, product, maximum, minimum, 
     zip, zip3, zipWith, zipWith3, unzip, unzip3,
     reads, shows, read, lex,
-    showChar, showString, readParen, showParen, ReadS, ShowS, Maybe(..), Either(..), sequence, sequence_, mapM, mapM_, (=<<), fst, snd, curry, uncurry)
+    showChar, showString, readParen, showParen, ReadS, ShowS, Maybe(..), Either(..), sequence, sequence_, mapM, mapM_, (=<<), fst, snd, curry, uncurry, readsPrec, showsPrec, show, showsPrec, showsPrec, readsPrec, showList, readList, maybe, (&&), (||), not, otherwise)
+
+
+infixr 9  .
+infixr 8  ^, ^^
+infixr 3  &&
+infixr 2  ||
+infixr 1  =<<
+infixr 0  $, $!
+
 
 -- Maybe type
 
@@ -149,6 +159,24 @@ flip f x y       =  f y x
 ($), ($!) :: (a -> b) -> a -> b
 f $  x    =  f x
 f $! x    =  x `seq` f x
+
+-- Boolean Functions
+
+
+(&&), (||)       :: Bool -> Bool -> Bool
+True  && x       =  x
+False && _       =  False
+True  || _       =  True
+False || x       =  x
+                                        
+
+not              :: Bool -> Bool
+not True         =  False
+not False        =  True
+
+
+otherwise        :: Bool
+otherwise        =  True
 
 
 -- Misc functions
@@ -540,95 +568,6 @@ mapM_ f as       =  sequence_ (map f as)
 (=<<)            :: Monad m => (a -> m b) -> m a -> m b
 f =<< x          =  x >>= f
 
-{-Prelude PreludeText-}
-type  ReadS a  = String -> [(a,String)]
-
-type  ShowS    = String -> String
-
-reads            :: (Read a) => ReadS a
-reads            =  readsPrec 0
-
-
-shows            :: (Show a) => a -> ShowS
-shows            =  showsPrec 0
-
-
-read             :: (Read a) => String -> a
-read s           =  case [x | (x,t) <- reads s, ("","") <- lex t] of
-                         [x] -> x
-                         []  -> error "Prelude.read: no parse"
-                         _   -> error "Prelude.read: ambiguous parse"
-
-
-showChar         :: Char -> ShowS
-showChar         =  (:)
-
-
-showString       :: String -> ShowS
-showString       =  (++)
-
-
-showParen        :: Bool -> ShowS -> ShowS
-showParen b p    =  if b then showChar '(' . p . showChar ')' else p
-
-
-readParen        :: Bool -> ReadS a -> ReadS a
-readParen b g    =  if b then mandatory else optional
-                    where optional r  = g r ++ mandatory r
-                          mandatory r = [(x,u) | ("(",s) <- lex r,
-                                                 (x,t)   <- optional s,
-                                                 (")",u) <- lex t    ]
-
-
--- This lexer is not completely faithful to the Haskell lexical syntax.
--- Current limitations:
---    Qualified names are not handled properly
---    Octal and hexidecimal numerics are not recognized as a single token
---    Comments are not treated properly
-
-
-lex              :: ReadS String
-lex ""           =  [("","")]
-lex (c:s)
-   | isSpace c   =  lex (dropWhile isSpace s)
-lex ('\'':s)     =  [('\'':ch++"'", t) | (ch,'\'':t)  <- lexLitChar s,
-                                         ch /= "'" ]
-lex ('"':s)      =  [('"':str, t)      | (str,t) <- lexString s]
-                    where
-                    lexString ('"':s) = [("\"",s)]
-                    lexString s = [(ch++str, u)
-                                         | (ch,t)  <- lexStrItem s,
-                                           (str,u) <- lexString t  ]
-
-                    lexStrItem ('\\':'&':s) =  [("\\&",s)]
-                    lexStrItem ('\\':c:s) | isSpace c
-                                           =  [("\\&",t) | 
-                                               '\\':t <-
-                                                   [dropWhile isSpace s]]
-                    lexStrItem s           =  lexLitChar s
-
-lex (c:s) | isSingle c = [([c],s)]
-          | isSym c    = [(c:sym,t)       | (sym,t) <- [span isSym s]]
-          | isAlpha c  = [(c:nam,t)       | (nam,t) <- [span isIdChar s]]
-          | isDigit c  = [(c:ds++fe,t)    | (ds,s)  <- [span isDigit s],
-                                            (fe,t)  <- lexFracExp s     ]
-          | otherwise  = []    -- bad character
-             where
-              isSingle c =  c `elem` ",;()[]{}_`"
-              isSym c    =  c `elem` "!@#$%&*+./<=>?\\^|:-~"
-              isIdChar c =  isAlphaNum c || c `elem` "_'"
-
-              lexFracExp ('.':c:cs) | isDigit c
-                            = [('.':ds++e,u) | (ds,t) <- lexDigits (c:cs),
-                                               (e,u)  <- lexExp t]
-              lexFracExp s  = lexExp s
-
-              lexExp (e:s) | e `elem` "eE"
-                       = [(e:c:ds,u) | (c:t)  <- [s], c `elem` "+-",
-                                                 (ds,u) <- lexDigits t] ++
-                         [(e:ds,t)   | (ds,t) <- lexDigits s]
-              lexExp s = [("",s)]
-
 
 {-Char Type-}
 
@@ -647,47 +586,6 @@ isSpace c               =  c == ' '     ||
                            c == '\xa0'  ||
                            iswspace (fromIntegral (ord c)) /= 0
 
-isAlpha :: Char -> Bool
-isAlpha    c = iswalpha (ord c) /= 0
-
-isDigit                 :: Char -> Bool
-isDigit c               =  (fromIntegral (ord c - ord '0') :: Word) <= 9
-
-isAlphaNum :: Char -> Bool
-isAlphaNum c = iswalnum (ord c) /= 0
-
-
-showLitChar                :: Char -> ShowS
-showLitChar c s | c > '\DEL' =  showChar '\\' (protectEsc isDec (shows (ord c)) s)
-showLitChar '\DEL'         s =  showString "\\DEL" s
-showLitChar '\\'           s =  showString "\\\\" s
-showLitChar c s | c >= ' '   =  showChar c s
-showLitChar '\a'           s =  showString "\\a" s
-showLitChar '\b'           s =  showString "\\b" s
-showLitChar '\f'           s =  showString "\\f" s
-showLitChar '\n'           s =  showString "\\n" s
-showLitChar '\r'           s =  showString "\\r" s
-showLitChar '\t'           s =  showString "\\t" s
-showLitChar '\v'           s =  showString "\\v" s
-showLitChar '\SO'          s =  protectEsc (== 'H') (showString "\\SO") s
-showLitChar c              s =  showString ('\\' : asciiTab!!ord c) s
-
-protectEsc :: (Char -> Bool) -> ShowS -> ShowS
-protectEsc p f             = f . cont
-                             where cont s@(c:_) | p c = "\\&" ++ s
-                                   cont s             = s
-
-
-isDec :: Char -> Bool
-isDec c = c >= '0' && c <= '9'
-
-asciiTab :: [String]
-asciiTab = 
-           ["NUL", "SOH", "STX", "ETX", "EOT", "ENQ", "ACK", "BEL",
-            "BS",  "HT",  "LF",  "VT",  "FF",  "CR",  "SO",  "SI",
-            "DLE", "DC1", "DC2", "DC3", "DC4", "NAK", "SYN", "ETB",
-            "CAN", "EM",  "SUB", "ESC", "FS",  "GS",  "RS",  "US",
-            "SP"]
 
 {-unsupported functions-}
 
@@ -702,10 +600,3 @@ iswalpha _ = error "the stepper does not support the iswalpha function. Try to a
 
 iswalnum :: Int -> Int
 iswalnum _ = error "the stepper does not support the iswalpha function. Try to add your own implementation using XY"
-
-
-lexLitChar :: ReadS String
-lexLitChar = error "the stepper does not support the lexLitChar function. Try to add your own implementation using XY"
-
-lexDigits :: ReadS String
-lexDigits = error "the stepper does not support the lexDigits function. Try to add your own implementation using XY"
