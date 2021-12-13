@@ -38,9 +38,6 @@ library
       OriginalCoreAST.CoreStepperHelpers.CoreTransformator
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
-      Source2
-      Source4
-      Source5
       TraverseAST
       Utils
   other-modules:
