@@ -4,22 +4,14 @@
 {-# OPTIONS -XNoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 
-module SteppablePrelude where
+module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Prelude) where
 
 {-Imports-}
 import GHC.Maybe hiding (Maybe(..), Maybe)
+import Prelude (Eq(..), Ord(..), Functor(..), Monad(..), Bounded(..), Floating(..), Fractional(..), Integral(..), Num(..), RealFloat(..), RealFrac(..), Applicative(..), Bool(..), Real(..), Int(..), String(..), Float(..), Double(..), Char(..), Integer(..), Rational(..), (-), (*), (+), (/), (<), (>), (<=), (>=), rem, (==), (/=), error, abs, quot, recip, fromInteger, toInteger, fromRational, seq, max, min) --import only "unsteppable functionality", provide the other functions
 
-import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, realToFrac, id, const, (.), flip, ($), ($!), until, asTypeOf, undefined, map, (++), filter, concat, concatMap, 
-    head, last, tail, init, null, length, (!!), 
-    foldl, foldl1, scanl, scanl1, foldr, foldr1, scanr, scanr1,
-    iterate, repeat, replicate, cycle,
-    take, drop, splitAt, takeWhile, dropWhile, span, break,
-    lines, words, unlines, unwords, reverse, and, or,
-    any, all, elem, notElem, lookup,
-    sum, product, maximum, minimum, 
-    zip, zip3, zipWith, zipWith3, unzip, unzip3,
-    reads, shows, read, lex,
-    showChar, showString, readParen, showParen, ReadS, ShowS, Maybe(..), Either(..), sequence, sequence_, mapM, mapM_, (=<<), fst, snd, curry, uncurry, readsPrec, showsPrec, show, showsPrec, showsPrec, readsPrec, showList, readList, maybe, (&&), (||), not, otherwise)
+import qualified Prelude as OriginalPrelude (Enum(..))
+import Source5 (x)
 
 {-Infixr-}
 infixr 9  .
@@ -33,7 +25,7 @@ infixr 5  ++
 infix  4  `elem`, `notElem`
 
 {-Type: Maybe-}
-data  Maybe a  =  Nothing | Just a      deriving (Eq, Ord, Read, Show)
+data  Maybe a  =  Nothing | Just a      deriving (Eq, Ord)
 maybe              :: b -> (a -> b) -> Maybe a -> b
 maybe n f Nothing  =  n
 maybe n f (Just x) =  f x
@@ -53,10 +45,10 @@ instance Applicative Maybe where
 
 {-Type: Ordering-}
 data  Ordering  =  LT | EQ | GT
-          deriving (Eq, Ord, Enum, Read, Show, Bounded)
+          deriving (Eq, Ord, Bounded)
 
 {-Type: Either-}
-data  Either a b  =  Left a | Right b   deriving (Eq, Ord, Read, Show)
+data  Either a b  =  Left a | Right b   deriving (Eq, Ord)
 
 either               :: (a -> c) -> (b -> c) -> Either a b -> c
 either f g (Left x)  =  f x
@@ -406,3 +398,90 @@ iswalpha _ = error "the stepper does not support the iswalpha function. Try to a
 
 iswalnum :: Int -> Int
 iswalnum _ = error "the stepper does not support the iswalpha function. Try to add your own implementation using XY"
+
+primIntToChar :: Int -> Char
+primIntToChar _ = error "the stepper does not support the primIntToChar function. Try to add your own implementation using XY"
+
+primCharToInt :: Char -> Int
+primCharToInt _ = error "the stepper does not support the primCharToInt function. Try to add your own implementation using XY"
+
+
+{-Type Class: Enum-}
+class  Enum a  where
+    succ, pred       :: a -> a
+    toEnum           :: Int -> a
+    fromEnum         :: a -> Int
+    enumFrom         :: a -> [a]             -- [n..]
+    enumFromThen     :: a -> a -> [a]        -- [n,n'..]
+    enumFromTo       :: a -> a -> [a]        -- [n..m]
+    enumFromThenTo   :: a -> a -> a -> [a]   -- [n,n'..m]
+
+        -- Minimal complete definition:
+        --      toEnum, fromEnum
+--
+-- NOTE: these default methods only make sense for types
+--   that map injectively into Int using fromEnum
+--  and toEnum.
+    succ             =  toEnum . (+1) . fromEnum
+    pred             =  toEnum . (subtract 1) . fromEnum
+    enumFrom x       =  map toEnum [fromEnum x ..]
+    enumFromTo x y   =  map toEnum [fromEnum x .. fromEnum y]
+    enumFromThen x y =  map toEnum [fromEnum x, fromEnum y ..]
+    enumFromThenTo x y z = 
+                        map toEnum [fromEnum x, fromEnum y .. fromEnum z]
+
+
+instance  Enum Char  where
+    toEnum            = primIntToChar
+    fromEnum          = primCharToInt
+    enumFrom c        = map toEnum [fromEnum c .. fromEnum (maxBound::Char)]
+    enumFromThen c c' = map toEnum [fromEnum c, fromEnum c' .. fromEnum lastChar]
+                      where lastChar :: Char
+                            lastChar | c' < c    = minBound
+                                     | otherwise = maxBound
+
+instance  Enum Int  where
+    toEnum x         =  x
+    fromEnum   x     =  x
+
+instance  Enum Integer  where
+    toEnum x         =  fromIntegral x
+    fromEnum   x     =  fromInteger x
+
+
+instance  Enum Float  where
+    succ x           =  x+1
+    pred x           =  x-1
+    toEnum           =  fromIntegral
+    fromEnum         =  fromInteger . truncate   -- may overflow
+    enumFrom         =  numericEnumFrom
+    enumFromThen     =  numericEnumFromThen
+    enumFromTo       =  numericEnumFromTo
+    enumFromThenTo   =  numericEnumFromThenTo
+
+instance  Enum Double  where
+    succ x           =  x+1
+    pred x           =  x-1
+    toEnum           =  fromIntegral
+    fromEnum         =  fromInteger . truncate   -- may overflow
+    enumFrom         =  numericEnumFrom
+    enumFromThen     =  numericEnumFromThen
+    enumFromTo       =  numericEnumFromTo
+    enumFromThenTo   =  numericEnumFromThenTo
+
+numericEnumFrom         :: (Fractional a) => a -> [a]
+
+numericEnumFromThen     :: (Fractional a) => a -> a -> [a]
+
+numericEnumFromTo       :: (Fractional a, Ord a) => a -> a -> [a]
+
+numericEnumFromThenTo   :: (Fractional a, Ord a) => a -> a -> a -> [a]
+numericEnumFrom         =  iterate (+1)
+numericEnumFromThen n m =  iterate (+(m-n)) n
+numericEnumFromTo n m   =  takeWhile (<= m+1/2) (numericEnumFrom n)
+numericEnumFromThenTo n n' m = takeWhile p (numericEnumFromThen n n')
+                             where
+                               p | n' >= n   = (<= m + (n'-n)/2)
+                                 | otherwise = (>= m + (n'-n)/2)
+
+
