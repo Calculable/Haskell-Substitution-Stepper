@@ -423,25 +423,24 @@ class  Enum a  where
 
 
 instance  Enum Char  where
+    succ             =  toEnum . (+1) . fromEnum
+    pred             =  toEnum . (subtract 1) . fromEnum
     toEnum            = primIntToChar
     fromEnum          = primCharToInt
-    enumFrom c        = map toEnum [fromEnum c .. fromEnum (maxBound::Char)]
-    enumFromThen c c' = map toEnum [fromEnum c, fromEnum c' .. fromEnum lastChar]
-                      where lastChar :: Char
-                            lastChar | c' < c    = minBound
-                                     | otherwise = maxBound
+    enumFrom         =  customEnumFrom
+    enumFromTo       =  customEnumFromTo
+    enumFromThen     =  customEnumFromThen
+    enumFromThenTo   = customEnumFromThenTo
 
 instance  Enum Int  where
     succ x           =  x+1
     pred x           =  x-1
     toEnum x         =  x
     fromEnum   x     =  x
-    enumFrom x       =  map toEnum [fromEnum x ..]
-    enumFromTo x y   =  map toEnum [fromEnum x .. fromEnum y]
-    enumFromThen x y =  map toEnum [fromEnum x, fromEnum y ..]
-    enumFromThenTo x y z = 
-                        map toEnum [fromEnum x, fromEnum y .. fromEnum z]
-
+    enumFrom         =  customEnumFrom
+    enumFromTo       =  customEnumFromTo
+    enumFromThen     =  customEnumFromThen
+    enumFromThenTo   = customEnumFromThenTo
 
 
 instance  Enum Integer  where
@@ -449,44 +448,50 @@ instance  Enum Integer  where
     pred x           =  x-1
     toEnum x         =  fromIntegral x
     fromEnum   x     =  fromInteger x
-    enumFrom x       =  map toEnum [fromEnum x ..]
-    enumFromTo x y   =  map toEnum [fromEnum x .. fromEnum y]
-    enumFromThen x y =  map toEnum [fromEnum x, fromEnum y ..]
-    enumFromThenTo x y z = 
-                        map toEnum [fromEnum x, fromEnum y .. fromEnum z]
+    enumFrom         =  customEnumFrom
+    enumFromTo       =  customEnumFromTo
+    enumFromThen     =  customEnumFromThen
+    enumFromThenTo   = customEnumFromThenTo
 
 instance  Enum Float  where
     succ x           =  x+1
     pred x           =  x-1
     toEnum           =  fromIntegral
     fromEnum         =  fromInteger . truncate   -- may overflow
-    enumFrom         =  numericEnumFrom
-    enumFromThen     =  numericEnumFromThen
-    enumFromTo       =  numericEnumFromTo
-    enumFromThenTo   =  numericEnumFromThenTo
+    enumFrom         =  customEnumFrom
+    enumFromTo       =  customEnumFromTo
+    enumFromThen     =  customEnumFromThen
+    enumFromThenTo   = customEnumFromThenTo
 
 instance  Enum Double  where
     succ x           =  x+1
     pred x           =  x-1
     toEnum           =  fromIntegral
     fromEnum         =  fromInteger . truncate   -- may overflow
-    enumFrom         =  numericEnumFrom
-    enumFromThen     =  numericEnumFromThen
-    enumFromTo       =  numericEnumFromTo
-    enumFromThenTo   =  numericEnumFromThenTo
+    enumFrom         =  customEnumFrom
+    enumFromTo       =  customEnumFromTo
+    enumFromThen     =  customEnumFromThen
+    enumFromThenTo   =  customEnumFromThenTo
 
-numericEnumFrom         :: (Fractional a) => a -> [a]
 
-numericEnumFromThen     :: (Fractional a) => a -> a -> [a]
+customEnumFrom :: Enum a => a -> [a]
+customEnumFrom x = x: (customEnumFrom (succ x))
 
-numericEnumFromTo       :: (Fractional a, Ord a) => a -> a -> [a]
+customEnumFromTo :: (Enum a, Ord a) => a -> a -> [a]
+customEnumFromTo n m = takeWhile (<= m) (customEnumFrom n) --check: why is original prelude implementation criteria (<= m+1/2)
 
-numericEnumFromThenTo   :: (Fractional a, Ord a) => a -> a -> a -> [a]
-numericEnumFrom         =  iterate (+1)
-numericEnumFromThen n m =  iterate (+(m-n)) n
-numericEnumFromTo n m   =  takeWhile (<= m+1/2) (numericEnumFrom n)
-numericEnumFromThenTo n n' m = takeWhile p (numericEnumFromThen n n')
-                             where
-                               p | n' >= n   = (<= m + (n'-n)/2)
-                                 | otherwise = (>= m + (n'-n)/2)
+customEnumFromThen:: (Enum a) => a -> a -> [a]
+customEnumFromThen n m = n : (customEnumFromThen (succStep n (stepSize n m)) (succStep m (stepSize n m)))
 
+customEnumFromThenTo :: (Enum a, Ord a) => a -> a -> a -> [a]
+customEnumFromThenTo n n' m = takeWhile p (customEnumFromThen n n')
+                                            where
+                                                p   | n' >= n   = (<= m)
+                                                    | otherwise = (>= m)
+
+succStep :: (Enum a) => a -> Int -> a
+succStep enum 0 = enum
+succStep enum stepsize = succStep (succ enum) (stepsize-1)
+
+stepSize :: (Enum a) => a -> a -> Int
+stepSize x y = (fromEnum y) - (fromEnum x)

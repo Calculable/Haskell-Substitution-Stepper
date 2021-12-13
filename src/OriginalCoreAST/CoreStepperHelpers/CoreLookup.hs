@@ -5,7 +5,10 @@ import GHC.Plugins
   ( Alt,
     AltCon (DEFAULT, DataAlt, LitAlt),
     Expr (App, Lit, Var),
-    Var,
+    Var(), 
+    varUnique, 
+    varName, 
+    varType,
     trace,
   )
 import OriginalCoreAST.CoreInformationExtractorFunctions
@@ -27,7 +30,7 @@ tryFindBinding = tryFindBindingForStringIncludingOverrideFunctions
 
 tryFindBindingForStringIncludingOverrideFunctions :: Var -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForStringIncludingOverrideFunctions name bindings = do
-  let overrideBindings = tryFindBindingForString ("override'" ++ varToString name) bindings
+  let overrideBindings =  tryFindBindingForString ("override'" ++ varToString name) bindings
   if isNothing overrideBindings
     then tryFindBindingForVar name bindings
     else overrideBindings
@@ -39,7 +42,7 @@ findBindingForString name bindings = do
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 tryFindBindingForVar :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForVar key = tryFindBindingForCriteria (\binding -> (==) (fst binding) key)
+tryFindBindingForVar key = tryFindBindingForCriteria (\binding -> (&&) ((==) (showOutputable (varName (fst binding))) (showOutputable (varName key))) ((==) (showOutputable (varType (fst binding))) (showOutputable (varType key))))
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForString key = tryFindBindingForCriteria (\binding -> (==) (varToString (fst binding)) key)

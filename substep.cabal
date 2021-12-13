@@ -36,6 +36,7 @@ library
       OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
       OriginalCoreAST.CoreStepperHelpers.CoreLookup
       OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+      OriginalCoreAST.CoreStepperHelpers.TracerHelper
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
       SteppablePrelude
