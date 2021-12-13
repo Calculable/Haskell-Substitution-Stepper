@@ -1,17 +1,17 @@
 module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Plugins
-  ( Expr (Lit),
-    Literal (LitChar, LitDouble, LitFloat, LitNumber),
-  )
-import OriginalCoreAST.CoreMakerFunctions
-  ( charToCoreLiteral,
-    fractionalToCoreLiteral,
-    integerToCoreExpression,
-    integerToCoreLiteral,
-    rationalToCoreExpression,
-    rationalToCoreLiteral,
-  )
+import GHC.Core (Expr (..))
+import GHC.Types.Literal(Literal (..))
+import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral)
+import GHC.Float (rationalToDouble)
+import Utils (showOutputable)
+import Debug.Trace(trace)
+import GHC.Utils.Outputable(OutputableBndr(..))
+import OriginalCoreAST.CoreInformationExtractorFunctions (varToString, isList, isJustMaybe, isNothingMaybe)
+import GHC.Types.Var (Var)
+
+instance (OutputableBndr b)  => Show (Expr b) where
+  show x = showOutputable x
 
 instance Num (Expr b) where
   (+) (Lit x) (Lit y) = Lit ((+) x y)
@@ -34,20 +34,71 @@ instance Fractional (Expr b) where
   fromRational = rationalToCoreExpression
 
 instance Eq (Expr b) where
-  (/=) (Lit x) (Lit y) = (/=) x y
-  (/=) _ _ = error "/= not supported by this type"
-  (==) (Lit x) (Lit y) = (==) x y
-  (==) _ _ = error "== not supported by this type"
+  (/=) x y = not ((==) x y)
+  (==) (Lit x) (Lit y) = weakEquals x y
+  (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
+  (==) x y = error "== and /= not supported by this type"
+
+weakEquals :: Literal -> Literal -> Bool
+weakEquals (LitChar first) (LitChar second) = ((==) first second) 
+weakEquals (LitNumber _ first) (LitNumber _ second) = ((==) first second) 
+weakEquals (LitString first) (LitString second) = ((==) first second) 
+weakEquals (LitNullAddr) (LitNullAddr) = True
+weakEquals (LitRubbish) (LitRubbish) = True
+weakEquals (LitFloat first) (LitFloat second) = ((==) first second) 
+weakEquals (LitDouble first) (LitFloat second) = ((==) first second) 
+weakEquals (LitFloat first) (LitDouble second) = ((==) first second) 
+weakEquals (LitDouble first) (LitDouble second) = ((==) first second) 
+weakEquals (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ) = ((==) (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ)) 
+weakEquals (LitNumber _ first) (LitFloat second) = ((==) (fromInteger first) (fromRational second))
+weakEquals (LitNumber _ first) (LitDouble second) = ((==) (fromInteger first) (fromRational second)) 
+weakEquals (LitFloat first) (LitNumber _ second) = ((==) (fromRational first) (fromInteger second)) 
+weakEquals (LitDouble first) (LitNumber _ second) = ((==) (fromRational first) (fromInteger second)) 
+
+weakEquals _ _ = False
 
 instance Ord (Expr b) where
-  (<=) (Lit x) (Lit y) = (<=) x y
+  (<=) (Lit x) (Lit y) = lessOrEqualLiteral x y
   (<=) _ _ = error "<= not supported by this type"
-  (<) (Lit x) (Lit y) = (<) x y
+  (<) (Lit x) (Lit y) = lessLiteral x y
   (<) _ _ = error "< not supported by this type"
-  (>=) (Lit x) (Lit y) = (>=) x y
+  (>=) (Lit x) (Lit y) = greaterEqualLiteral x y
   (>=) _ _ = error ">= not supported by this type"
-  (>) (Lit x) (Lit y) = (>) x y
+  (>) (Lit x) (Lit y) = greaterLiteral x y
   (>) _ _ = error "> not supported by this type"
+
+
+compareLiteral :: Literal -> Literal -> Ordering
+compareLiteral leftExpression rightExpression
+    | weakEquals leftExpression rightExpression = EQ
+    | lessOrEqualLiteral leftExpression rightExpression = LT
+    | otherwise = GT
+
+lessOrEqualLiteral :: Literal -> Literal -> Bool
+lessOrEqualLiteral (LitChar x) (LitChar y) = x <= y
+lessOrEqualLiteral (LitNumber _ x) (LitNumber _ y) = x <= y
+lessOrEqualLiteral (LitString x) (LitString y) = x <= y
+lessOrEqualLiteral (LitFloat x) (LitFloat y) = x <= y
+lessOrEqualLiteral (LitDouble x) (LitDouble y) = x <= y
+lessOrEqualLiteral (LitFloat x) (LitDouble y) = x <= y
+lessOrEqualLiteral (LitDouble x) (LitFloat y) = x <= y
+lessOrEqualLiteral (LitNumber _ x) (LitFloat y) = fromInteger x <= y
+lessOrEqualLiteral (LitFloat x) (LitNumber _ y) = x <= fromInteger y
+lessOrEqualLiteral (LitNumber _ x) (LitDouble y) = fromInteger x <= y
+lessOrEqualLiteral (LitDouble x) (LitNumber _ y) = x <= fromInteger y
+lessOrEqualLiteral x y = x <= y --use existing equality operator in literal type
+
+
+{-implementieren-}
+
+lessLiteral :: Literal -> Literal -> Bool  
+lessLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == LT
+
+greaterEqualLiteral  :: Literal -> Literal -> Bool  
+greaterEqualLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression /= LT
+
+greaterLiteral :: Literal -> Literal -> Bool  
+greaterLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == GT
 
 instance Enum (Expr b) where
   succ (Lit x) = Lit (succ x)
@@ -382,13 +433,10 @@ instance Integral Literal where
   div _ _ = error "div not supported for this type"
   mod (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (mod x y)
   mod _ _ = error "mod not supported for this type"
-
   quotRem (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = quotRem x y
   quotRem _ _ = error "quotRem not supported for this type"
-
   divMod (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = divMod x y
   divMod _ _ = error "divMod not supported for this type"
-
   toInteger (LitNumber _ x) = x
   toInteger _ = error "toInteger not supported for this type"
 

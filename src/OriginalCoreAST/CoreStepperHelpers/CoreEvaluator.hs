@@ -1,4 +1,5 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments) where
+module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator(evaluateFunctionWithArguments, prepareExpressionArgumentForEvaluation)
+where
 
 import GHC.Plugins (Expr (App, Lit, Var), Literal (LitNumber), Var)
 import OriginalCoreAST.CoreInformationExtractorFunctions
@@ -11,16 +12,34 @@ import OriginalCoreAST.CoreMakerFunctions
     rationalToCoreExpression,
   )
 import OriginalCoreAST.CoreTypeClassInstances ()
+import Data.Maybe (isNothing, fromJust)
+import GHC.Core (Expr (..))
+import GHC.Types.Literal ( Literal (..))
+import GHC.Types.Var (Var)
+import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, expressionListToCoreList, expressionTupleToCoreTuple, maybeToCoreExpression, expressionListToCoreListWithType)
+import OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isJustMaybe, isNothingMaybe, isListType)
+import Utils (showOutputable)
+import Debug.Trace(trace)
+import Data.Bifunctor (bimap)
+import Control.Monad  (join)
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertToMultiArgumentFunction, convertFunctionApplicationWithArgumentListToNestedFunctionApplication, getIndividualElementsOfList)
+import GHC.Core.TyCo.Rep (Type)
 
-evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Maybe (Expr Var)
-evaluateFunctionWithArguments (Var functionOrOperatorName) arguments = do
-  let argumentsWithoutApplications = map replaceApplicationWithArgument arguments --sometimes, arguments are of type "application". For example for a Double: "D# 0.5##". ToDo: Check if this command is dangerous
-  evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not . isTypeInformation) argumentsWithoutApplications) --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
-evaluateFunctionWithArguments _ _ = error "function-expression has to be a 'Var'"
+evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> (Expr Var -> Maybe (Expr Var)) -> Maybe (Expr Var)
+evaluateFunctionWithArguments (Var functionOrOperatorName) arguments reducer = do
+    let argumentsWithoutApplications = (map prepareExpressionArgumentForEvaluation arguments)
+    let evaluatedWithTypes = evaluateUnsteppableFunctionWithArgumentsAndTypes (varToString functionOrOperatorName) argumentsWithoutApplications reducer
+    if (isNothing evaluatedWithTypes) 
+        then evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not.isTypeInformation) argumentsWithoutApplications) --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
+        else evaluatedWithTypes
+evaluateFunctionWithArguments _ _ _ = (error "function-expression has to be a 'Var'")
 
-replaceApplicationWithArgument :: Expr Var -> Expr Var
-replaceApplicationWithArgument (App expr arg) = arg
-replaceApplicationWithArgument x = x
+prepareExpressionArgumentForEvaluation :: Expr Var -> Expr Var
+prepareExpressionArgumentForEvaluation (App (Var id) arg) = case varToString id of
+                                                                [_, '#'] ->  arg --type constructor, simply return value
+                                                                "unpackCString#" -> arg --argument is simply a String
+                                                                _ -> App (Var id) arg
+prepareExpressionArgumentForEvaluation x = x
 
 evaluateUnsteppableFunctionWithArguments :: String -> [Expr Var] -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArguments "+" [x, y] = Just ((+) x y)
@@ -62,6 +81,8 @@ evaluateUnsteppableFunctionWithArguments "atanh" [x] = Just (atanh x)
 evaluateUnsteppableFunctionWithArguments "**" [x, y] = Just ((**) x y)
 evaluateUnsteppableFunctionWithArguments "logBase" [x, y] = Just (logBase x y)
 evaluateUnsteppableFunctionWithArguments "quot" [x, y] = Just (quot x y)
+evaluateUnsteppableFunctionWithArguments "quotRem" [x, y] = Just $ expressionTupleToCoreTuple (quotRem x y)
+evaluateUnsteppableFunctionWithArguments "divMod" [x, y] = Just $ expressionTupleToCoreTuple (divMod x y)
 evaluateUnsteppableFunctionWithArguments "rem" [x, y] = Just (rem x y)
 evaluateUnsteppableFunctionWithArguments "div" [x, y] = Just (div x y)
 evaluateUnsteppableFunctionWithArguments "mod" [x, y] = Just (mod x y)
@@ -69,7 +90,9 @@ evaluateUnsteppableFunctionWithArguments "toInteger" [x] = Just (integerToCoreEx
 evaluateUnsteppableFunctionWithArguments "toRational" [x] = Just (rationalToCoreExpression (toRational x))
 evaluateUnsteppableFunctionWithArguments "floatRadix" [x] = Just $ integerToCoreExpression (floatRadix x)
 evaluateUnsteppableFunctionWithArguments "floatDigits" [x] = Just $ integerToCoreExpression (toInteger (floatDigits x))
-evaluateUnsteppableFunctionWithArguments "encodeFloat" [Lit (LitNumber _ x), Lit (LitNumber _ y)] = Just (encodeFloat x (fromIntegral y))
+evaluateUnsteppableFunctionWithArguments "floatRange" [x] = Just $ expressionTupleToCoreTuple (join bimap integerToCoreExpression (join bimap toInteger (floatRange x)))
+evaluateUnsteppableFunctionWithArguments "decodeFloat" [x] = Just $ expressionTupleToCoreTuple (integerToCoreExpression (fst res), integerToCoreExpression (toInteger (snd res))) where res = decodeFloat x
+evaluateUnsteppableFunctionWithArguments "encodeFloat" [(Lit (LitNumber _ x)), (Lit (LitNumber _ y))] = Just (encodeFloat x (fromIntegral y))
 evaluateUnsteppableFunctionWithArguments "exponent" [x] = Just (integerToCoreExpression (toInteger (exponent x)))
 evaluateUnsteppableFunctionWithArguments "significand" [x] = Just (significand x)
 evaluateUnsteppableFunctionWithArguments "scaleFloat" [Lit (LitNumber _ x), y] = Just (scaleFloat (fromIntegral x) y)
@@ -79,9 +102,90 @@ evaluateUnsteppableFunctionWithArguments "isDenormalized" [x] = Just (boolToCore
 evaluateUnsteppableFunctionWithArguments "isNegativeZero" [x] = Just (boolToCoreExpression (isNegativeZero x))
 evaluateUnsteppableFunctionWithArguments "isIEEE" [x] = Just (boolToCoreExpression (isIEEE x))
 evaluateUnsteppableFunctionWithArguments "atan2" [x, y] = Just (atan2 x y)
+evaluateUnsteppableFunctionWithArguments "properFraction" [x] = Just $ expressionTupleToCoreTuple (properFraction x)
 evaluateUnsteppableFunctionWithArguments "truncate" [x] = Just (integerToCoreExpression (toInteger (truncate x)))
 evaluateUnsteppableFunctionWithArguments "round" [x] = Just (integerToCoreExpression (toInteger (round x)))
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] = Just (integerToCoreExpression (toInteger (floor x)))
-evaluateUnsteppableFunctionWithArguments name _ = Nothing --function not supported
---toDo: Implement more operators and functions
+evaluateUnsteppableFunctionWithArguments "eqString" [x, y] = Just (boolToCoreExpression (x == y))
+evaluateUnsteppableFunctionWithArguments "fmap" [x, y] = customFmapForMaybe x y
+evaluateUnsteppableFunctionWithArguments name args = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
+
+customFmapForMaybe :: Expr Var -> Expr Var -> Maybe (Expr Var)
+customFmapForMaybe function (App constructor argument)
+    | isNothingMaybe (App constructor argument) = Just (App constructor argument)
+    | isJustMaybe (App constructor argument) = Just (App constructor (App function argument))
+customFmapForMaybe _ _ = trace "fmap not supported for this type" Nothing
+
+
+evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> (Expr Var -> Maybe (Expr Var)) -> Maybe (Expr Var)
+evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [(Type monadType), _, (Type ty), value] reducer = Just (customReturn monadType ty value)
+evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [(Type monadType), _, (Type ty), _] reducer = Just (customFail monadType ty)
+evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, (Type newType), argument, function] reducer = customMonadOperator newType argument function reducer
+evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, (Type newType), argument, function] reducer = customMonadOperator2 newType argument function reducer
+evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, (Type newType), function, argument] reducer = (customFmapForList newType function argument)
+
+evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
+
+
+customMonadOperator :: Type -> Expr Var -> Expr Var -> (Expr Var -> Maybe (Expr Var)) -> Maybe (Expr Var)
+customMonadOperator newType (App constructor argument) function reducer
+    | isNothingMaybe (App constructor argument) = Just (App constructor argument)
+    | isJustMaybe (App constructor argument) = Just (App function argument)
+    | isList (App constructor argument) = do
+        fmappedList <- customFmapForList newType function (App constructor argument)
+        customConcatForList newType fmappedList reducer
+customMonadOperator _ _ _ _ = trace ">>= not supported for this type" Nothing
+
+customMonadOperator2 :: Type -> Expr Var -> Expr Var -> (Expr Var -> Maybe (Expr Var)) -> Maybe (Expr Var)
+customMonadOperator2 newType (App constructor argument) function reducer
+    | isNothingMaybe (App constructor argument) = Just (App constructor argument)
+    | isJustMaybe (App constructor argument) = Just function
+    | isList (App constructor argument) = do
+        fmappedList <- repalceAllListItemsWithFunction newType function (App constructor argument)
+        customConcatForList newType fmappedList reducer
+customMonadOperator2 _ _ _ _ = trace ">> not supported for this type" Nothing
+
+customReturn :: Type -> Type -> Expr Var -> Expr Var
+customReturn monadType ty expression = do
+    if isListType (Type monadType)
+        then expressionListToCoreListWithType ty [expression]
+        else maybeToCoreExpression (Just expression) ty --is maybe type (could be checked again)    
+
+customFail :: Type -> Type -> Expr Var
+customFail monadType ty =
+    if isListType (Type monadType)
+        then expressionListToCoreListWithType ty []
+        else maybeToCoreExpression Nothing ty --is maybe type (could be checked again)   
+
+repalceAllListItemsWithFunction :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
+repalceAllListItemsWithFunction newType element functorArgument
+    | isList functorArgument = do
+        let listItems = getIndividualElementsOfList functorArgument
+        let listItemsWithoutTypes = (filter (not.isTypeInformation) listItems)
+        let mappedListItems = replicate (length listItemsWithoutTypes) element
+        Just (expressionListToCoreListWithType newType mappedListItems)
+    | otherwise = Nothing
+
+
+customFmapForList :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
+customFmapForList newType function functorArgument
+    | isList functorArgument = do
+        let listItems = getIndividualElementsOfList functorArgument
+        let listItemsWithoutTypes = (filter (not.isTypeInformation) listItems)
+        let mappedListItems = map (App function) listItemsWithoutTypes
+        Just (expressionListToCoreListWithType newType mappedListItems)
+    | otherwise = Nothing
+
+customConcatForList :: Type -> Expr Var -> (Expr Var -> Maybe (Expr Var)) -> Maybe (Expr Var)
+customConcatForList newType nestedListExpression reducer = do
+    let (_, subLists) = convertToMultiArgumentFunction nestedListExpression
+    let maybeMappedArguments = (map reducer subLists)
+    if (any isNothing maybeMappedArguments)
+        then Nothing
+        else do
+            let flatArguments = concatMap extractArgumentsOfNestedApplication (map fromJust maybeMappedArguments)
+            return (expressionListToCoreListWithType newType (filter (not.isTypeInformation) flatArguments))
+
+extractArgumentsOfNestedApplication :: Expr Var -> [Expr Var]
+extractArgumentsOfNestedApplication expr = snd (convertToMultiArgumentFunction expr)
