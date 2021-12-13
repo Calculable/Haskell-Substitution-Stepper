@@ -101,7 +101,6 @@ test-suite substep-test
   other-modules:
       DataProvider.DataProvider
       OriginalCoreAST.IntegrationTestSpec
-      SimplifiedCoreAST.SimplifiedCoreASTConverterSpec
       Paths_substep
   hs-source-dirs:
       test

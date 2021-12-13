@@ -6,7 +6,6 @@ import OriginalCoreAST.CoreStepperHelpers.CoreLookup
   ( findBindingForString,
   )
 import OriginalCoreAST.CoreStepperPrinter (convertToBindingsList)
-import OriginalCoreAST.IntegrationTestSpec
 
 findBinding :: String -> IO (Expr Var)
 findBinding name = do findBindingForString name <$> coreBindings
@@ -21,7 +20,6 @@ compiledCore = compileToCore "src/IntegrationTestBindings.hs"
 coreProgram :: IO CoreProgram
 coreProgram = do getCoreProgram <$> compiledCore
 
-coreBindings :: IO [Binding]
 coreBindings = do convertToBindingsList <$> coreProgram
 
 getBindingFinderWithCoreBindings :: IO (String -> Expr Var, [(Var, Expr Var)])
