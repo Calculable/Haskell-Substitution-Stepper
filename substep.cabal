@@ -50,6 +50,7 @@ library
       Source3
       Source4
       Source5
+      SteppablePrelude
       TraverseAST
       Utils
   other-modules:
