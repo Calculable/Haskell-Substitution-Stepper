@@ -1,17 +1,21 @@
 module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Core (Expr (..))
-import GHC.Types.Literal(Literal (..))
-import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral)
-import GHC.Float (rationalToDouble)
+import GHC.Plugins (Expr (Lit, Var), Literal (..), OutputableBndr)
+import OriginalCoreAST.CoreInformationExtractorFunctions
+  ( varToString,
+  )
+import OriginalCoreAST.CoreMakerFunctions
+  ( charToCoreLiteral,
+    fractionalToCoreLiteral,
+    integerToCoreExpression,
+    integerToCoreLiteral,
+    rationalToCoreExpression,
+    rationalToCoreLiteral,
+  )
 import Utils (showOutputable)
-import Debug.Trace(trace)
-import GHC.Utils.Outputable(OutputableBndr(..))
-import OriginalCoreAST.CoreInformationExtractorFunctions (varToString, isList, isJustMaybe, isNothingMaybe)
-import GHC.Types.Var (Var)
 
-instance (OutputableBndr b)  => Show (Expr b) where
-  show x = showOutputable x
+instance (OutputableBndr b) => Show (Expr b) where
+  show = showOutputable
 
 instance Num (Expr b) where
   (+) (Lit x) (Lit y) = Lit ((+) x y)
@@ -40,21 +44,20 @@ instance Eq (Expr b) where
   (==) x y = error "== and /= not supported by this type"
 
 weakEquals :: Literal -> Literal -> Bool
-weakEquals (LitChar first) (LitChar second) = ((==) first second) 
-weakEquals (LitNumber _ first) (LitNumber _ second) = ((==) first second) 
-weakEquals (LitString first) (LitString second) = ((==) first second) 
-weakEquals (LitNullAddr) (LitNullAddr) = True
-weakEquals (LitRubbish) (LitRubbish) = True
-weakEquals (LitFloat first) (LitFloat second) = ((==) first second) 
-weakEquals (LitDouble first) (LitFloat second) = ((==) first second) 
-weakEquals (LitFloat first) (LitDouble second) = ((==) first second) 
-weakEquals (LitDouble first) (LitDouble second) = ((==) first second) 
-weakEquals (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ) = ((==) (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ)) 
-weakEquals (LitNumber _ first) (LitFloat second) = ((==) (fromInteger first) (fromRational second))
-weakEquals (LitNumber _ first) (LitDouble second) = ((==) (fromInteger first) (fromRational second)) 
-weakEquals (LitFloat first) (LitNumber _ second) = ((==) (fromRational first) (fromInteger second)) 
-weakEquals (LitDouble first) (LitNumber _ second) = ((==) (fromRational first) (fromInteger second)) 
-
+weakEquals (LitChar first) (LitChar second) = (==) first second
+weakEquals (LitNumber _ first) (LitNumber _ second) = (==) first second
+weakEquals (LitString first) (LitString second) = (==) first second
+weakEquals LitNullAddr LitNullAddr = True
+weakEquals LitRubbish LitRubbish = True
+weakEquals (LitFloat first) (LitFloat second) = (==) first second
+weakEquals (LitDouble first) (LitFloat second) = (==) first second
+weakEquals (LitFloat first) (LitDouble second) = (==) first second
+weakEquals (LitDouble first) (LitDouble second) = (==) first second
+weakEquals (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ) = (==) (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ)
+weakEquals (LitNumber _ first) (LitFloat second) = (==) (fromInteger first) (fromRational second)
+weakEquals (LitNumber _ first) (LitDouble second) = (==) (fromInteger first) (fromRational second)
+weakEquals (LitFloat first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
+weakEquals (LitDouble first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
 weakEquals _ _ = False
 
 instance Ord (Expr b) where
@@ -67,12 +70,11 @@ instance Ord (Expr b) where
   (>) (Lit x) (Lit y) = greaterLiteral x y
   (>) _ _ = error "> not supported by this type"
 
-
 compareLiteral :: Literal -> Literal -> Ordering
 compareLiteral leftExpression rightExpression
-    | weakEquals leftExpression rightExpression = EQ
-    | lessOrEqualLiteral leftExpression rightExpression = LT
-    | otherwise = GT
+  | weakEquals leftExpression rightExpression = EQ
+  | lessOrEqualLiteral leftExpression rightExpression = LT
+  | otherwise = GT
 
 lessOrEqualLiteral :: Literal -> Literal -> Bool
 lessOrEqualLiteral (LitChar x) (LitChar y) = x <= y
@@ -88,16 +90,15 @@ lessOrEqualLiteral (LitNumber _ x) (LitDouble y) = fromInteger x <= y
 lessOrEqualLiteral (LitDouble x) (LitNumber _ y) = x <= fromInteger y
 lessOrEqualLiteral x y = x <= y --use existing equality operator in literal type
 
-
 {-implementieren-}
 
-lessLiteral :: Literal -> Literal -> Bool  
+lessLiteral :: Literal -> Literal -> Bool
 lessLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == LT
 
-greaterEqualLiteral  :: Literal -> Literal -> Bool  
+greaterEqualLiteral :: Literal -> Literal -> Bool
 greaterEqualLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression /= LT
 
-greaterLiteral :: Literal -> Literal -> Bool  
+greaterLiteral :: Literal -> Literal -> Bool
 greaterLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == GT
 
 instance Enum (Expr b) where
@@ -202,7 +203,7 @@ instance Real (Expr b) where
   toRational _ = error "toRational not supported for this type"
 
 instance RealFrac (Expr b) where
-  properFraction (Lit x) = ((fst res), Lit (snd res)) where res = properFraction x
+  properFraction (Lit x) = (fst res, Lit (snd res)) where res = properFraction x
   properFraction _ = error "properFraction not supported for this type"
 
   truncate (Lit x) = truncate x
