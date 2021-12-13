@@ -12,15 +12,12 @@ import Data.Data
     Typeable,
     cast,
   )
-import GHC
-  ( GenLocated (..),
-    GhcTc,
+import GHC.Data.Bag (Bag, bagToList)
+import GHC.Hs
+  ( GhcTc,
     HsBind,
     HsLit (HsInt64Prim, HsIntPrim, HsWord64Prim, HsWordPrim),
-    Located,
-    SrcSpan,
   )
-import GHC.Data.Bag (Bag, bagToList)
 import GHC.Hs.Dump (BlankSrcSpan (..))
 import GHC.Plugins
   ( GenLocated (..),
@@ -147,7 +144,7 @@ ext1Q ::
   (forall e. Data e => t e -> q) ->
   d ->
   q
-ext1Q def ext = unQ ((Q def) `ext1` (Q ext))
+ext1Q def ext = unQ (Q def `ext1` Q ext)
 
 -- | Type extension of queries for type constructors
 ext2Q ::
@@ -156,7 +153,7 @@ ext2Q ::
   (forall d1 d2. (Data d1, Data d2) => t d1 d2 -> q) ->
   d ->
   q
-ext2Q def ext = unQ ((Q def) `ext2` (Q ext))
+ext2Q def ext = unQ (Q def `ext2` Q ext)
 
 -- | Flexible type extension
 ext1 ::

@@ -34,35 +34,10 @@ import GHC.Driver.Session
       ),
     defaultDynFlags,
   )
-import GHC.Platform
-  ( Arch (ArchUnknown),
-    ByteOrder (LittleEndian),
-    OS (OSUnknown),
-    Platform
-      ( Platform,
-        platformByteOrder,
-        platformHasGnuNonexecStack,
-        platformHasIdentDirective,
-        platformHasSubsectionsViaSymbols,
-        platformIsCrossCompiling,
-        platformLeadingUnderscore,
-        platformMini,
-        platformTablesNextToCode,
-        platformUnregisterised,
-        platformWordSize
-      ),
-    PlatformMini (PlatformMini, platformMini_arch, platformMini_os),
-    PlatformMisc (PlatformMisc),
-    PlatformWordSize (PW8),
-  )
+import GHC.Fingerprint (fingerprint0)
+import GHC.Platform (Arch (ArchUnknown), ByteOrder (LittleEndian), OS (OSUnknown), PlatformWordSize (PW8))
 import GHC.Settings
-  ( FileSettings (FileSettings),
-    GhcNameVersion
-      ( GhcNameVersion,
-        ghcNameVersion_programName,
-        ghcNameVersion_projectVersion
-      ),
-    Platform
+  ( Platform
       ( Platform,
         platformByteOrder,
         platformHasGnuNonexecStack,
@@ -75,30 +50,10 @@ import GHC.Settings
         platformUnregisterised,
         platformWordSize
       ),
-    PlatformConstants
-      ( PlatformConstants,
-        pc_DYNAMIC_BY_DEFAULT,
-        pc_WORD_SIZE
-      ),
     PlatformMini (PlatformMini, platformMini_arch, platformMini_os),
-    PlatformMisc (PlatformMisc),
-    Settings
-      ( Settings,
-        sFileSettings,
-        sGhcNameVersion,
-        sPlatformConstants,
-        sPlatformMisc,
-        sTargetPlatform,
-        sToolSettings
-      ),
-    ToolSettings
-      ( ToolSettings,
-        toolSettings_opt_P_fingerprint,
-        toolSettings_pgm_F
-      ),
+    ToolSettings (ToolSettings, toolSettings_opt_P_fingerprint, toolSettings_pgm_F),
   )
-import GHC.Settings.Config (cProjectVersion)
-import GHC.Utils.Fingerprint (fingerprint0)
+import GHC.Version (cProjectVersion)
 
 fakeSettings :: Settings
 fakeSettings =

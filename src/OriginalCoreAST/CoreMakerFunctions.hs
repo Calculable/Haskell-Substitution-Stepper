@@ -6,7 +6,6 @@ import GHC.Plugins
     Expr (Lit, Var),
     IdDetails (VanillaId),
     Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
-    Type,
     Var,
     charTy,
     doubleTy,

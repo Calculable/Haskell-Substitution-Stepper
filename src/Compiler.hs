@@ -2,10 +2,10 @@
 
 module Compiler (compileToCore, writeDump, getCoreProgram) where
 
-import Control.Monad.State (MonadIO (liftIO), StateT (runStateT))
-import Data.Map.Strict (Map, empty, fromList, mapWithKey, singleton, toList)
+import Control.Monad.IO.Class (MonadIO (liftIO))
+import Data.Map.Strict (Map, fromList, toList)
 import Data.Text (Text, unpack)
-import qualified Data.Text.IO as T (writeFile)
+import qualified Data.Text.IO as T
 import GHC
   ( DesugaredModule (dm_core_module),
     DynFlags (hscTarget),
@@ -26,20 +26,25 @@ import GHC
     setSessionDynFlags,
     typecheckModule,
   )
-import GHC.Core (Bind (NonRec), CoreProgram, Expr)
-import GHC.Core.Ppr (pprCoreBindings)
-import GHC.Driver.Types (ModGuts (mg_binds, mg_fam_insts, mg_insts, mg_patsyns, mg_rdr_env, mg_tcs))
-import GHC.Paths (libdir)
-import OriginalCoreAST.CoreStepperPrinter
-  ( printCoreStepByStepReductionForEveryBinding,
+import GHC.Core (CoreProgram)
+import GHC.Driver.Types
+  ( ModGuts
+      ( mg_binds,
+        mg_fam_insts,
+        mg_insts,
+        mg_patsyns,
+        mg_rdr_env,
+        mg_tcs
+      ),
   )
+import GHC.Paths (libdir)
 import System.Directory
   ( createDirectory,
     doesDirectoryExist,
     removeDirectory,
   )
 import System.FilePath (joinPath, takeBaseName)
-import Utils (printAst, showOutputable, textAst, textOutputable)
+import Utils (textAst, textOutputable)
 
 data CompilationResult = CompilationResult
   { coreProgram :: CoreProgram,
