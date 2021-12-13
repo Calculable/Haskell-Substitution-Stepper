@@ -121,6 +121,7 @@ evaluateUnsteppableFunctionWithArguments "eqString" [x, y] _ = Just (boolToCoreE
 evaluateUnsteppableFunctionWithArguments "fmap" [x, y] _ = customFmapForMaybe x y
 evaluateUnsteppableFunctionWithArguments "primError" [x] _ = Nothing
 evaluateUnsteppableFunctionWithArguments "error" [x] _ = Nothing
+evaluateUnsteppableFunctionWithArguments "seq" [x, y] reducer = Just (seq (reducer x) y)
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
 customFmapForMaybe :: Expr Var -> Expr Var -> Maybe (Expr Var)
