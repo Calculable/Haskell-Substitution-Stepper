@@ -1,5 +1,6 @@
 module Main where
-import Cli ( runCli, dispatch )
+
+import Cli (dispatch, runCli)
 
 main :: IO ()
 main = do

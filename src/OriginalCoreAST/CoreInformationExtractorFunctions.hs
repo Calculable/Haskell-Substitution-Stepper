@@ -1,26 +1,26 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions(varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression)
-where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression) where
 
-import GHC.Core (Expr (..), collectArgs)
-import GHC.Types.Literal(Literal (..), mkLitInt64, mkLitString)
-import GHC.Types.Var (Var (varName, varType), TyVar, Id, mkCoVar, mkGlobalVar)
-import GHC.Types.Name(nameUnique, Name, mkSystemVarName, mkSysTvName, mkSystemName, pprNameUnqualified, nameStableString, getOccString)
-import GHC.Core.Utils (exprIsHNF)
-import Data.List(isPrefixOf)
-import Debug.Trace(trace)
+import Data.List (isPrefixOf)
+import GHC.Plugins
+  ( Expr (..),
+    Literal (LitDouble, LitFloat),
+    Name,
+    Var (varName),
+    collectArgs,
+    exprIsHNF,
+    getOccString,
+  )
 import Utils (showOutputable)
-
 
 varExpressionToString :: Expr Var -> String
 varExpressionToString (Var var) = varToString var
 varExpressionToString _ = error "Expression is no var"
 
 varToString :: Var -> String
-varToString var = 
-  if (isBooleanVar (Var var)) --find better solution for boolean workaround
+varToString var =
+  if isBooleanVar (Var var) --find better solution for boolean workaround
     then varToSimpleString var
-    else (showOutputable var)
-
+    else showOutputable var
 
 coreLiteralToFractional :: Fractional a => Literal -> a
 coreLiteralToFractional (LitFloat value) = fromRational value
@@ -31,13 +31,11 @@ isInHeadNormalForm = exprIsHNF
 
 isTypeInformation :: Expr Var -> Bool
 isTypeInformation (Type _) = True
-isTypeInformation (App expr arg) =  isTypeInformation expr
-isTypeInformation x = if isClassDictionary x
-                        then True
-                        else False
+isTypeInformation (App expr arg) = isTypeInformation expr
+isTypeInformation x = isClassDictionary x
 
 isClassDictionary :: Expr Var -> Bool
-isClassDictionary (Var name) = ("$" `isPrefixOf` (varToString name))
+isClassDictionary (Var name) = "$" `isPrefixOf` varToString name
 isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
 isClassDictionary x = False
 
@@ -50,22 +48,21 @@ canBeReduced :: Expr Var -> Bool
 canBeReduced exp
   | isTypeInformation exp = False
   | isBooleanVar exp = False
-  | otherwise = case exp of { --check nested application
-      (App (Lam _ _) x) -> True;
-      (App (Let _ _) x) -> True;
-      (Case _ _ _ _) -> True;
-      (Cast _ _) -> True;
-      (Let _ _) -> True;
-      (App x y) -> (canBeReduced (getFunctionOfNestedApplication (App x y))) || not (exprIsHNF exp);
-      _ -> not (exprIsHNF exp)
-  }
+  | otherwise = case exp of --check nested application
+    (App (Lam _ _) x) -> True
+    (App (Let _ _) x) -> True
+    (Case {}) -> True
+    (Cast _ _) -> True
+    (Let _ _) -> True
+    (App x y) -> canBeReduced (getFunctionOfNestedApplication (App x y)) || not (exprIsHNF exp)
+    _ -> not (exprIsHNF exp)
 
 isBooleanVar :: Expr Var -> Bool
-isBooleanVar (Var x) = or [((==) (varToSimpleString x) "True"), ((==) (varToSimpleString x) "False")]
+isBooleanVar (Var x) = (==) (varToSimpleString x) "True" || (==) (varToSimpleString x) "False"
 isBooleanVar _ = False
 
 varToSimpleString :: Var -> String
-varToSimpleString var = nameToString (varName var) 
+varToSimpleString var = nameToString (varName var)
 
 nameToString :: Name -> String
 nameToString = getOccString
@@ -88,19 +85,17 @@ isJustMaybe expr = isConstructorApplicationOfType expr "Just"
 isMaybe :: Expr a -> Bool
 isMaybe expr = (||) (isNothingMaybe expr) (isJustMaybe expr)
 
-isConstructorApplicationOfType :: Expr a -> String -> Bool 
+isConstructorApplicationOfType :: Expr a -> String -> Bool
 isConstructorApplicationOfType (App expr arg) name = do
   let (function, arguments) = collectArgs (App expr arg)
-  case function of {
+  case function of
     (Var var) -> (==) (varToString var) name
-  } 
-isConstructorApplicationOfType _ _ = False 
+isConstructorApplicationOfType _ _ = False
 
 isListType :: Expr a -> Bool --is there a more elegant solution?
-isListType (Type ty) = ((showOutputable ty) == "[]")
+isListType (Type ty) = showOutputable ty == "[]"
 
-
-getFunctionOfNestedApplication :: Expr Var -> Expr Var 
+getFunctionOfNestedApplication :: Expr Var -> Expr Var
 getFunctionOfNestedApplication expr = fst (collectArgs expr)
 
 typeOfExpression :: Expr Var -> String --used for tracing / debugging
@@ -109,7 +104,7 @@ typeOfExpression (Lit _) = "Lit"
 typeOfExpression (App _ _) = "App"
 typeOfExpression (Lam _ _) = "Lam"
 typeOfExpression (Let _ _) = "Let"
-typeOfExpression (Case _ _ _ _) = "Case"
+typeOfExpression (Case {}) = "Case"
 typeOfExpression (Cast _ _) = "Cast"
 typeOfExpression (Tick _ _) = "Tick"
 typeOfExpression (Type _) = "Type"

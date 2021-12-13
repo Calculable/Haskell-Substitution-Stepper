@@ -29,7 +29,6 @@ library
       DynFlags
       FlatCoreASTPrinter
       IntegrationTestBindings
-      OldStepper
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CorePrettyPrinter
@@ -39,17 +38,6 @@ library
       OriginalCoreAST.CoreStepperHelpers.CoreTransformator
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
-      SimplifiedAST.TypedStepperProofOfConcept
-      SimplifiedAST.TypedStepperProofOfConceptExamples
-      SimplifiedCoreAST.SimplifiedCoreAST
-      SimplifiedCoreAST.SimplifiedCoreASTConverter
-      SimplifiedCoreAST.SimplifiedCoreASTPrinter
-      SimplifiedCoreAST.SimplifiedCoreASTReducer
-      Source
-      Source2
-      Source3
-      Source4
-      Source5
       SteppablePrelude
       TraverseAST
       Utils
@@ -111,7 +99,6 @@ test-suite substep-test
   other-modules:
       DataProvider.DataProvider
       OriginalCoreAST.IntegrationTestSpec
-      SimplifiedCoreAST.SimplifiedCoreASTConverterSpec
       Paths_substep
   hs-source-dirs:
       test

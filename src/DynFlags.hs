@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-missing-fields #-}
+
 -- basic dynflags for use with the standalone parser
 -- https://github.com/tweag/ormolu/blob/f55ab70bff8aabc8f57f3c51035df7e48af5ae25/src/GHC/DynFlags.hs
 
@@ -8,10 +9,51 @@ module DynFlags
 where
 
 import GHC.Driver.Session
-import GHC.Platform
+  ( DynFlags,
+    FileSettings (FileSettings),
+    GhcNameVersion
+      ( GhcNameVersion,
+        ghcNameVersion_programName,
+        ghcNameVersion_projectVersion
+      ),
+    LlvmConfig (LlvmConfig),
+    PlatformConstants
+      ( PlatformConstants,
+        pc_DYNAMIC_BY_DEFAULT,
+        pc_WORD_SIZE
+      ),
+    PlatformMisc (PlatformMisc),
+    Settings
+      ( Settings,
+        sFileSettings,
+        sGhcNameVersion,
+        sPlatformConstants,
+        sPlatformMisc,
+        sTargetPlatform,
+        sToolSettings
+      ),
+    defaultDynFlags,
+  )
+import GHC.Fingerprint (fingerprint0)
+import GHC.Platform (Arch (ArchUnknown), ByteOrder (LittleEndian), OS (OSUnknown), PlatformWordSize (PW8))
 import GHC.Settings
-import GHC.Settings.Config
-import GHC.Utils.Fingerprint
+  ( Platform
+      ( Platform,
+        platformByteOrder,
+        platformHasGnuNonexecStack,
+        platformHasIdentDirective,
+        platformHasSubsectionsViaSymbols,
+        platformIsCrossCompiling,
+        platformLeadingUnderscore,
+        platformMini,
+        platformTablesNextToCode,
+        platformUnregisterised,
+        platformWordSize
+      ),
+    PlatformMini (PlatformMini, platformMini_arch, platformMini_os),
+    ToolSettings (ToolSettings, toolSettings_opt_P_fingerprint, toolSettings_pgm_F),
+  )
+import GHC.Version (cProjectVersion)
 
 fakeSettings :: Settings
 fakeSettings =
