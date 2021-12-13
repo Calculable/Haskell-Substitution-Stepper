@@ -15,8 +15,7 @@ import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, r
     sum, product, maximum, minimum, 
     zip, zip3, zipWith, zipWith3, unzip, unzip3,
     reads, shows, read, lex,
-    showChar, showString, readParen, showParen, ReadS, ShowS, Maybe(..), Either(..), sequence, sequence_, mapM, mapM_, (=<<))
-
+    showChar, showString, readParen, showParen, ReadS, ShowS, Maybe(..), Either(..), sequence, sequence_, mapM, mapM_, (=<<), fst, snd, curry, uncurry)
 
 -- Maybe type
 
@@ -54,6 +53,25 @@ data  Either a b  =  Left a | Right b   deriving (Eq, Ord, Read, Show)
 either               :: (a -> c) -> (b -> c) -> Either a b -> c
 either f g (Left x)  =  f x
 either f g (Right y) =  g y
+
+-- Tuples
+
+fst              :: (a,b) -> a
+fst (x,y)        =  x
+
+
+snd              :: (a,b) -> b
+snd (x,y)        =  y
+
+-- curry converts an uncurried function to a curried function;
+-- uncurry converts a curried function to a function on pairs.
+
+curry            :: ((a, b) -> c) -> a -> b -> c
+curry f x y      =  f (x, y)
+
+
+uncurry          :: (a -> b -> c) -> ((a, b) -> c)
+uncurry f p      =  f (fst p) (snd p)
 
 -- Numeric functions
 
