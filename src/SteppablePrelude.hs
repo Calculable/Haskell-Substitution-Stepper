@@ -3,6 +3,8 @@
 {-# OPTIONS -XNoImplicitPrelude #-}
 
 module SteppablePrelude where
+import GHC.Maybe hiding (Maybe(..), Maybe)
+
 import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, realToFrac, id, const, (.), flip, ($), ($!), until, asTypeOf, undefined, map, (++), filter, concat, concatMap, 
     head, last, tail, init, null, length, (!!), 
     foldl, foldl1, scanl, scanl1, foldr, foldr1, scanr, scanr1,
@@ -13,8 +15,45 @@ import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, r
     sum, product, maximum, minimum, 
     zip, zip3, zipWith, zipWith3, unzip, unzip3,
     reads, shows, read, lex,
-    showChar, showString, readParen, showParen, ReadS, ShowS)
+    showChar, showString, readParen, showParen, ReadS, ShowS, Maybe(..), Either(..), sequence, sequence_, mapM, mapM_, (=<<))
 
+
+-- Maybe type
+
+data  Maybe a  =  Nothing | Just a      deriving (Eq, Ord, Read, Show)
+
+
+maybe              :: b -> (a -> b) -> Maybe a -> b
+maybe n f Nothing  =  n
+maybe n f (Just x) =  f x
+
+
+instance  Functor Maybe  where
+    fmap f Nothing    =  Nothing
+    fmap f (Just x)   =  Just (f x)
+        
+
+instance  Monad Maybe  where
+    (Just x) >>= k   =  k x
+    Nothing  >>= k   =  Nothing
+    return           =  Just
+
+instance Applicative Maybe where
+  pure = Just
+  Just f <*> Just x = Just (f x)    
+
+data  Ordering  =  LT | EQ | GT
+          deriving (Eq, Ord, Enum, Read, Show, Bounded)
+
+-- Either type
+
+
+data  Either a b  =  Left a | Right b   deriving (Eq, Ord, Read, Show)
+
+
+either               :: (a -> c) -> (b -> c) -> Either a b -> c
+either f g (Left x)  =  f x
+either f g (Right y) =  g y
 
 -- Numeric functions
 
@@ -457,6 +496,31 @@ unzip            =  foldr (\(a,b) ~(as,bs) -> (a:as,b:bs)) ([],[])
 unzip3           :: [(a,b,c)] -> ([a],[b],[c])
 unzip3           =  foldr (\(a,b,c) ~(as,bs,cs) -> (a:as,b:bs,c:cs))
                           ([],[],[])
+
+{- Monadic classes-}
+
+
+sequence       :: Monad m => [m a] -> m [a] 
+sequence       =  foldr mcons (return [])
+                    where mcons p q = p >>= \x -> q >>= \y -> return (x:y)
+
+
+sequence_      :: Monad m => [m a] -> m () 
+sequence_      =  foldr (>>) (return ())
+
+-- The xxxM functions take list arguments, but lift the function or
+-- list element to a monad type
+
+mapM             :: Monad m => (a -> m b) -> [a] -> m [b]
+mapM f as        =  sequence (map f as)
+
+
+mapM_            :: Monad m => (a -> m b) -> [a] -> m ()
+mapM_ f as       =  sequence_ (map f as)
+
+
+(=<<)            :: Monad m => (a -> m b) -> m a -> m b
+f =<< x          =  x >>= f
 
 {-Prelude PreludeText-}
 type  ReadS a  = String -> [(a,String)]
