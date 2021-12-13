@@ -10,9 +10,6 @@ module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Prelu
 import GHC.Maybe hiding (Maybe(..), Maybe)
 import Prelude (Eq(..), Ord(..), Functor(..), Monad(..), Bounded(..), Floating(..), Fractional(..), Integral(..), Num(..), RealFloat(..), RealFrac(..), Applicative(..), Bool(..), Real(..), Int(..), String(..), Float(..), Double(..), Char(..), Integer(..), Rational(..), (-), (*), (+), (/), (<), (>), (<=), (>=), rem, (==), (/=), error, abs, quot, recip, fromInteger, toInteger, fromRational, seq, max, min) --import only "unsteppable functionality", provide the other functions
 
-import qualified Prelude as OriginalPrelude (Enum(..))
-import Source5 (x)
-
 {-Infixr-}
 infixr 9  .
 infixr 8  ^, ^^
@@ -416,12 +413,6 @@ class  Enum a  where
     enumFromTo       :: a -> a -> [a]        -- [n..m]
     enumFromThenTo   :: a -> a -> a -> [a]   -- [n,n'..m]
 
-        -- Minimal complete definition:
-        --      toEnum, fromEnum
---
--- NOTE: these default methods only make sense for types
---   that map injectively into Int using fromEnum
---  and toEnum.
     succ             =  toEnum . (+1) . fromEnum
     pred             =  toEnum . (subtract 1) . fromEnum
     enumFrom x       =  map toEnum [fromEnum x ..]
@@ -441,13 +432,28 @@ instance  Enum Char  where
                                      | otherwise = maxBound
 
 instance  Enum Int  where
+    succ x           =  x+1
+    pred x           =  x-1
     toEnum x         =  x
     fromEnum   x     =  x
+    enumFrom x       =  map toEnum [fromEnum x ..]
+    enumFromTo x y   =  map toEnum [fromEnum x .. fromEnum y]
+    enumFromThen x y =  map toEnum [fromEnum x, fromEnum y ..]
+    enumFromThenTo x y z = 
+                        map toEnum [fromEnum x, fromEnum y .. fromEnum z]
+
+
 
 instance  Enum Integer  where
+    succ x           =  x+1
+    pred x           =  x-1
     toEnum x         =  fromIntegral x
     fromEnum   x     =  fromInteger x
-
+    enumFrom x       =  map toEnum [fromEnum x ..]
+    enumFromTo x y   =  map toEnum [fromEnum x .. fromEnum y]
+    enumFromThen x y =  map toEnum [fromEnum x, fromEnum y ..]
+    enumFromThenTo x y z = 
+                        map toEnum [fromEnum x, fromEnum y .. fromEnum z]
 
 instance  Enum Float  where
     succ x           =  x+1
@@ -483,5 +489,4 @@ numericEnumFromThenTo n n' m = takeWhile p (numericEnumFromThen n n')
                              where
                                p | n' >= n   = (<= m + (n'-n)/2)
                                  | otherwise = (>= m + (n'-n)/2)
-
 
