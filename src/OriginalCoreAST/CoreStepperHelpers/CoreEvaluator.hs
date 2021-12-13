@@ -101,6 +101,9 @@ evaluateUnsteppableFunctionWithArguments "ceiling" [x] _ = Just (integerToCoreEx
 evaluateUnsteppableFunctionWithArguments "floor" [x] _ = Just (integerToCoreExpression (toInteger (floor x)))
 evaluateUnsteppableFunctionWithArguments "eqString" [x, y] _ = Just (boolToCoreExpression (x == y))
 evaluateUnsteppableFunctionWithArguments "fmap" [x, y] _ = customFmapForMaybe x y
+evaluateUnsteppableFunctionWithArguments "primError" [x] _ = Nothing
+evaluateUnsteppableFunctionWithArguments "error" [x] _ = Nothing
+
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
 customFmapForMaybe :: Expr Var -> Expr Var -> Maybe (Expr Var)
