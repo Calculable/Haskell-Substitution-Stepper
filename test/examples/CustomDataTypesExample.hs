@@ -1,4 +1,4 @@
-module Source3 where
+module CustomDataTypesExample where
 
 -- Custom List
 data List a = Nil | Cons a (List a) deriving (Eq, Ord, Show, Read)
@@ -7,8 +7,8 @@ l :: List Integer
 l = Cons 1 (Cons 2 (Cons 3 Nil))
 
 instance Functor List where
-    fmap _ Nil = Nil
-    fmap f (Cons x xs) = Cons (f x) (fmap f xs)
+  fmap _ Nil = Nil
+  fmap f (Cons x xs) = Cons (f x) (fmap f xs)
 
 append :: a -> List a -> List a
 append x (Cons y Nil) = Cons y (Cons x Nil)
@@ -23,22 +23,22 @@ rev (Cons x xs) = append x (rev xs)
 data Optional a = None | Some a deriving (Eq, Ord, Show, Read)
 
 instance Functor Optional where
-    fmap _ None = None
-    fmap f (Some x) = Some (f x)
+  fmap _ None = None
+  fmap f (Some x) = Some (f x)
 
 instance Applicative Optional where
-    pure = Some
-    None <*> _ = None
-    (Some f) <*> g = fmap f g
+  pure = Some
+  None <*> _ = None
+  (Some f) <*> g = fmap f g
 
 instance Monad Optional where
-    return = pure
-    None >>= g = None
-    (Some x) >>= f = f x
+  return = pure
+  None >>= g = None
+  (Some x) >>= f = f x
 
-isSome :: Optional a -> Bool 
-isSome None = False 
-isSome _ = True 
+isSome :: Optional a -> Bool
+isSome None = False
+isSome _ = True
 
-isNone :: Optional a -> Bool 
+isNone :: Optional a -> Bool
 isNone = not . isSome
