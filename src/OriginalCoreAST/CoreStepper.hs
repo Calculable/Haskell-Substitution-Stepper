@@ -3,7 +3,6 @@ where
 
 import OriginalCoreAST.CoreTypeClassInstances ()
 import Data.List ( isPrefixOf, find, isPrefixOf )
-import SimplifiedCoreAST.SimplifiedCoreASTPrinter (printSimplifiedCoreExpression)
 import Data.Maybe
 import GHC.Core (Bind (NonRec, Rec), Expr (..), Alt, AltCon (..), CoreBind, collectArgs)
 import GHC.Types.Literal
