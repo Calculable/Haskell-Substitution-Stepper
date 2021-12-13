@@ -1,7 +1,7 @@
 {-# OPTIONS -XNoImplicitPrelude #-}
 
 module SteppablePrelude where
-import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, realToFrac)
+import Prelude hiding (subtract, even, odd, gcd, lcm, (^), (^^), fromIntegral, realToFrac, id, const, (.), flip, ($), ($!))
 
 -- Numeric functions
 
@@ -51,4 +51,34 @@ realToFrac      =  fromRational . toRational
 
 
 
---fromRational, toRational, fromInteger, toInteger
+-- Function type
+
+-- identity function
+
+id               :: a -> a
+id x             =  x
+
+-- constant function
+
+const            :: a -> b -> a
+const x _        =  x
+
+-- function composition
+
+(.)              :: (b -> c) -> (a -> b) -> a -> c
+f . g            =  \ x -> f (g x)
+
+-- flip f  takes its (first) two arguments in the reverse order of f.
+
+flip             :: (a -> b -> c) -> b -> a -> c
+flip f x y       =  f y x
+
+-- right-associating infix application operators 
+-- (useful in continuation-passing style)
+
+($), ($!) :: (a -> b) -> a -> b
+f $  x    =  f x
+f $! x    =  x `seq` f x
+
+
+
