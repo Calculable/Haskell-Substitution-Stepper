@@ -1,11 +1,17 @@
-module OriginalCoreAST.CoreTypeClassInstances()
-where
+module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Core (Expr (..))
-import GHC.Types.Literal(Literal (..))
-import OriginalCoreAST.CoreMakerFunctions(fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral)
-import GHC.Float (rationalToDouble)
-import Refact.Compat (xFlags)
+import GHC.Plugins
+  ( Expr (Lit),
+    Literal (LitChar, LitDouble, LitFloat, LitNumber),
+  )
+import OriginalCoreAST.CoreMakerFunctions
+  ( charToCoreLiteral,
+    fractionalToCoreLiteral,
+    integerToCoreExpression,
+    integerToCoreLiteral,
+    rationalToCoreExpression,
+    rationalToCoreLiteral,
+  )
 
 instance Num (Expr b) where
   (+) (Lit x) (Lit y) = Lit ((+) x y)
@@ -16,7 +22,7 @@ instance Num (Expr b) where
   (*) _ _ = error "* not supported by this type"
   signum (Lit x) = Lit (signum x)
   signum _ = error "signum not supported by this type"
-  fromInteger x = integerToCoreExpression x
+  fromInteger = integerToCoreExpression
   abs (Lit x) = Lit (abs x)
   abs _ = error "abs not supported by this type"
 
@@ -25,7 +31,7 @@ instance Fractional (Expr b) where
   (/) _ _ = error "/ not supported by this type"
   recip (Lit x) = Lit (recip x)
   recip _ = error "recip not supported by this type"
-  fromRational x = rationalToCoreExpression x
+  fromRational = rationalToCoreExpression
 
 instance Eq (Expr b) where
   (/=) (Lit x) (Lit y) = (/=) x y
@@ -51,28 +57,28 @@ instance Enum (Expr b) where
   fromEnum _ = error "fromEnum not supported for this type"
 
   enumFrom (Lit x) = map Lit (enumFrom x)
-  enumFrom _ = error "enumFrom not supported for this type" 
+  enumFrom _ = error "enumFrom not supported for this type"
 
   enumFromThen (Lit x) (Lit y) = map Lit (enumFromThen x y)
-  enumFromThen _ _ = error "enumFromThen not supported for this type" 
+  enumFromThen _ _ = error "enumFromThen not supported for this type"
 
   enumFromTo (Lit x) (Lit y) = map Lit (enumFromTo x y)
-  enumFromTo _ _ = error "enumFromTo not supported for this type" 
-  
+  enumFromTo _ _ = error "enumFromTo not supported for this type"
+
   enumFromThenTo (Lit x) (Lit y) (Lit z) = map Lit (enumFromThenTo x y z)
   enumFromThenTo _ _ _ = error "enumFromThenTo not supported for this type"
-  
+
   toEnum x = Lit (integerToCoreLiteral (toInteger x))
 
 instance Floating (Expr b) where
   pi = Lit (fractionalToCoreLiteral Prelude.pi)
-  
+
   exp (Lit x) = Lit (exp x)
   exp _ = error "exp not supported for this type"
 
   log (Lit x) = Lit (log x)
   log _ = error "log not supported for this type"
-  
+
   sqrt (Lit x) = Lit (sqrt x)
   sqrt _ = error "sqrt not supported for this type"
 
@@ -132,14 +138,14 @@ instance Integral (Expr b) where
   mod _ _ = error "mod not supported for this type"
 
   quotRem (Lit x) (Lit y) = (Lit (fst res), Lit (snd res)) where res = quotRem x y
-  quotRem _ _ = error "quotRem not supported" 
+  quotRem _ _ = error "quotRem not supported"
 
   divMod (Lit x) (Lit y) = (Lit (fst res), Lit (snd res)) where res = divMod x y
   divMod _ _ = error "divMod not supported"
 
   toInteger (Lit x) = toInteger x
   toInteger _ = error "toInteger not supported for this type"
- 
+
 instance Real (Expr b) where
   toRational (Lit x) = toRational x
   toRational _ = error "toRational not supported for this type"
@@ -147,7 +153,7 @@ instance Real (Expr b) where
 instance RealFrac (Expr b) where
   properFraction (Lit x) = ((fst res), Lit (snd res)) where res = properFraction x
   properFraction _ = error "properFraction not supported for this type"
-  
+
   truncate (Lit x) = truncate x
   truncate _ = error "truncate is not supported for this type"
 
@@ -163,43 +169,43 @@ instance RealFrac (Expr b) where
 instance RealFloat (Expr b) where
   floatRadix (Lit x) = floatRadix x
   floatRadix _ = error "floatRadix is not supported for this type"
-  
+
   floatDigits (Lit x) = floatDigits x
   floatDigits _ = error "floatDigits is not supported for this type"
-  
+
   floatRange (Lit x) = floatRange x
   floatRange _ = error "floatRange is not supported for this type"
-  
+
   decodeFloat (Lit x) = decodeFloat x
   decodeFloat _ = error "decodeFloat is not supported for this type"
-  
+
   encodeFloat x y = Lit (encodeFloat x y)
-  
+
   exponent (Lit x) = exponent x
   exponent _ = error "exponent is not supported for this type"
-  
+
   significand (Lit x) = Lit (significand x)
   significand _ = error "significand is not supported for this type"
-  
+
   scaleFloat x (Lit y) = Lit (scaleFloat x y)
   scaleFloat _ _ = error "scaleFloat is not supported for this type"
-  
+
   isNaN (Lit x) = isNaN x
   isNaN _ = error "isNaN is not supported for this type"
-  
+
   isInfinite (Lit x) = isInfinite x
   isInfinite _ = error "isInfinite is not supported for this type"
-  
+
   isDenormalized (Lit x) = isDenormalized x
   isDenormalized _ = error "isDenormalized is not supported for this type"
-  
+
   isNegativeZero (Lit x) = isNegativeZero x
   isNegativeZero _ = error "isNegativeZero is not supported for this type"
-  
+
   isIEEE (Lit x) = isIEEE x
   isIEEE _ = error "isIEEE is not supported for this type"
-  
-  atan2 (Lit x) (Lit y) = Lit (atan2 x y)  
+
+  atan2 (Lit x) (Lit y) = Lit (atan2 x y)
   atan2 _ _ = error "atan2 is not supported for this type"
 
 instance Num Literal where
@@ -237,7 +243,7 @@ instance Num Literal where
   signum (LitDouble x) = fractionalToCoreLiteral (signum x)
   signum (LitFloat x) = fractionalToCoreLiteral (signum x)
   signum _ = error "signum not supported for this type"
-  fromInteger x = integerToCoreLiteral x
+  fromInteger = integerToCoreLiteral
   abs (LitNumber _ x) = integerToCoreLiteral (abs x)
   abs (LitDouble x) = fractionalToCoreLiteral (abs (fromRational x))
   abs (LitFloat x) = fractionalToCoreLiteral (abs (fromRational x))
@@ -255,13 +261,13 @@ instance Fractional Literal where
   (/) (LitDouble x) (LitFloat y) = fractionalToCoreLiteral ((Prelude./) x y)
   (/) _ _ = error "/ not supported by this type"
   recip expression = 1 / expression
-  fromRational x = (LitDouble x)
+  fromRational = LitDouble
 
 instance Enum Literal where
-  succ (LitNumber _ x) =  integerToCoreLiteral (succ x)
-  succ (LitDouble x) =  fractionalToCoreLiteral (succ x)
-  succ (LitFloat x) =  fractionalToCoreLiteral (succ x)
-  succ (LitChar x) =  charToCoreLiteral (succ x)
+  succ (LitNumber _ x) = integerToCoreLiteral (succ x)
+  succ (LitDouble x) = fractionalToCoreLiteral (succ x)
+  succ (LitFloat x) = fractionalToCoreLiteral (succ x)
+  succ (LitChar x) = charToCoreLiteral (succ x)
   succ _ = error "succ not supported for this type"
 
   fromEnum (LitNumber _ x) = fromEnum x
@@ -277,85 +283,85 @@ instance Enum Literal where
   enumFrom _ = error "enumFrom not supported for this type"
 
   enumFromThen (LitNumber _ x) (LitNumber _ y) = map integerToCoreLiteral (enumFromThen x y)
-  enumFromThen (LitDouble x) (LitDouble y)= map rationalToCoreLiteral (enumFromThen x y)
+  enumFromThen (LitDouble x) (LitDouble y) = map rationalToCoreLiteral (enumFromThen x y)
   enumFromThen (LitFloat x) (LitFloat y) = map rationalToCoreLiteral (enumFromThen x y)
   enumFromThen (LitChar x) (LitChar y) = map charToCoreLiteral (enumFromThen x y)
   enumFromThen _ _ = error "enumFromThen not supported for this type"
 
-  enumFromTo  (LitNumber _ x) (LitNumber _ y) = map integerToCoreLiteral (enumFromTo x y)
-  enumFromTo  (LitDouble x) (LitDouble y)= map rationalToCoreLiteral (enumFromTo x y)
-  enumFromTo  (LitFloat x) (LitFloat y) = map rationalToCoreLiteral (enumFromTo x y)
-  enumFromTo  (LitChar x) (LitChar y) = map charToCoreLiteral (enumFromTo x y)
+  enumFromTo (LitNumber _ x) (LitNumber _ y) = map integerToCoreLiteral (enumFromTo x y)
+  enumFromTo (LitDouble x) (LitDouble y) = map rationalToCoreLiteral (enumFromTo x y)
+  enumFromTo (LitFloat x) (LitFloat y) = map rationalToCoreLiteral (enumFromTo x y)
+  enumFromTo (LitChar x) (LitChar y) = map charToCoreLiteral (enumFromTo x y)
   enumFromTo _ _ = error "enumFromTo not supported for this type"
 
-  enumFromThenTo  (LitNumber _ x) (LitNumber _ y) (LitNumber _ z) = map integerToCoreLiteral (enumFromThenTo  x y z)
-  enumFromThenTo  (LitDouble x) (LitDouble y) (LitDouble z) = map rationalToCoreLiteral (enumFromThenTo  x y z)
-  enumFromThenTo  (LitFloat x) (LitFloat y) (LitFloat z) = map rationalToCoreLiteral (enumFromThenTo  x y z)
-  enumFromThenTo  (LitChar x) (LitChar y) (LitChar z) = map charToCoreLiteral (enumFromThenTo  x y z)
+  enumFromThenTo (LitNumber _ x) (LitNumber _ y) (LitNumber _ z) = map integerToCoreLiteral (enumFromThenTo x y z)
+  enumFromThenTo (LitDouble x) (LitDouble y) (LitDouble z) = map rationalToCoreLiteral (enumFromThenTo x y z)
+  enumFromThenTo (LitFloat x) (LitFloat y) (LitFloat z) = map rationalToCoreLiteral (enumFromThenTo x y z)
+  enumFromThenTo (LitChar x) (LitChar y) (LitChar z) = map charToCoreLiteral (enumFromThenTo x y z)
   enumFromThenTo _ _ _ = error "enumFromThenTo not supported for this type"
 
-  toEnum =  integerToCoreLiteral.toInteger
+  toEnum = integerToCoreLiteral . toInteger
 
 instance Floating Literal where
   pi = fractionalToCoreLiteral Prelude.pi
-  exp (LitDouble x) = fractionalToCoreLiteral (Prelude.exp (fromRational x ))
-  exp (LitFloat x) = fractionalToCoreLiteral (Prelude.exp (fromRational x ))
+  exp (LitDouble x) = fractionalToCoreLiteral (Prelude.exp (fromRational x))
+  exp (LitFloat x) = fractionalToCoreLiteral (Prelude.exp (fromRational x))
   exp _ = error "exp not supported for this type"
-  
-  log (LitDouble x) = fractionalToCoreLiteral (Prelude.log (fromRational x ))
-  log (LitFloat x) = fractionalToCoreLiteral (Prelude.log (fromRational x ))
+
+  log (LitDouble x) = fractionalToCoreLiteral (Prelude.log (fromRational x))
+  log (LitFloat x) = fractionalToCoreLiteral (Prelude.log (fromRational x))
   log _ = error "log not supported for this type"
-  
-  sqrt (LitDouble x) = fractionalToCoreLiteral (Prelude.sqrt (fromRational x ))
-  sqrt (LitFloat x) = fractionalToCoreLiteral (Prelude.sqrt (fromRational x ))
+
+  sqrt (LitDouble x) = fractionalToCoreLiteral (Prelude.sqrt (fromRational x))
+  sqrt (LitFloat x) = fractionalToCoreLiteral (Prelude.sqrt (fromRational x))
   sqrt _ = error "sqrt not supported for this type"
- 
-  sin (LitDouble x) = fractionalToCoreLiteral (Prelude.sin (fromRational x ))
-  sin (LitFloat x) = fractionalToCoreLiteral (Prelude.sin (fromRational x ))
+
+  sin (LitDouble x) = fractionalToCoreLiteral (Prelude.sin (fromRational x))
+  sin (LitFloat x) = fractionalToCoreLiteral (Prelude.sin (fromRational x))
   sin _ = error "sin not supported for this type"
-  
-  cos (LitDouble x) = fractionalToCoreLiteral (Prelude.cos (fromRational x ))
-  cos (LitFloat x) = fractionalToCoreLiteral (Prelude.cos (fromRational x ))
+
+  cos (LitDouble x) = fractionalToCoreLiteral (Prelude.cos (fromRational x))
+  cos (LitFloat x) = fractionalToCoreLiteral (Prelude.cos (fromRational x))
   cos _ = error "cos not supported for this type"
-  
-  tan (LitDouble x) = fractionalToCoreLiteral (Prelude.tan (fromRational x ))
-  tan (LitFloat x) = fractionalToCoreLiteral (Prelude.tan (fromRational x ))
+
+  tan (LitDouble x) = fractionalToCoreLiteral (Prelude.tan (fromRational x))
+  tan (LitFloat x) = fractionalToCoreLiteral (Prelude.tan (fromRational x))
   tan _ = error "tan not supported for this type"
-  
-  asin (LitDouble x) = fractionalToCoreLiteral (Prelude.asin (fromRational x ))
-  asin (LitFloat x) = fractionalToCoreLiteral (Prelude.asin (fromRational x ))
+
+  asin (LitDouble x) = fractionalToCoreLiteral (Prelude.asin (fromRational x))
+  asin (LitFloat x) = fractionalToCoreLiteral (Prelude.asin (fromRational x))
   asin _ = error "asin not supported for this type"
-  
-  acos (LitDouble x) = fractionalToCoreLiteral (Prelude.acos (fromRational x ))
-  acos (LitFloat x) = fractionalToCoreLiteral (Prelude.acos (fromRational x ))
+
+  acos (LitDouble x) = fractionalToCoreLiteral (Prelude.acos (fromRational x))
+  acos (LitFloat x) = fractionalToCoreLiteral (Prelude.acos (fromRational x))
   acos _ = error "acos not supported for this type"
-  
-  atan (LitDouble x) = fractionalToCoreLiteral (Prelude.atan (fromRational x ))
-  atan (LitFloat x) = fractionalToCoreLiteral (Prelude.atan (fromRational x ))
+
+  atan (LitDouble x) = fractionalToCoreLiteral (Prelude.atan (fromRational x))
+  atan (LitFloat x) = fractionalToCoreLiteral (Prelude.atan (fromRational x))
   atan _ = error "atan not supported for this type"
-  
-  sinh (LitDouble x) = fractionalToCoreLiteral (Prelude.sinh (fromRational x ))
-  sinh (LitFloat x) = fractionalToCoreLiteral (Prelude.sinh (fromRational x ))
+
+  sinh (LitDouble x) = fractionalToCoreLiteral (Prelude.sinh (fromRational x))
+  sinh (LitFloat x) = fractionalToCoreLiteral (Prelude.sinh (fromRational x))
   sinh _ = error "sinh not supported for this type"
-  
-  cosh (LitDouble x) = fractionalToCoreLiteral (Prelude.cosh (fromRational x ))
-  cosh (LitFloat x) = fractionalToCoreLiteral (Prelude.cosh (fromRational x ))
+
+  cosh (LitDouble x) = fractionalToCoreLiteral (Prelude.cosh (fromRational x))
+  cosh (LitFloat x) = fractionalToCoreLiteral (Prelude.cosh (fromRational x))
   cosh _ = error "cosh not supported for this type"
 
-  tanh (LitDouble x) = fractionalToCoreLiteral (Prelude.tanh (fromRational x ))
-  tanh (LitFloat x) = fractionalToCoreLiteral (Prelude.tanh (fromRational x ))
+  tanh (LitDouble x) = fractionalToCoreLiteral (Prelude.tanh (fromRational x))
+  tanh (LitFloat x) = fractionalToCoreLiteral (Prelude.tanh (fromRational x))
   tanh _ = error "tanh not supported for this type"
 
-  asinh (LitDouble x) = fractionalToCoreLiteral (Prelude.asinh (fromRational x ))
-  asinh (LitFloat x) = fractionalToCoreLiteral (Prelude.asinh (fromRational x ))
+  asinh (LitDouble x) = fractionalToCoreLiteral (Prelude.asinh (fromRational x))
+  asinh (LitFloat x) = fractionalToCoreLiteral (Prelude.asinh (fromRational x))
   asinh _ = error "asinh not supported for this type"
 
-  acosh (LitDouble x) = fractionalToCoreLiteral (Prelude.acosh (fromRational x ))
-  acosh (LitFloat x) = fractionalToCoreLiteral (Prelude.acosh (fromRational x ))
+  acosh (LitDouble x) = fractionalToCoreLiteral (Prelude.acosh (fromRational x))
+  acosh (LitFloat x) = fractionalToCoreLiteral (Prelude.acosh (fromRational x))
   acosh _ = error "acosh not supported for this type"
 
-  atanh (LitDouble x) = fractionalToCoreLiteral (Prelude.atanh (fromRational x ))
-  atanh (LitFloat x) = fractionalToCoreLiteral (Prelude.atanh (fromRational x ))
+  atanh (LitDouble x) = fractionalToCoreLiteral (Prelude.atanh (fromRational x))
+  atanh (LitFloat x) = fractionalToCoreLiteral (Prelude.atanh (fromRational x))
   atanh _ = error "atanh not supported for this type"
 
   x ** y = exp (log x * y)
@@ -372,17 +378,17 @@ instance Integral Literal where
   quot _ _ = error "quot not supported for this type"
   rem (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (rem x y)
   rem _ _ = error "rem not supported for this type"
-  div (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (div x y)  
+  div (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (div x y)
   div _ _ = error "div not supported for this type"
-  mod (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (mod x y) 
+  mod (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (mod x y)
   mod _ _ = error "mod not supported for this type"
- 
+
   quotRem (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = quotRem x y
   quotRem _ _ = error "quotRem not supported for this type"
- 
+
   divMod (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = divMod x y
   divMod _ _ = error "divMod not supported for this type"
- 
+
   toInteger (LitNumber _ x) = x
   toInteger _ = error "toInteger not supported for this type"
 
@@ -407,22 +413,21 @@ instance RealFloat Literal where
   floatRadix (LitDouble x) = floatRadix (fromRational x)
   floatRadix (LitFloat x) = floatRadix (fromRational x)
   floatRadix _ = error "floatRadix not supported for this type"
-  
+
   floatDigits (LitDouble x) = floatDigits (fromRational x)
-  floatDigits (LitFloat x) = floatDigits (fromRational x)  
+  floatDigits (LitFloat x) = floatDigits (fromRational x)
   floatDigits _ = error "floatDigits not supported for this type"
-  
+
   exponent (LitDouble x) = exponent (fromRational x)
   exponent (LitFloat x) = exponent (fromRational x)
   exponent _ = error "exponent not supported for this type"
-  
-  
+
   significand (LitDouble x) = significand (fromRational x)
   significand (LitFloat x) = significand (fromRational x)
   significand _ = error "significand not supported for this type"
 
-  scaleFloat  x (LitDouble y) = (scaleFloat x (fromRational y))
-  scaleFloat  x (LitFloat y) = (scaleFloat x (fromRational y))
+  scaleFloat x (LitDouble y) = scaleFloat x (fromRational y)
+  scaleFloat x (LitFloat y) = scaleFloat x (fromRational y)
   scaleFloat _ _ = error "scaleFloat not supported for this type"
 
   isNaN (LitDouble x) = isNaN (fromRational x)
@@ -445,16 +450,16 @@ instance RealFloat Literal where
   isIEEE (LitFloat x) = isIEEE (fromRational x)
   isIEEE _ = error "isIEEE not supported for this type"
 
-  atan2 (LitDouble x) (LitDouble y) = (atan2 (fromRational x) (fromRational y))
-  atan2 (LitFloat x) (LitFloat y) = (atan2 (fromRational x) (fromRational y))
+  atan2 (LitDouble x) (LitDouble y) = atan2 (fromRational x) (fromRational y)
+  atan2 (LitFloat x) (LitFloat y) = atan2 (fromRational x) (fromRational y)
   atan2 _ _ = error "atan2 not supported for this type"
 
-  encodeFloat x y = (encodeFloat x y)
+  encodeFloat = encodeFloat
 
   floatRange (LitDouble x) = floatRange (fromRational x)
   floatRange (LitFloat x) = floatRange (fromRational x)
   floatRange _ = error "floatRange not supported for this type"
-  
+
   decodeFloat (LitDouble x) = decodeFloat (fromRational x)
   decodeFloat (LitFloat x) = decodeFloat (fromRational x)
   decodeFloat _ = error "decodeFloat not supported"
