@@ -28,8 +28,6 @@ library
       Compiler
       DynFlags
       FlatCoreASTPrinter
-      GADTSourceExample
-      OldStepper
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CorePrettyPrinter
@@ -39,18 +37,7 @@ library
       OriginalCoreAST.CoreStepperHelpers.CoreTransformator
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
-      SafeListSouceExample
-      SimplifiedAST.TypedStepperProofOfConcept
-      SimplifiedAST.TypedStepperProofOfConceptExamples
-      SimplifiedCoreAST.SimplifiedCoreAST
-      SimplifiedCoreAST.SimplifiedCoreASTConverter
-      SimplifiedCoreAST.SimplifiedCoreASTPrinter
-      SimplifiedCoreAST.SimplifiedCoreASTReducer
-      Source
-      Source2
-      Source3
       TraverseAST
-      TypeFamilySourceExample
       Utils
   other-modules:
       Paths_substep
