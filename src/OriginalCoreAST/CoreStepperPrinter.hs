@@ -57,12 +57,12 @@ printCoreStepByStepReductionForSingleExpression bindings expression
     --check if it can be reduced even more to normal form
     if canBeReducedToNormalForm expression
       then do
-        putStrLn "\n{-reduction complete in Head Normal Form. I will try to reduce normal Form-}"
+        putStrLn "\n{-reduction is complete in head normal form. I will try to reduce to normal Form-}"
         let (function, arguments) = convertToMultiArgumentFunction expression
         let maybeArgumentsInNormalForm = map (safeReduceToNormalForm bindings) arguments
         if any isNothing maybeArgumentsInNormalForm
           then do
-            putStrLn "\n{reduction to normal form not possible (most likely because it would result in an infinite-loop if recursive data structures are used)}"
+            putStrLn "\n{reduction to normal form is not possible. This can be the case if reduction to normal form would lead to an infinite loop}"
             return expression
           else do
             let argumentsInNormalForm = map fromJust maybeArgumentsInNormalForm

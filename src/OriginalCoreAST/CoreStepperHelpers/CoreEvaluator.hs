@@ -5,7 +5,7 @@ import Data.Bifunctor (Bifunctor (bimap))
 import Data.Maybe (fromJust, isNothing)
 import GHC.Plugins
   ( Expr (App, Lit, Type, Var),
-    Literal (LitNumber),
+    Literal (LitNumber, LitChar),
     Type,
     Var,
     trace,
@@ -25,12 +25,17 @@ import OriginalCoreAST.CoreMakerFunctions
     integerToCoreExpression,
     maybeToCoreExpression,
     rationalToCoreExpression,
+    charToCoreExpression
   )
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
   ( convertToMultiArgumentFunction,
     getIndividualElementsOfList,
   )
 import OriginalCoreAST.CoreTypeClassInstances ()
+import Data.Char 
+  ( ord,
+    isSpace 
+  )
 import Utils ()
 
 type Reducer = (Expr Var -> Maybe (Expr Var)) 
@@ -122,6 +127,10 @@ evaluateUnsteppableFunctionWithArguments "fmap" [x, y] _ = customFmapForMaybe x 
 evaluateUnsteppableFunctionWithArguments "primError" [x] _ = Nothing
 evaluateUnsteppableFunctionWithArguments "error" [x] _ = Nothing
 evaluateUnsteppableFunctionWithArguments "seq" [x, y] reducer = Just (seq (reducer x) y)
+evaluateUnsteppableFunctionWithArguments "ord" [Lit (LitChar input)] reducer = Just (integerToCoreExpression (toInteger (ord input)))
+evaluateUnsteppableFunctionWithArguments "isSpace" [Lit (LitChar input)] reducer = Just (boolToCoreExpression (isSpace input))
+evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primIntToChar" [Lit (LitNumber _ input)] reducer = Just (charToCoreExpression (toEnum (fromIntegral input)))
+evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Lit (LitChar input)] reducer = Just (integerToCoreExpression (toInteger (fromEnum input)))
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
 customFmapForMaybe :: Expr Var -> Expr Var -> Maybe (Expr Var)

@@ -1,6 +1,7 @@
 module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString) where
 
 import Data.Maybe (fromMaybe, isNothing)
+import Data.List (isPrefixOf)
 import GHC.Plugins
   ( Alt,
     AltCon (DEFAULT, DataAlt, LitAlt),
@@ -26,14 +27,17 @@ import Utils (showOutputable)
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
 tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBinding = tryFindBindingForStringIncludingOverrideFunctions
+tryFindBinding = tryFindBindingIncludingOverrideFunctions
 
-tryFindBindingForStringIncludingOverrideFunctions :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForStringIncludingOverrideFunctions name bindings = do
-  let overrideBindings =  tryFindBindingForString ("override'" ++ varToString name) bindings
-  if isNothing overrideBindings
-    then tryFindBindingForVar name bindings
-    else overrideBindings
+tryFindBindingIncludingOverrideFunctions :: Var -> [Binding] -> Maybe (Expr Var)
+tryFindBindingIncludingOverrideFunctions name bindings = do
+  if "unsteppableFunction'" `isPrefixOf` varToString name
+    then Nothing --use implementation from stepper backend
+    else do
+      let overrideBindings =  tryFindBindingForString ("override'" ++ varToString name) bindings
+      if isNothing overrideBindings
+        then tryFindBindingForVar name bindings
+        else overrideBindings
 
 --should only be used for testing
 findBindingForString :: String -> [Binding] -> Expr Var

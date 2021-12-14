@@ -9,6 +9,7 @@ module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Prelu
 {-Imports-}
 import GHC.Maybe hiding (Maybe(..), Maybe)
 import Prelude (Eq(..), Ord(..), Functor(..), Monad(..), Bounded(..), Floating(..), Fractional(..), Integral(..), Num(..), RealFloat(..), RealFrac(..), Applicative(..), Bool(..), Real(..), Int(..), String(..), Float(..), Double(..), Char(..), Integer(..), Rational(..), (-), (*), (+), (/), (<), (>), (<=), (>=), rem, (==), (/=), error, abs, quot, recip, fromInteger, toInteger, fromRational, seq, max, min) --import only "unsteppable functionality", provide the other functions
+import Data.Char (ord, isSpace)
 
 {-Infixr-}
 infixr 9  .
@@ -372,37 +373,6 @@ mapM_ f as       =  sequence_ (map f as)
 (=<<)            :: Monad m => (a -> m b) -> m a -> m b
 f =<< x          =  x >>= f
 
-{-Functions: Char-}
-isSpace                 :: Char -> Bool
-isSpace c               =  c == ' '     ||
-                           c == '\t'    ||
-                           c == '\n'    ||
-                           c == '\r'    ||
-                           c == '\f'    ||
-                           c == '\v'    ||
-                           c == '\xa0'  ||
-                           iswspace (fromIntegral (ord c)) /= 0
-
-{-Functions: Unsupported-}
-ord :: Char -> Int
-ord _ = error "the stepper does not support the ord function. Try to add your own implementation using XY"
-
-iswspace :: Int -> Int
-iswspace _ = error "the stepper does not support the iswspace function. Try to add your own implementation using XY"
-
-iswalpha :: Int -> Int
-iswalpha _ = error "the stepper does not support the iswalpha function. Try to add your own implementation using XY"
-
-iswalnum :: Int -> Int
-iswalnum _ = error "the stepper does not support the iswalpha function. Try to add your own implementation using XY"
-
-primIntToChar :: Int -> Char
-primIntToChar _ = error "the stepper does not support the primIntToChar function. Try to add your own implementation using XY"
-
-primCharToInt :: Char -> Int
-primCharToInt _ = error "the stepper does not support the primCharToInt function. Try to add your own implementation using XY"
-
-
 {-Type Class: Enum-}
 class  Enum a  where
     succ, pred       :: a -> a
@@ -425,8 +395,8 @@ class  Enum a  where
 instance  Enum Char  where
     succ             =  toEnum . (+1) . fromEnum
     pred             =  toEnum . (subtract 1) . fromEnum
-    toEnum            = primIntToChar
-    fromEnum          = primCharToInt
+    toEnum            = unsteppableFunction'primIntToChar
+    fromEnum          = unsteppableFunction'primIntToCharprimCharToInt
     enumFrom         =  customEnumFrom
     enumFromTo       =  customEnumFromTo
     enumFromThen     =  customEnumFromThen
@@ -495,3 +465,10 @@ succStep enum stepsize = succStep (succ enum) (stepsize-1)
 
 stepSize :: (Enum a) => a -> a -> Int
 stepSize x y = (fromEnum y) - (fromEnum x)
+
+{-Functions that are implemented in the backend. The definitions here are not actualy used in the stepping process but simply added here so there are no compilation errors for this file. Every function that is prefixed with "unsteppableFunction" is not reduced using the definition from this file but with the definition in the Haskell backend-}
+unsteppableFunction'primIntToChar :: Int -> Char
+unsteppableFunction'primIntToChar _ = error "This is only a dummy function. The real reduction happens in the stepper backend"
+
+unsteppableFunction'primIntToCharprimCharToInt :: Char -> Int
+unsteppableFunction'primIntToCharprimCharToInt _ = error "This is only a dummy function. The real reduction happens in the stepper backend"
