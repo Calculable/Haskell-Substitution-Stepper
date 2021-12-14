@@ -443,6 +443,33 @@ instance  Enum Double  where
     enumFromThen     =  customEnumFromThen
     enumFromThenTo   =  customEnumFromThenTo
 
+instance  Enum Bool  where
+    succ False                          = True
+    succ True                           = error "Prelude.Enum.Bool.succ: bad argument"
+    pred True                           = False 
+    pred False                          = error "Prelude.Enum.Bool.succ: bad argument"
+    fromEnum True                       = 1
+    fromEnum False                      = 0
+    toEnum 1                            = True
+    toEnum 0                            = False
+    enumFrom True                       = [True]
+    enumFrom False                      = [False, True]
+    enumFromTo True True                = [True]
+    enumFromTo True False               = []
+    enumFromTo False True               = [False,True]
+    enumFromTo False False              = [False]
+    enumFromThen True True              = True : (enumFromThen True True)
+    enumFromThen True False             = [True,False]
+    enumFromThen False True             = [False,True]
+    enumFromThen False False            = False : (enumFromThen False False)       
+    enumFromThenTo True True True       = True : (enumFromThenTo True True True)
+    enumFromThenTo True True False      = []  
+    enumFromThenTo True False True      = [True]
+    enumFromThenTo True False False     = [True,False]
+    enumFromThenTo False True True      = [False,True]
+    enumFromThenTo False True False     = [False]
+    enumFromThenTo False False True     = False : (enumFromThenTo False False True)
+    enumFromThenTo False False False    = False : (enumFromThenTo False False False)
 
 customEnumFrom :: Enum a => a -> [a]
 customEnumFrom x = x: (customEnumFrom (succ x))
