@@ -289,6 +289,12 @@ patternMatchingOnUnsupportedTypeInput = customIsNothing (Just 5)
 
 patternMatchingOnUnsupportedTypeExpectedOutput = False
 
+localPatternMatchingVariant1Input = isItATwoVariant1 2
+localPatternMatchingVariant1ExpectedOutput = True
+
+localPatternMatchingVariant2Input = isItATwoVariant2 2
+localPatternMatchingVariant2ExpectedOutput = True
+
 {-Recursion-}
 
 recursionInput = findMaximum [1, 2, 3, 4, 42, 5]
@@ -594,3 +600,16 @@ True && x = x
 False && _ = False
 True || _ = True
 False || x = x
+
+isItATwoVariant1 :: Int -> Bool
+isItATwoVariant1 x  | (x == 1) = False
+                    | (x == 2) = True
+                    | (x == 3) = False
+                    | otherwise = False
+
+isItATwoVariant2 :: Int -> Bool
+isItATwoVariant2 x = case x of {
+    1 -> False;
+    2 -> True;
+    _ -> False
+}

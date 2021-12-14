@@ -157,6 +157,10 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "patternMatchingOnAnyConstructor" bindingFinder coreBindings
     it "pattern matching works on unsupported type" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "patternMatchingOnUnsupportedType" bindingFinder coreBindings
+    it "local pattern matching works (variant 1)" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "localPatternMatchingVariant1" bindingFinder coreBindings
+    it "local pattern matching works (variant 2)" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "localPatternMatchingVariant2" bindingFinder coreBindings
   describe "Recursion" $ do
     it "recursion works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "recursion" bindingFinder coreBindings
