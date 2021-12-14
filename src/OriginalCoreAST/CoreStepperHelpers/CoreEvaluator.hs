@@ -139,7 +139,6 @@ customFmapForMaybe function (App constructor argument)
   | isJustMaybe (App constructor argument) = Just (App constructor (App function argument))
 customFmapForMaybe _ _ = trace "fmap not supported for this type" Nothing
 
-
 evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [Type monadType, _, Type ty, value] _ = Just (customReturn monadType ty value)
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type ty, _] _ = Just (customFail monadType ty)

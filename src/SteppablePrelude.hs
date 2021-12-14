@@ -8,7 +8,7 @@ module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Prelu
 
 {-Imports-}
 import GHC.Maybe hiding (Maybe(..), Maybe)
-import Prelude (Eq(..), Ord(..), Functor(..), Monad(..), Bounded(..), Floating(..), Fractional(..), Integral(..), Num(..), RealFloat(..), RealFrac(..), Applicative(..), Bool(..), Real(..), Int(..), String(..), Float(..), Double(..), Char(..), Integer(..), Rational(..), (-), (*), (+), (/), (<), (>), (<=), (>=), rem, (==), (/=), error, abs, quot, recip, fromInteger, toInteger, fromRational, seq, max, min) --import only "unsteppable functionality", provide the other functions
+import Prelude (Eq(..), Ord(..), Functor(..), Monad(..), Bounded(..), Floating(..), Fractional(..), Integral(..), Num(..), RealFloat(..), RealFrac(..), Applicative(..), Bool(..), Real(..), Int(..), String(..), Float(..), Double(..), Char(..), Integer(..), Rational(..), (+), (-), (*), (/), recip, signum, abs, negate, fromInteger, (/=), (==), (<), (>), (>=), (<=), min, max, exp, log, sqrt, sin, cos, tan, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, (**), logBase, quot, quotRem, divMod, rem, div, mod, toInteger, toRational, floatRadix, floatDigits, floatRange, decodeFloat, encodeFloat, exponent, significand, scaleFloat, isNaN, isInfinite, isDenormalized, isNegativeZero, isIEEE, atan2, properFraction, truncate, round, ceiling, floor, fmap, error, seq, return, fail, (>>=), (>>), fmap) --import only "unsteppable functionality", provide the other functions
 import Data.Char (ord, isSpace)
 
 {-Infixr-}
