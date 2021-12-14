@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar) where
 
 import Data.List (isPrefixOf)
 import GHC.Plugins
@@ -19,7 +19,7 @@ varExpressionToString _ = error "Expression is no var"
 
 varToString :: Var -> String
 varToString var =
-  if isBooleanVar (Var var) --find better solution for boolean workaround
+  if isBoolVar (Var var) --find better solution for boolean workaround
     then varToSimpleString var
     else showOutputable var
 
@@ -48,7 +48,7 @@ isVarExpression _ = False
 canBeReduced :: Expr Var -> Bool
 canBeReduced exp
   | isTypeInformation exp = False
-  | isBooleanVar exp = False
+  | isBoolVar exp = False
   | otherwise = case exp of --check nested application
     (App (Lam _ _) x) -> True
     (App (Let _ _) x) -> True
@@ -58,9 +58,21 @@ canBeReduced exp
     (App x y) -> canBeReduced (getFunctionOfNestedApplication (App x y)) || not (exprIsHNF exp)
     _ -> not (exprIsHNF exp)
 
-isBooleanVar :: Expr Var -> Bool
-isBooleanVar (Var x) = (==) (varToSimpleString x) "True" || (==) (varToSimpleString x) "False"
-isBooleanVar _ = False
+isBoolVar :: Expr Var -> Bool
+isBoolVar (Var x) = isBoolVarTrue x || isBoolVarFalse x
+isBoolVar _ = False
+
+boolValueFromVar :: Var -> Bool
+boolValueFromVar x | isBoolVarTrue x = True
+                   | isBoolVarFalse x = False
+                   | otherwise = error "the provided variable does not represent a bool" 
+
+
+isBoolVarTrue :: Var -> Bool
+isBoolVarTrue x = (==) (varToSimpleString x) "True"
+
+isBoolVarFalse :: Var -> Bool
+isBoolVarFalse x = (==) (varToSimpleString x) "False"
 
 varToSimpleString :: Var -> String
 varToSimpleString var = nameToString (varName var)

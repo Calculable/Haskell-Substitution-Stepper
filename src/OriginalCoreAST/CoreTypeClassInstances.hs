@@ -2,7 +2,9 @@ module OriginalCoreAST.CoreTypeClassInstances () where
 
 import GHC.Plugins (Expr (Lit, Var), Literal (..), OutputableBndr)
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( varToString,
+  ( varToString, 
+    boolValueFromVar, 
+    isBoolVar
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( charToCoreLiteral,
@@ -62,12 +64,16 @@ weakEquals _ _ = False
 
 instance Ord (Expr b) where
   (<=) (Lit x) (Lit y) = lessOrEqualLiteral x y
+  (<=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) <= (boolValueFromVar y)
   (<=) _ _ = error "<= not supported by this type"
   (<) (Lit x) (Lit y) = lessLiteral x y
+  (<) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) < (boolValueFromVar y)
   (<) _ _ = error "< not supported by this type"
   (>=) (Lit x) (Lit y) = greaterEqualLiteral x y
+  (>=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) >= (boolValueFromVar y)
   (>=) _ _ = error ">= not supported by this type"
   (>) (Lit x) (Lit y) = greaterLiteral x y
+  (>) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) > (boolValueFromVar y)
   (>) _ _ = error "> not supported by this type"
 
 compareLiteral :: Literal -> Literal -> Ordering
