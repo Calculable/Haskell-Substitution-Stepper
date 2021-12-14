@@ -112,6 +112,11 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "succWithInteger" bindingFinder coreBindings
     it "succ with double works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "succWithDouble" bindingFinder coreBindings
+  describe "Support for Bounded Type" $ do
+    it "maxBound works" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "maxBoundInt" bindingFinder coreBindings
+    it "minBound works" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "minBoundBool" bindingFinder coreBindings
   describe "Support for Floating Type" $ do
     it "exp works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "exp" bindingFinder coreBindings

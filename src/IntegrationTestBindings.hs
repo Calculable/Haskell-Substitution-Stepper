@@ -183,6 +183,14 @@ maxInput = max "Hello" "World"
 
 maxExpectedOutput = "World"
 
+{-Support for Bounded Type Instance-}
+
+maxBoundIntInput = maxBound :: Int
+maxBoundIntExpectedOutput = 9223372036854775807
+
+minBoundBoolInput = minBound :: Bool
+minBoundBoolExpectedOutput = False
+
 {-Support for Enum Type Instance-}
 
 succWithIntegerInput = succ 1

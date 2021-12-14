@@ -1,10 +1,11 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType) where
 
 import Data.List (isPrefixOf)
 import GHC.Plugins
   ( Expr (..),
     Literal (LitDouble, LitFloat),
     Name,
+    Type,
     Var (varName),
     collectArgs,
     exprIsHNF,
@@ -94,6 +95,16 @@ isConstructorApplicationOfType _ _ = False
 
 isListType :: Expr a -> Bool --is there a more elegant solution?
 isListType (Type ty) = showOutputable ty == "[]"
+isListType _ = False
+
+isIntType :: Type -> Bool --is there a more elegant solution?
+isIntType ty = showOutputable ty == "Int"
+
+isBoolType :: Type -> Bool --is there a more elegant solution?
+isBoolType ty = showOutputable ty == "Bool"
+
+isCharType :: Type -> Bool --is there a more elegant solution?
+isCharType ty = showOutputable ty == "Char"
 
 getFunctionOfNestedApplication :: Expr Var -> Expr Var
 getFunctionOfNestedApplication expr = fst (collectArgs expr)

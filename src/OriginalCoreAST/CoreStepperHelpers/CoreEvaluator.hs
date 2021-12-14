@@ -17,6 +17,9 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     isNothingMaybe,
     isTypeInformation,
     varToString,
+    isIntType, 
+    isBoolType, 
+    isCharType
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( boolToCoreExpression,
@@ -145,7 +148,22 @@ evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type
 evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, Type newType, argument, function] reducer = customMonadOperator newType argument function reducer
 evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, Type newType, argument, function] reducer = customMonadOperator2 newType argument function reducer
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, Type newType, function, argument] _ = customFmapForList newType function argument
+evaluateUnsteppableFunctionWithArgumentsAndTypes "minBound" [Type ty, _] _ = minBoundForType ty
+evaluateUnsteppableFunctionWithArgumentsAndTypes "maxBound" [Type ty, _] _ = maxBoundForType ty
+
 evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
+
+minBoundForType :: Type -> Maybe (Expr Var)
+minBoundForType ty  | isIntType ty = Just $ integerToCoreExpression (toInteger (minBound::Int))
+                    | isBoolType ty = Just $ boolToCoreExpression (minBound::Bool)
+                    | isCharType ty = Just $ charToCoreExpression (minBound::Char)
+                    | otherwise = Nothing
+
+maxBoundForType :: Type -> Maybe (Expr Var)
+maxBoundForType ty  | isIntType ty = Just $ integerToCoreExpression (toInteger (maxBound::Int))
+                    | isBoolType ty = Just $ boolToCoreExpression (maxBound::Bool)
+                    | isCharType ty = Just $ charToCoreExpression (maxBound::Char)
+                    | otherwise = Nothing
 
 customMonadOperator :: Type -> Expr Var -> Expr Var -> Reducer -> Maybe (Expr Var)
 customMonadOperator newType (App constructor argument) function reducer
