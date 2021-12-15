@@ -39,8 +39,47 @@ instance  Monad Maybe  where
 
 instance Applicative Maybe where
   pure = Just
-  Just f <*> Just x = Just (f x)    
+  Just f <*> Just x = Just (f x)
 
+--Maybe functions taken from Data.Maybe
+isJust         :: Maybe a -> Bool
+isJust Nothing = False
+isJust _       = True
+
+isNothing         :: Maybe a -> Bool
+isNothing Nothing = True
+isNothing _       = False
+
+fromJust          :: Maybe a -> a
+fromJust Nothing  = error "Maybe.fromJust: Nothing"
+fromJust (Just x) = x
+
+fromMaybe     :: a -> Maybe a -> a
+fromMaybe d x = case x of {Nothing -> d;Just v  -> v}
+
+maybeToList            :: Maybe a -> [a]
+maybeToList  Nothing   = []
+maybeToList  (Just x)  = [x]
+
+listToMaybe :: [a] -> Maybe a
+listToMaybe = foldr (const . Just) Nothing
+
+catMaybes :: [Maybe a] -> [a]
+catMaybes = mapMaybe id
+
+mapMaybe          :: (a -> Maybe b) -> [a] -> [b]
+mapMaybe _ []     = []
+mapMaybe f (x:xs) =
+ let rs = mapMaybe f xs in
+ case f x of
+  Nothing -> rs
+  Just r  -> r:rs
+
+mapMaybeFB :: (b -> r -> r) -> (a -> Maybe b) -> a -> r -> r
+mapMaybeFB cons f x next = case f x of
+  Nothing -> next
+  Just r -> cons r next
+  
 {-Type: Ordering-}
 data  Ordering  =  LT | EQ | GT
           deriving (Eq, Ord, Bounded)
@@ -51,6 +90,49 @@ data  Either a b  =  Left a | Right b   deriving (Eq, Ord)
 either               :: (a -> c) -> (b -> c) -> Either a b -> c
 either f g (Left x)  =  f x
 either f g (Right y) =  g y
+
+instance Functor (Either a) where
+    fmap _ (Left x) = Left x
+    fmap f (Right y) = Right (f y)
+
+instance Applicative (Either e) where
+    pure          = Right
+    Left  e <*> _ = Left e
+    Right f <*> r = fmap f r
+
+instance Monad (Either e) where
+    Left  l >>= _ = Left l
+    Right r >>= k = k r
+
+--Either functions taken from Data.Either
+
+lefts   :: [Either a b] -> [a]
+lefts x = [a | Left a <- x]
+
+rights   :: [Either a b] -> [b]
+rights x = [a | Right a <- x]
+
+partitionEithers :: [Either a b] -> ([a],[b])
+partitionEithers = foldr (either left right) ([],[])
+ where
+  left  a ~(l, r) = (a:l, r)
+  right a ~(l, r) = (l, a:r)
+
+isLeft :: Either a b -> Bool
+isLeft (Left  _) = True
+isLeft (Right _) = False
+
+isRight :: Either a b -> Bool
+isRight (Left  _) = False
+isRight (Right _) = True
+
+fromLeft :: a -> Either a b -> a
+fromLeft _ (Left a) = a
+fromLeft a _        = a
+
+fromRight :: b -> Either a b -> b
+fromRight _ (Right b) = b
+fromRight b _         = b
 
 {-Functions: Tuple-}
 fst              :: (a,b) -> a
