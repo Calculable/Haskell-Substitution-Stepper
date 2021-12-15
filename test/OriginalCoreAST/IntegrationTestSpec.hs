@@ -47,8 +47,8 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "higherOrderParameter" bindingFinder coreBindings
   describe "Types" $ do
     it "can reduce basic operation on Boolean" $ \(bindingFinder, coreBindings) -> do
-      --expectationForExpression "basicOperationOnBoolean" bindingFinder coreBindings
-      pendingWith "Boolean type not fully supported"
+      expectationForExpression "basicOperationOnBoolean" bindingFinder coreBindings
+      --pendingWith "Boolean type not fully supported"
     it "can reduce basic operation on Char" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnChar" bindingFinder coreBindings
     it "can reduce basic operation on Double" $ \(bindingFinder, coreBindings) -> do
@@ -58,21 +58,21 @@ spec = before getBindingFinderWithCoreBindings $ do
     it "can reduce basic operation on Integer" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnInteger" bindingFinder coreBindings
     it "can reduce basic operation on Either" $ \(bindingFinder, coreBindings) -> do
-      --expectationForExpression "basicOperationOnEither" bindingFinder coreBindings
-      pendingWith "Either type not fully supported"
+      expectationForExpression "basicOperationOnEither" bindingFinder coreBindings
+      --pendingWith "Either type not fully supported"
     it "can reduce basic operation on Maybe" $ \(bindingFinder, coreBindings) -> do
-      --expectationForExpression "basicOperationOnMaybe" bindingFinder coreBindings
-      pendingWith "Maybe type not fully supported"
+      expectationForExpression "basicOperationOnMaybe" bindingFinder coreBindings
+      --pendingWith "Maybe type not fully supported"
     it "can reduce basic operation on  Rational" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnRational" bindingFinder coreBindings
     it "can reduce basic operation on String" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnString" bindingFinder coreBindings
     it "can reduce basic operation on List" $ \(bindingFinder, coreBindings) -> do
-      --expectationForExpression "basicOperationOnList" bindingFinder coreBindings
-      pendingWith "List type not fully supported"
+      expectationForExpression "basicOperationOnList" bindingFinder coreBindings
+      --pendingWith "List type not fully supported"
     it "can reduce basic operation on Tuple" $ \(bindingFinder, coreBindings) -> do
-      --expectationForExpression "basicOperationOnTuple" bindingFinder coreBindings
-      pendingWith "Tuple type not fully supported"
+      expectationForExpression "basicOperationOnTuple" bindingFinder coreBindings
+      --pendingWith "Tuple type not fully supported"
   describe "Support for Num Type" $ do
     it "abs works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "abs" bindingFinder coreBindings
@@ -171,8 +171,8 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "recursion" bindingFinder coreBindings
   describe "List Operations" $ do
     it "list operations work" $ \(bindingFinder, coreBindings) -> do
-      --expectationForExpression "listOperations" bindingFinder coreBindings
-      pendingWith "not all list operations are supported yet"
+      expectationForExpression "listOperations" bindingFinder coreBindings
+      --pendingWith "not all list operations are supported yet"
   describe "Where Bindings" $ do
     it "expressions with where syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "where" bindingFinder coreBindings
@@ -185,8 +185,8 @@ spec = before getBindingFinderWithCoreBindings $ do
     it "Tuples as parameter work" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "tupleAsParameter" bindingFinder coreBindings
     it "Equality on Tuple works" $ \(bindingFinder, coreBindings) -> do
-      pendingWith "tuples are not fully supported yet"
-  --expectationForExpression "equalsOnTuple" bindingFinder coreBindings
+      --pendingWith "tuples are not fully supported yet"
+      expectationForExpression "equalsOnTuple" bindingFinder coreBindings
   describe "Infinite List" $ do
     it "Infinite lists works as function parameter" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "infiniteList" bindingFinder coreBindings
@@ -197,8 +197,8 @@ spec = before getBindingFinderWithCoreBindings $ do
     it "function on custom type works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "functionOnCustomType" bindingFinder coreBindings
     it "equality on custom type works" $ \(bindingFinder, coreBindings) -> do
-      pendingWith "custom data types are not fully supported yet"
-  --expectationForExpression "equalityOnCustomType" bindingFinder coreBindings
+      --pendingWith "custom data types are not fully supported yet"
+      expectationForExpression "equalityOnCustomType" bindingFinder coreBindings
   describe "Map works" $ do
     it "map on lists works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "map" bindingFinder coreBindings
