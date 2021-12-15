@@ -51,8 +51,6 @@ tryFindBindingForVar key bindings = tryFindBindingForCriteriaCascade [equalityFi
     equalityFilter = (\binding -> (==) (fst binding) key)
     nameAndSignatureFilter = (\binding -> (&&) ((==) (showOutputable (varName (fst binding))) (showOutputable (varName key))) ((==) (showOutputable (varType (fst binding))) (showOutputable (varType key))))
 
-
-
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
 tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [(\binding -> (==) (varToString (fst binding)) key)] bindings
 
@@ -65,7 +63,6 @@ tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
     1 -> Just (snd (head foundBindings));
     _ -> trace "more than one binding was found. I will return the first one (this might lead to a wrong expression)" Just (snd (head foundBindings))
   }
-
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingPattern expression patterns = do

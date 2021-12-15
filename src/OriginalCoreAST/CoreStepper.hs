@@ -84,11 +84,18 @@ applyStep bindings (Case expression binding caseType alternatives) = do
       matchingPattern <- findMatchingPattern expression alternatives
       return ("Replace with matching pattern", matchingPattern, bindings)
 applyStep bindings (Let (NonRec b expr) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, bindings)
-applyStep bindings (Let (Rec [(b, expr)]) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, (b, expr) : bindings)
+applyStep bindings (Let (Rec [(b, expr)]) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, addToBindingsIfNotExists (b, expr) bindings)
 applyStep bindings (Cast expression cohersion) = Just ("Remove cohersion from cast", expression, bindings)
 applyStep bindings (Tick _ _) = trace "no applicable step found: tick is not supported" Nothing
 applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not supported" Nothing
 applyStep _ _ = trace "no applicable step found" Nothing
+
+addToBindingsIfNotExists :: Binding -> [Binding] -> [Binding]
+addToBindingsIfNotExists (name, expression) bindings = do
+  let maybeExistingBinding = tryFindBinding name bindings
+  if isNothing maybeExistingBinding
+    then (name, expression) : bindings
+    else bindings --already exists, do not add
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe StepResult
 applyStepToNestedApp bindings expr = do
