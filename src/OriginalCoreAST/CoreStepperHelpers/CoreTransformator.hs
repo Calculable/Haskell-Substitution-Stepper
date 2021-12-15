@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction, getIndividualElementsOfList) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction) where
 
 import GHC.Plugins
   ( Alt,
@@ -10,11 +10,13 @@ import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
   ( isEmptyList,
     isList,
+    isNonEmptyTuple,
+    isEmptyTuple,
     isTypeInformation,
     varToString,
+    isTuple
   )
 import Utils (showOutputable)
-
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Expr Var -> [Expr Var] -> Expr Var
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression [] = expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
@@ -57,15 +59,3 @@ deepReplaceMultipleVarWithinExpression (x : xs) (y : ys) expression = deepReplac
 
 convertToMultiArgumentFunction :: Expr Var -> (Expr Var, [Expr Var])
 convertToMultiArgumentFunction = collectArgs
-
-getIndividualElementsOfList :: Expr Var -> [Expr Var]
-getIndividualElementsOfList expr
-  | isEmptyList expr = []
-  | isList expr = do
-    let (constructor, elements) = convertToMultiArgumentFunction expr
-    if length elements /= 3
-      then error ("unexpected number of arguments to cons operator: " ++ show (length elements))
-      else do
-        let [ty, first, nestedList] = take 3 elements
-        [ty, first] ++ getIndividualElementsOfList nestedList
-  | otherwise = []

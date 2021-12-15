@@ -1,6 +1,6 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple) where
 
-import Data.List (isPrefixOf)
+import Data.List (isPrefixOf, isSuffixOf)
 import GHC.Plugins
   ( Expr (..),
     Literal (LitDouble, LitFloat),
@@ -30,12 +30,12 @@ coreLiteralToFractional (LitDouble value) = fromRational value
 isInHeadNormalForm :: Expr Var -> Bool
 isInHeadNormalForm = exprIsHNF
 
-isTypeInformation :: Expr Var -> Bool
+isTypeInformation :: Expr b -> Bool
 isTypeInformation (Type _) = True
 isTypeInformation (App expr arg) = isTypeInformation expr
 isTypeInformation x = isClassDictionary x
 
-isClassDictionary :: Expr Var -> Bool
+isClassDictionary :: Expr b -> Bool
 isClassDictionary (Var name) = "$" `isPrefixOf` varToString name
 isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
 isClassDictionary x = False
@@ -80,7 +80,7 @@ varToSimpleString var = nameToString (varName var)
 nameToString :: Name -> String
 nameToString = getOccString
 
-isNonEmptyList :: Expr a -> Bool --can this be checked more elegant?
+isNonEmptyList :: Expr a -> Bool --can this be checked more elegantly?
 isNonEmptyList expr = isConstructorApplicationOfType expr ":"
 
 isEmptyList :: Expr a -> Bool
@@ -89,7 +89,22 @@ isEmptyList expr = isConstructorApplicationOfType expr "[]"
 isList :: Expr a -> Bool
 isList expr = (||) (isNonEmptyList expr) (isEmptyList expr)
 
-isNothingMaybe :: Expr a -> Bool --can this be checked more elegant?
+isNonEmptyTuple :: Expr a -> Bool --can this be checked more elegantly?
+isNonEmptyTuple (App expr arg) = do
+  let (function, arguments) = collectArgs (App expr arg)
+  case function of
+    (Var var) -> (("(" `isPrefixOf` constructorName) && (")" `isSuffixOf` constructorName)) && (',' `elem` constructorName)
+      where constructorName = (varToString var)
+isNonEmptyTuple _ = False
+
+isEmptyTuple :: Expr a -> Bool  --can this be checked more elegantly?
+isEmptyTuple (Var var) = (varToString var) == "()"
+isEmptyTuple _ = False
+
+isTuple :: Expr a -> Bool
+isTuple expr = (||) (isNonEmptyTuple expr) (isEmptyTuple expr)
+
+isNothingMaybe :: Expr a -> Bool --can this be checked more elegantly?
 isNothingMaybe expr = isConstructorApplicationOfType expr "Nothing"
 
 isJustMaybe :: Expr a -> Bool
@@ -105,9 +120,13 @@ isConstructorApplicationOfType (App expr arg) name = do
     (Var var) -> (==) (varToString var) name
 isConstructorApplicationOfType _ _ = False
 
-isListType :: Expr a -> Bool --is there a more elegant solution?
-isListType (Type ty) = showOutputable ty == "[]"
-isListType _ = False
+isListType :: Type -> Bool --is there a more elegant solution?
+isListType ty = "[" `isPrefixOf` typeRepresentation && "]" `isSuffixOf` typeRepresentation
+  where typeRepresentation = showOutputable ty
+
+isTupleType :: Type -> Bool --is there a more elegant solution?
+isTupleType ty = "(" `isPrefixOf` typeRepresentation && ")" `isSuffixOf` typeRepresentation
+  where typeRepresentation = showOutputable ty
 
 isIntType :: Type -> Bool --is there a more elegant solution?
 isIntType ty = showOutputable ty == "Int"
@@ -118,10 +137,10 @@ isBoolType ty = showOutputable ty == "Bool"
 isCharType :: Type -> Bool --is there a more elegant solution?
 isCharType ty = showOutputable ty == "Char"
 
-getFunctionOfNestedApplication :: Expr Var -> Expr Var
+getFunctionOfNestedApplication :: Expr b -> Expr b
 getFunctionOfNestedApplication expr = fst (collectArgs expr)
 
-typeOfExpression :: Expr Var -> String --used for tracing / debugging
+typeOfExpression :: Expr a -> String --used for tracing / debugging
 typeOfExpression (Var _) = "Var"
 typeOfExpression (Lit _) = "Lit"
 typeOfExpression (App _ _) = "App"
@@ -132,3 +151,31 @@ typeOfExpression (Cast _ _) = "Cast"
 typeOfExpression (Tick _ _) = "Tick"
 typeOfExpression (Type _) = "Type"
 typeOfExpression (Coercion _) = "Coercion"
+
+removeTypeInformation :: [Expr b] -> [Expr b]
+removeTypeInformation list = filter (not . isTypeInformation) list
+
+getIndividualElementsOfList :: Expr b -> [Expr b]
+getIndividualElementsOfList expr
+  | isEmptyList expr = []
+  | isList expr = do
+    let (constructor, elements) = collectArgs expr
+    if length elements /= 3
+      then error ("unexpected number of arguments to cons operator: " ++ show (length elements))
+      else do
+        let [ty, first, nestedList] = take 3 elements
+        [ty, first] ++ getIndividualElementsOfList nestedList
+  | otherwise = error "expression is not a list"
+
+getIndividualElementsOfTuple :: Expr b -> [Expr b]
+getIndividualElementsOfTuple expr
+  | isEmptyTuple expr = []
+  | isTuple expr = do
+    let (constructor, elements) = collectArgs expr
+    let values = snd (split elements)
+    values
+  | otherwise = error "expression is not a tuple"
+
+{-this function is taken from: https://stackoverflow.com/questions/19074520/how-to-split-a-list-into-two-in-haskell-}
+split :: [a] -> ([a], [a])
+split myList = splitAt (((length myList) + 1) `div` 2) myList

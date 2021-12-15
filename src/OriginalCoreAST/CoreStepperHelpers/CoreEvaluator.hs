@@ -19,7 +19,11 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     varToString,
     isIntType, 
     isBoolType, 
-    isCharType
+    isCharType,
+    isTupleType,
+    removeTypeInformation,
+    getIndividualElementsOfList,
+    getIndividualElementsOfTuple
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( boolToCoreExpression,
@@ -31,15 +35,13 @@ import OriginalCoreAST.CoreMakerFunctions
     charToCoreExpression
   )
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
-  ( convertToMultiArgumentFunction,
-    getIndividualElementsOfList,
+  ( convertToMultiArgumentFunction
   )
 import OriginalCoreAST.CoreTypeClassInstances ()
 import Data.Char 
   ( ord,
     isSpace 
   )
-import Utils ()
 
 type Reducer = (Expr Var -> Maybe (Expr Var)) 
 
@@ -70,7 +72,7 @@ evaluateUnsteppableFunctionWithArguments "abs" [x] _ = Just (abs x)
 evaluateUnsteppableFunctionWithArguments "negate" [x] _ = Just (negate x)
 evaluateUnsteppableFunctionWithArguments "fromInteger" [Lit (LitNumber _ x)] _ = Just (fromInteger x)
 evaluateUnsteppableFunctionWithArguments "/=" [x, y] _ = Just (boolToCoreExpression ((/=) x y))
-evaluateUnsteppableFunctionWithArguments "==" [x, y] _ = Just (boolToCoreExpression ((==) x y))
+evaluateUnsteppableFunctionWithArguments "==" [x, y] reducer = Just (boolToCoreExpression ((==) (reducer x) (reducer y)))
 evaluateUnsteppableFunctionWithArguments "<" [x, y] _ = Just (boolToCoreExpression ((<) x y))
 evaluateUnsteppableFunctionWithArguments ">" [x, y] _ = Just (boolToCoreExpression ((>) x y))
 evaluateUnsteppableFunctionWithArguments ">=" [x, y] _ = Just (boolToCoreExpression ((>=) x y))
@@ -150,7 +152,6 @@ evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, Type newType, ar
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, Type newType, function, argument] _ = customFmapForList newType function argument
 evaluateUnsteppableFunctionWithArgumentsAndTypes "minBound" [Type ty, _] _ = minBoundForType ty
 evaluateUnsteppableFunctionWithArgumentsAndTypes "maxBound" [Type ty, _] _ = maxBoundForType ty
-
 evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
 
 minBoundForType :: Type -> Maybe (Expr Var)
@@ -185,13 +186,13 @@ customMonadOperator2 _ _ _ _ = trace ">> not supported for this type" Nothing
 
 customReturn :: Type -> Type -> Expr Var -> Expr Var
 customReturn monadType ty expression = do
-  if isListType (Type monadType)
+  if isListType monadType
     then expressionListToCoreListWithType ty [expression]
     else maybeToCoreExpression (Just expression) ty --is maybe type (could be checked again)
 
 customFail :: Type -> Type -> Expr Var
 customFail monadType ty =
-  if isListType (Type monadType)
+  if isListType monadType
     then expressionListToCoreListWithType ty []
     else maybeToCoreExpression Nothing ty --is maybe type (could be checked again)
 
@@ -199,7 +200,7 @@ repalceAllListItemsWithFunction :: Type -> Expr Var -> Expr Var -> Maybe (Expr V
 repalceAllListItemsWithFunction newType element functorArgument
   | isList functorArgument = do
     let listItems = getIndividualElementsOfList functorArgument
-    let listItemsWithoutTypes = filter (not . isTypeInformation) listItems
+    let listItemsWithoutTypes = removeTypeInformation listItems
     let mappedListItems = replicate (length listItemsWithoutTypes) element
     Just (expressionListToCoreListWithType newType mappedListItems)
   | otherwise = Nothing
