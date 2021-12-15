@@ -94,4 +94,5 @@ printF fp fn = do
 stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
-  printCoreStepByStepReductionForEveryBinding (getCoreProgram cr)
+  spr <- compileToCore "src/SteppablePrelude.hs"
+  printCoreStepByStepReductionForEveryBinding ((getCoreProgram cr) ++ (getCoreProgram spr))
