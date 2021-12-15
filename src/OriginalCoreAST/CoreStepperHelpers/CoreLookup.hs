@@ -46,20 +46,26 @@ findBindingForString name bindings = do
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 tryFindBindingForVar :: Var -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForVar key = tryFindBindingForCriteria (\binding -> (&&) ((==) (showOutputable (varName (fst binding))) (showOutputable (varName key))) ((==) (showOutputable (varType (fst binding))) (showOutputable (varType key))))
+tryFindBindingForVar key bindings = tryFindBindingForCriteriaCascade [equalityFilter, nameAndSignatureFilter] bindings
+  where
+    equalityFilter = (\binding -> (==) (fst binding) key)
+    nameAndSignatureFilter = (\binding -> (&&) ((==) (showOutputable (varName (fst binding))) (showOutputable (varName key))) ((==) (showOutputable (varType (fst binding))) (showOutputable (varType key))))
+
+
 
 tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForString key = tryFindBindingForCriteria (\binding -> (==) (varToString (fst binding)) key)
+tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [(\binding -> (==) (varToString (fst binding)) key)] bindings
 
-tryFindBindingForCriteria :: (Binding -> Bool) -> [Binding] -> Maybe (Expr Var)
-tryFindBindingForCriteria criteria bindings = do
+tryFindBindingForCriteriaCascade :: [(Binding -> Bool)] -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForCriteriaCascade [] bindings = Nothing
+tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
   let foundBindings = filter criteria bindings
-  if length foundBindings > 1
-    then trace "more than one binding with the same name was found. I will return the first one (this might lead to a wrong expression)" Just (snd (head foundBindings))
-    else
-      if length foundBindings == 1
-        then Just (snd (head foundBindings))
-        else Nothing
+  case (length foundBindings) of {
+    0 -> tryFindBindingForCriteriaCascade criterias bindings;
+    1 -> Just (snd (head foundBindings));
+    _ -> trace "more than one binding was found. I will return the first one (this might lead to a wrong expression)" Just (snd (head foundBindings))
+  }
+
 
 findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingPattern expression patterns = do
