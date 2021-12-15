@@ -81,7 +81,7 @@ basicOperationOnIntegerExpectedOutput = 1 :: Integer
 
 {-basic operations on Either Type-}
 
-basicOperationOnEitherInput = fromRight (Right 4)
+basicOperationOnEitherInput = fromRight 42 (Right 4)
 
 basicOperationOnEitherExpectedOutput = 4
 
@@ -344,9 +344,9 @@ functionOnCustomTypeInput = getData (Top 5)
 
 functionOnCustomTypeExpectedOutput = 5
 
-equalityOnCustomTypeInput = change (Top 5)
+equalityOnCustomTypeInput = (change (Top 5)) == Down 5
 
-equalityOnCustomTypeExpectedOutput = Down 5
+equalityOnCustomTypeExpectedOutput = True
 
 {-infinite lists-}
 infiniteListInput = sumOfTheFirstXElements [1 ..] 3
