@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple) where
 
 import Data.List (isPrefixOf, isSuffixOf)
 import GHC.Plugins
@@ -30,12 +30,12 @@ coreLiteralToFractional (LitDouble value) = fromRational value
 isInHeadNormalForm :: Expr Var -> Bool
 isInHeadNormalForm = exprIsHNF
 
-isTypeInformation :: Expr Var -> Bool
+isTypeInformation :: Expr b -> Bool
 isTypeInformation (Type _) = True
 isTypeInformation (App expr arg) = isTypeInformation expr
 isTypeInformation x = isClassDictionary x
 
-isClassDictionary :: Expr Var -> Bool
+isClassDictionary :: Expr b -> Bool
 isClassDictionary (Var name) = "$" `isPrefixOf` varToString name
 isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
 isClassDictionary x = False
@@ -137,7 +137,7 @@ isBoolType ty = showOutputable ty == "Bool"
 isCharType :: Type -> Bool --is there a more elegant solution?
 isCharType ty = showOutputable ty == "Char"
 
-getFunctionOfNestedApplication :: Expr Var -> Expr Var
+getFunctionOfNestedApplication :: Expr b -> Expr b
 getFunctionOfNestedApplication expr = fst (collectArgs expr)
 
 typeOfExpression :: Expr a -> String --used for tracing / debugging
@@ -151,3 +151,31 @@ typeOfExpression (Cast _ _) = "Cast"
 typeOfExpression (Tick _ _) = "Tick"
 typeOfExpression (Type _) = "Type"
 typeOfExpression (Coercion _) = "Coercion"
+
+removeTypeInformation :: [Expr b] -> [Expr b]
+removeTypeInformation list = filter (not . isTypeInformation) list
+
+getIndividualElementsOfList :: Expr b -> [Expr b]
+getIndividualElementsOfList expr
+  | isEmptyList expr = []
+  | isList expr = do
+    let (constructor, elements) = collectArgs expr
+    if length elements /= 3
+      then error ("unexpected number of arguments to cons operator: " ++ show (length elements))
+      else do
+        let [ty, first, nestedList] = take 3 elements
+        [ty, first] ++ getIndividualElementsOfList nestedList
+  | otherwise = error "expression is not a list"
+
+getIndividualElementsOfTuple :: Expr b -> [Expr b]
+getIndividualElementsOfTuple expr
+  | isEmptyTuple expr = []
+  | isTuple expr = do
+    let (constructor, elements) = collectArgs expr
+    let values = snd (split elements)
+    values
+  | otherwise = error "expression is not a tuple"
+
+{-this function is taken from: https://stackoverflow.com/questions/19074520/how-to-split-a-list-into-two-in-haskell-}
+split :: [a] -> ([a], [a])
+split myList = splitAt (((length myList) + 1) `div` 2) myList

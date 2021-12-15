@@ -1,10 +1,15 @@
 module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Plugins (Expr (Lit, Var), Literal (..), OutputableBndr)
+import GHC.Plugins (Expr (Lit, Var, App, Type), Literal (..), OutputableBndr)
 import OriginalCoreAST.CoreInformationExtractorFunctions
   ( varToString, 
     boolValueFromVar, 
-    isBoolVar
+    isBoolVar,
+    isList,
+    isTuple,
+    removeTypeInformation,
+    getIndividualElementsOfList,
+    getIndividualElementsOfTuple
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( charToCoreLiteral,
@@ -15,6 +20,7 @@ import OriginalCoreAST.CoreMakerFunctions
     rationalToCoreLiteral,
   )
 import Utils (showOutputable)
+import Data.Maybe (isNothing, fromJust)
 
 instance (OutputableBndr b) => Show (Expr b) where
   show = showOutputable
@@ -43,7 +49,17 @@ instance Eq (Expr b) where
   (/=) x y = not ((==) x y)
   (==) (Lit x) (Lit y) = weakEquals x y
   (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
+  (==) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (==)
   (==) x y = error "== and /= not supported by this type"
+
+operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
+operatorForCollection a b operator = operator (elementsToCompareForCollection a) (elementsToCompareForCollection b)
+
+elementsToCompareForCollection :: Expr b -> [Expr b]
+elementsToCompareForCollection expr   | isList expr = removeTypeInformation (getIndividualElementsOfList expr)
+                                      | isTuple expr = removeTypeInformation (getIndividualElementsOfTuple expr)
+                                      | otherwise = error "operator not supported: unknown type"
+
 
 weakEquals :: Literal -> Literal -> Bool
 weakEquals (LitChar first) (LitChar second) = (==) first second
@@ -65,15 +81,19 @@ weakEquals _ _ = False
 instance Ord (Expr b) where
   (<=) (Lit x) (Lit y) = lessOrEqualLiteral x y
   (<=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) <= (boolValueFromVar y)
+  (<=) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (<=)
   (<=) _ _ = error "<= not supported by this type"
   (<) (Lit x) (Lit y) = lessLiteral x y
   (<) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) < (boolValueFromVar y)
+  (<) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (<)
   (<) _ _ = error "< not supported by this type"
   (>=) (Lit x) (Lit y) = greaterEqualLiteral x y
   (>=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) >= (boolValueFromVar y)
+  (>=) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (>=)
   (>=) _ _ = error ">= not supported by this type"
   (>) (Lit x) (Lit y) = greaterLiteral x y
   (>) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) > (boolValueFromVar y)
+  (>) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (>)
   (>) _ _ = error "> not supported by this type"
 
 compareLiteral :: Literal -> Literal -> Ordering
