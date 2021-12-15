@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction, getIndividualElementsOfList) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction, getIndividualElementsOfList, getIndividualElementsOfTuple) where
 
 import GHC.Plugins
   ( Alt,
@@ -10,11 +10,13 @@ import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
   ( isEmptyList,
     isList,
+    isNonEmptyTuple,
+    isEmptyTuple,
     isTypeInformation,
     varToString,
+    isTuple
   )
 import Utils (showOutputable)
-
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Expr Var -> [Expr Var] -> Expr Var
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression [] = expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
@@ -68,4 +70,17 @@ getIndividualElementsOfList expr
       else do
         let [ty, first, nestedList] = take 3 elements
         [ty, first] ++ getIndividualElementsOfList nestedList
-  | otherwise = []
+  | otherwise = error "expression is not a list"
+
+getIndividualElementsOfTuple :: Expr Var -> [Expr Var]
+getIndividualElementsOfTuple expr
+  | isEmptyTuple expr = []
+  | isTuple expr = do
+    let (constructor, elements) = convertToMultiArgumentFunction expr
+    let values = snd (split elements)
+    values
+  | otherwise = error "expression is not a tuple"
+
+{-this function is taken from: https://stackoverflow.com/questions/19074520/how-to-split-a-list-into-two-in-haskell-}
+split :: [a] -> ([a], [a])
+split myList = splitAt (((length myList) + 1) `div` 2) myList

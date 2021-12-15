@@ -1,6 +1,6 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isEmptyList, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar) where
 
-import Data.List (isPrefixOf)
+import Data.List (isPrefixOf, isSuffixOf)
 import GHC.Plugins
   ( Expr (..),
     Literal (LitDouble, LitFloat),
@@ -80,7 +80,7 @@ varToSimpleString var = nameToString (varName var)
 nameToString :: Name -> String
 nameToString = getOccString
 
-isNonEmptyList :: Expr a -> Bool --can this be checked more elegant?
+isNonEmptyList :: Expr a -> Bool --can this be checked more elegantly?
 isNonEmptyList expr = isConstructorApplicationOfType expr ":"
 
 isEmptyList :: Expr a -> Bool
@@ -89,7 +89,22 @@ isEmptyList expr = isConstructorApplicationOfType expr "[]"
 isList :: Expr a -> Bool
 isList expr = (||) (isNonEmptyList expr) (isEmptyList expr)
 
-isNothingMaybe :: Expr a -> Bool --can this be checked more elegant?
+isNonEmptyTuple :: Expr a -> Bool --can this be checked more elegantly?
+isNonEmptyTuple (App expr arg) = do
+  let (function, arguments) = collectArgs (App expr arg)
+  case function of
+    (Var var) -> (("(" `isPrefixOf` constructorName) && (")" `isSuffixOf` constructorName)) && (',' `elem` constructorName)
+      where constructorName = (varToString var)
+isNonEmptyTuple _ = False
+
+isEmptyTuple :: Expr a -> Bool  --can this be checked more elegantly?
+isEmptyTuple (Var var) = (varToString var) == "()"
+isEmptyTuple _ = False
+
+isTuple :: Expr a -> Bool
+isTuple expr = (||) (isNonEmptyTuple expr) (isEmptyTuple expr)
+
+isNothingMaybe :: Expr a -> Bool --can this be checked more elegantly?
 isNothingMaybe expr = isConstructorApplicationOfType expr "Nothing"
 
 isJustMaybe :: Expr a -> Bool
@@ -105,9 +120,13 @@ isConstructorApplicationOfType (App expr arg) name = do
     (Var var) -> (==) (varToString var) name
 isConstructorApplicationOfType _ _ = False
 
-isListType :: Expr a -> Bool --is there a more elegant solution?
-isListType (Type ty) = showOutputable ty == "[]"
-isListType _ = False
+isListType :: Type -> Bool --is there a more elegant solution?
+isListType ty = "[" `isPrefixOf` typeRepresentation && "]" `isSuffixOf` typeRepresentation
+  where typeRepresentation = showOutputable ty
+
+isTupleType :: Type -> Bool --is there a more elegant solution?
+isTupleType ty = "(" `isPrefixOf` typeRepresentation && ")" `isSuffixOf` typeRepresentation
+  where typeRepresentation = showOutputable ty
 
 isIntType :: Type -> Bool --is there a more elegant solution?
 isIntType ty = showOutputable ty == "Int"
@@ -121,7 +140,7 @@ isCharType ty = showOutputable ty == "Char"
 getFunctionOfNestedApplication :: Expr Var -> Expr Var
 getFunctionOfNestedApplication expr = fst (collectArgs expr)
 
-typeOfExpression :: Expr Var -> String --used for tracing / debugging
+typeOfExpression :: Expr a -> String --used for tracing / debugging
 typeOfExpression (Var _) = "Var"
 typeOfExpression (Lit _) = "Lit"
 typeOfExpression (App _ _) = "App"

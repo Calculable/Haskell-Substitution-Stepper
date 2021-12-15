@@ -19,7 +19,8 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     varToString,
     isIntType, 
     isBoolType, 
-    isCharType
+    isCharType,
+    isTupleType
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( boolToCoreExpression,
@@ -33,13 +34,13 @@ import OriginalCoreAST.CoreMakerFunctions
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
   ( convertToMultiArgumentFunction,
     getIndividualElementsOfList,
+    getIndividualElementsOfTuple
   )
 import OriginalCoreAST.CoreTypeClassInstances ()
 import Data.Char 
   ( ord,
     isSpace 
   )
-import Utils ()
 
 type Reducer = (Expr Var -> Maybe (Expr Var)) 
 
@@ -150,8 +151,31 @@ evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, Type newType, ar
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, Type newType, function, argument] _ = customFmapForList newType function argument
 evaluateUnsteppableFunctionWithArgumentsAndTypes "minBound" [Type ty, _] _ = minBoundForType ty
 evaluateUnsteppableFunctionWithArgumentsAndTypes "maxBound" [Type ty, _] _ = maxBoundForType ty
-
+evaluateUnsteppableFunctionWithArgumentsAndTypes "==" [Type ty, _, first, second] reducer = equalsForType ty first second reducer
 evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
+
+equalsForType :: Type -> Expr Var -> Expr Var -> Reducer -> Maybe (Expr Var) 
+equalsForType ty first second reducer   | isListType ty = trace "isList" $ Just (boolToCoreExpression $ equalsForListExpression first second reducer)
+                                        | isTupleType ty = trace "istuple" $ Just (boolToCoreExpression $ equalsForTuple first second reducer)
+                                        | otherwise = trace "isSomething else" $ Nothing
+
+equalsForListExpression :: Expr Var -> Expr Var -> Reducer -> Bool
+equalsForListExpression firstList secondList reducer = do
+  let firstItems = removeTypeInformation (getIndividualElementsOfList firstList)
+  let secondItems = removeTypeInformation (getIndividualElementsOfList secondList)
+  equalsForListOfExpressions firstItems secondItems reducer
+
+equalsForListOfExpressions :: [Expr Var] -> [Expr Var] -> Reducer -> Bool
+equalsForListOfExpressions [] [] reducer = True
+equalsForListOfExpressions [] (y:ys) reducer = False
+equalsForListOfExpressions (x:xs) [] reducer = False
+equalsForListOfExpressions (x:xs) (y:ys) reducer = ((reducer x) == reducer y) && (equalsForListOfExpressions xs ys reducer)
+
+equalsForTuple :: Expr Var -> Expr Var -> Reducer -> Bool
+equalsForTuple firstList secondList reducer = do
+  let firstItems = removeTypeInformation (getIndividualElementsOfTuple firstList)
+  let secondItems = removeTypeInformation (getIndividualElementsOfTuple secondList)
+  equalsForListOfExpressions firstItems secondItems reducer
 
 minBoundForType :: Type -> Maybe (Expr Var)
 minBoundForType ty  | isIntType ty = Just $ integerToCoreExpression (toInteger (minBound::Int))
@@ -185,13 +209,13 @@ customMonadOperator2 _ _ _ _ = trace ">> not supported for this type" Nothing
 
 customReturn :: Type -> Type -> Expr Var -> Expr Var
 customReturn monadType ty expression = do
-  if isListType (Type monadType)
+  if isListType monadType
     then expressionListToCoreListWithType ty [expression]
     else maybeToCoreExpression (Just expression) ty --is maybe type (could be checked again)
 
 customFail :: Type -> Type -> Expr Var
 customFail monadType ty =
-  if isListType (Type monadType)
+  if isListType monadType
     then expressionListToCoreListWithType ty []
     else maybeToCoreExpression Nothing ty --is maybe type (could be checked again)
 
@@ -199,10 +223,13 @@ repalceAllListItemsWithFunction :: Type -> Expr Var -> Expr Var -> Maybe (Expr V
 repalceAllListItemsWithFunction newType element functorArgument
   | isList functorArgument = do
     let listItems = getIndividualElementsOfList functorArgument
-    let listItemsWithoutTypes = filter (not . isTypeInformation) listItems
+    let listItemsWithoutTypes = removeTypeInformation listItems
     let mappedListItems = replicate (length listItemsWithoutTypes) element
     Just (expressionListToCoreListWithType newType mappedListItems)
   | otherwise = Nothing
+
+removeTypeInformation :: [Expr Var] -> [Expr Var]
+removeTypeInformation list = filter (not . isTypeInformation) list
 
 customFmapForList :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
 customFmapForList newType function functorArgument
