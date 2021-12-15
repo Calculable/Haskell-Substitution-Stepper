@@ -4,7 +4,7 @@
 {-# OPTIONS -XNoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 
-module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Prelude) where
+module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Data.Char, module Prelude) where
 
 {-Imports-}
 import GHC.Maybe hiding (Maybe(..), Maybe)
@@ -475,10 +475,10 @@ class  Enum a  where
 
 
 instance  Enum Char  where
-    succ             =  toEnum . (+1) . fromEnum
     pred             =  toEnum . (subtract 1) . fromEnum
-    toEnum            = unsteppableFunction'primIntToChar
-    fromEnum          = unsteppableFunction'primIntToCharprimCharToInt
+    succ             =  toEnum . (+1) . fromEnum
+    toEnum x            = unsteppableFunction'primIntToChar x
+    fromEnum x          = unsteppableFunction'primCharToInt x
     enumFrom         =  customEnumFrom
     enumFromTo       =  customEnumFromTo
     enumFromThen     =  customEnumFromThen
@@ -579,5 +579,5 @@ stepSize x y = (fromEnum y) - (fromEnum x)
 unsteppableFunction'primIntToChar :: Int -> Char
 unsteppableFunction'primIntToChar _ = error "This is only a dummy function. The real reduction happens in the stepper backend"
 
-unsteppableFunction'primIntToCharprimCharToInt :: Char -> Int
-unsteppableFunction'primIntToCharprimCharToInt _ = error "This is only a dummy function. The real reduction happens in the stepper backend"
+unsteppableFunction'primCharToInt :: Char -> Int
+unsteppableFunction'primCharToInt _ = error "This is only a dummy function. The real reduction happens in the stepper backend"

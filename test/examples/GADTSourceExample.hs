@@ -1,6 +1,9 @@
 {-# LANGUAGE GADTs #-}
+{-# OPTIONS -XNoImplicitPrelude #-}
 
 module GADTSourceExample where
+
+import SteppablePrelude
 
 data Expr a where
   ILit :: Int -> Expr Int

@@ -1,6 +1,9 @@
 {-# LANGUAGE GADTs #-}
+{-# OPTIONS -XNoImplicitPrelude #-}
 
 module SafeListSouceExample where
+
+import SteppablePrelude
 
 data Empty
 

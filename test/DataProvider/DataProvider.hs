@@ -16,11 +16,18 @@ bindingFinder = do
   return (\x -> findBindingForString x bindings)
 
 compiledCore = compileToCore "src/IntegrationTestBindings.hs"
+compiledPrelude = compileToCore "src/SteppablePrelude.hs"
 
 coreProgram :: IO CoreProgram
 coreProgram = do getCoreProgram <$> compiledCore
 
-coreBindings = do convertToBindingsList <$> coreProgram
+corePrelude :: IO CoreProgram
+corePrelude = do getCoreProgram <$> compiledPrelude
+
+coreBindings = do 
+  program <- coreProgram
+  prelude <- corePrelude
+  return ((convertToBindingsList program) ++ (convertToBindingsList prelude))
 
 getBindingFinderWithCoreBindings :: IO (String -> Expr Var, [(Var, Expr Var)])
 getBindingFinderWithCoreBindings = do

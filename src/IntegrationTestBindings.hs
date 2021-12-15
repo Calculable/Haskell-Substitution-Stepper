@@ -1,8 +1,8 @@
+{-# OPTIONS -XNoImplicitPrelude #-}
+
 module IntegrationTestBindings where
 
-import Prelude hiding ((&&))
-import Data.Either (fromRight)
-import Data.Maybe (isNothing)
+import SteppablePrelude
 
 {-Arithmetic-}
 additionInput = 1 + 1
@@ -193,13 +193,13 @@ minBoundBoolExpectedOutput = False
 
 {-Support for Enum Type Instance-}
 
-succWithIntegerInput = succ 1
+succWithIntegerInput = succ 1::Int
 
 succWithIntegerExpectedOutput = 2
 
-succWithDoubleInput = succ 2.0
+succWithDoubleInput = succ 2.0 :: Double
 
-succWithDoubleExpectedOutput = 3.0
+succWithDoubleExpectedOutput = 3.0 :: Double
 
 {-Support for Floating Type Instance-}
 
@@ -305,7 +305,7 @@ localPatternMatchingVariant2ExpectedOutput = True
 
 {-Recursion-}
 
-recursionInput = findMaximum [1, 2, 3, 4, 42, 5]
+recursionInput = maximum [1, 2, 3, 4, 42, 5]
 
 recursionExpectedOutput = 42
 
@@ -330,7 +330,7 @@ functionWithDoAndLetInput = functionWithDoAndLet 1
 functionWithDoAndLetExpectedOutput = 8
 
 {-Tuples-}
-tupleAsParameterInput = second (1, 2)
+tupleAsParameterInput = snd (1, 2)
 
 tupleAsParameterExpectedOutput = 2
 
@@ -358,12 +358,12 @@ boundedListInput = sumOfTheFirstXElements [1 .. 10] 3
 boundedListExpectedOutput = 6
 
 {-map-}
-mapInput = first (map (+ 1) [1, 2, 3, 4, 5])
+mapInput = head (map (+ 1) [1, 2, 3, 4, 5])
 
 mapExpectedOutput = 2
 
 {-fmap on maybe-}
-fmapOnJustInput = getMaybeValue (fmap (+ 1) (Just (5 :: Integer)))
+fmapOnJustInput = fromJust (fmap (+ 1) (Just (5 :: Integer)))
 
 fmapOnJustExpectedOutput = 6
 
@@ -371,7 +371,7 @@ fmapOnNothingInput = isNothing (fmap (+ 1) Nothing)
 
 fmapOnNothingExpectedOutput = True
 
-fmapOnListInput = (first (fmap convertToString [1, 2, 3, 4, 5]))
+fmapOnListInput = (head (fmap convertToString [1, 2, 3, 4, 5]))
 
 fmapOnListExpectedOutput = "Hallo"
 
@@ -381,24 +381,24 @@ generatedList =
   [ (i, j) | i <- [1, 2, 3], j <- [1, 4, 3]
   ]
 
-generatorInput = count generatedList
+generatorInput = length generatedList
 
 generatorExpectedOutput = 9
 
 {-Monad maybe-}
 
-monadMaybeInput = (getMaybeValue (monadicFunction (Just 4)))
+monadMaybeInput = (fromJust (monadicFunction (Just 4)))
 
 monadMaybeExpectedOutput = "Hallo"
 
 {-Monad list-}
 
-monadListInput = (first monadicListFunction) == 3
+monadListInput = (head monadicListFunction) == 3
 
 monadListExpectedOutput = True
 
 {-Functions that can throw errors-}
-functionThatMightThrowErrorInput = findMaximum [1, 2, 3]
+functionThatMightThrowErrorInput = maximum [1, 2, 3]
 
 functionThatMightThrowErrorExpectedOutput = 3
 
@@ -538,48 +538,15 @@ functionWithMultipleWhere x = (y * z)
     y = x
     z = 1
 
-second :: (a, b) -> b
-second (x, y) = y
-
-override'enumFrom :: Enum a => a -> [a]
-override'enumFrom x = x : (override'enumFrom (succ x))
-
-override'enumFromTo :: Enum a => a -> [a]
-override'enumFromTo x = x : (override'enumFrom (succ x))
-
-override'enumTo :: (Ord a, Enum a) => a -> a -> [a]
-override'enumTo x y =
-  if (x == y)
-    then [x]
-    else x : (override'enumTo (succ x) y)
-
 sumOfTheFirstXElements :: (Num a) => [a] -> Integer -> a
 sumOfTheFirstXElements _ 0 = 0
 sumOfTheFirstXElements [] _ = 0
 sumOfTheFirstXElements (x : xs) amountOfElements = x + (sumOfTheFirstXElements xs (amountOfElements - 1))
 
-override'map :: (a -> b) -> [a] -> [b]
-override'map f [] = []
-override'map f (x : xs) = f x : map f xs
-
-first :: [a] -> a
-first (x : xs) = x
-
 monadicFunction :: Maybe Int -> Maybe String
 monadicFunction maybeValue = do
   value <- maybeValue
   return "Hallo"
-
-getMaybeValue :: Maybe a -> a
-getMaybeValue (Just x) = x
-
-override'isNothing :: Maybe a -> Bool
-override'isNothing Nothing = True
-override'isNothing _ = False
-
-override'length :: [a] -> Int
-override'length [] = 0
-override'length (_ : l) = 1 + length l
 
 convertToString :: Int -> String
 convertToString x = "Hallo"
@@ -590,24 +557,9 @@ monadicListFunction = do
   b <- [3, 2, 1]
   return (a * b)
 
-count :: [a] -> Int
-count [] = 0
-count (_ : l) = 1 + count l
-
-findMaximum :: (Ord a) => [a] -> a
-findMaximum [] = error "maximum of empty list"
-findMaximum [x] = x
-findMaximum (x : xs) = max x (findMaximum xs)
-
 getData :: Direction a -> a
 getData (Top a) = a
 getData (Down a) = a
-
-(&&), (||) :: Bool -> Bool -> Bool
-True && x = x
-False && _ = False
-True || _ = True
-False || x = x
 
 isItATwoVariant1 :: Int -> Bool
 isItATwoVariant1 x  | (x == 1) = False

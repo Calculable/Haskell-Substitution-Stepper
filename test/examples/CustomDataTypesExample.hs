@@ -1,4 +1,9 @@
+{-# OPTIONS -XNoImplicitPrelude #-}
+
+
 module CustomDataTypesExample where
+
+import SteppablePrelude
 
 -- Custom List
 data List a = Nil | Cons a (List a) deriving (Eq, Ord, Show, Read)

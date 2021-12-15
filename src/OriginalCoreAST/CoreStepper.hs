@@ -15,6 +15,7 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     isTypeInformation,
     isVarExpression,
     varToString,
+    typeOfExpression
   )
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
   ( evaluateFunctionWithArguments,
@@ -72,19 +73,8 @@ applyStep :: [Binding] -> Expr Var -> Maybe StepResult
 applyStep bindings (Var name) = do
   foundBinding <- tryFindBinding name bindings
   return ("Replace '" ++ varToString name ++ "' with definition", foundBinding, bindings {-replace binding reference with actual expression (Delta Reduction)-})
-applyStep bindings (App (Lam parameter expression) argument) = do
-  Just ("Lamda Application", deepReplaceVarWithinExpression parameter argument expression, bindings)
-applyStep bindings (App (Let binding expression) argument) = do
-  (description, reducedLet, newBindings) <- applyStep bindings (Let binding expression)
-  return (description, App reducedLet argument, newBindings)
-applyStep bindings (App (App first second) third) = do
-  applyStepToNestedApp bindings (App (App first second) third) --nested app
-applyStep bindings (App (Var name) argument) = do
-  let expression = tryFindBinding name bindings
-  if isNothing expression
-    then do
-      applyStepToNestedApp bindings (App (Var name) argument)
-    else Just ("Replace '" ++ varToString name ++ "' with definition", App (fromJust expression) argument, bindings)
+applyStep bindings (App expr arg) = do
+  applyStepToNestedApp bindings (App expr arg)
 applyStep bindings (Case expression binding caseType alternatives) = do
   if canBeReduced expression
     then do
@@ -120,12 +110,15 @@ applyStepToNestedApp bindings expr = do
                     return ("Apply " ++ showOutputable function, appliedFunction, bindings)
               )
             else do
-              (description, reducedFunction, newBindings) <- applyStep bindings (App function (head arguments))
-              return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), newBindings)
-        (Lam _ _) -> do
-          (description, reducedFunction, newBindings) <- applyStep bindings (App function (head arguments))
-          return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), newBindings)
-        _ -> trace "application with unsupported expression type" Nothing
+              (description, reducedFunction, newBindings) <- applyStep bindings function
+              return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
+        (Lam lamdaParameter lamdaExpression) -> do
+          let reducedFunction = deepReplaceVarWithinExpression lamdaParameter (head arguments) lamdaExpression
+          Just ("Lamda Application", convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), bindings)
+        (Let letBind letExpr) -> do
+          (description, reducedLet, newBindings) <- applyStep bindings (Let letBind letExpr)
+          return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedLet arguments, newBindings)
+        _ -> trace ("application with unsupported expression type") Nothing
 
 applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var], [Binding])
 applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =
