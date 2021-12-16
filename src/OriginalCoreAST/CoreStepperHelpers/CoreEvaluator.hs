@@ -23,7 +23,8 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     isTupleType,
     removeTypeInformation,
     getIndividualElementsOfList,
-    getIndividualElementsOfTuple
+    getIndividualElementsOfTuple,
+    isTypeWrapperFunctionName
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( boolToCoreExpression,
@@ -79,9 +80,6 @@ evaluateUnsteppableFunctionWithArguments ">=" [x, y] _ = Just (boolToCoreExpress
 evaluateUnsteppableFunctionWithArguments "<=" [x, y] _ = Just (boolToCoreExpression ((<=) x y))
 evaluateUnsteppableFunctionWithArguments "min" [x, y] _ = Just $ min x y
 evaluateUnsteppableFunctionWithArguments "max" [x, y] _ = Just $ max x y
-evaluateUnsteppableFunctionWithArguments "unpackCString#" [x] _ = Just x
-evaluateUnsteppableFunctionWithArguments "C#" [Lit (LitChar x)] _ = Just $ Lit (LitChar x)
-evaluateUnsteppableFunctionWithArguments "I#" [Lit (LitNumber x y)] _ = Just $ Lit (LitNumber x y)
 evaluateUnsteppableFunctionWithArguments "succ" [x] _ = Just $ succ x
 evaluateUnsteppableFunctionWithArguments "pred" [x] _ = Just $ pred x
 evaluateUnsteppableFunctionWithArguments "fromEnum" [x] _ = Just $ integerToCoreExpression (toInteger (fromEnum x))
@@ -138,6 +136,7 @@ evaluateUnsteppableFunctionWithArguments "ord" [Lit (LitChar input)] reducer = J
 evaluateUnsteppableFunctionWithArguments "isSpace" [Lit (LitChar input)] reducer = Just (boolToCoreExpression (isSpace input))
 evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primIntToChar" [Lit (LitNumber _ input)] reducer = Just (charToCoreExpression (toEnum (fromIntegral input)))
 evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Lit (LitChar input)] reducer = Just (integerToCoreExpression (toInteger (fromEnum input)))
+evaluateUnsteppableFunctionWithArguments functionName [x] reducer | isTypeWrapperFunctionName functionName = Just x
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
 customFmapForMaybe :: Expr Var -> Expr Var -> Maybe (Expr Var)
