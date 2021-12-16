@@ -7,6 +7,8 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     isBoolVar,
     isList,
     isTuple,
+    isPrimitiveTypeConstructorApp,
+    getLiteralArgument,
     removeTypeInformation,
     getIndividualElementsOfList,
     getIndividualElementsOfTuple
@@ -21,6 +23,7 @@ import OriginalCoreAST.CoreMakerFunctions
   )
 import Utils (showOutputable)
 import Data.Maybe (isNothing, fromJust)
+import Debug.Trace (trace)
 
 instance (OutputableBndr b) => Show (Expr b) where
   show = showOutputable
@@ -49,7 +52,7 @@ instance Eq (Expr b) where
   (/=) x y = not ((==) x y)
   (==) (Lit x) (Lit y) = weakEquals x y
   (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
-  (==) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (==)
+  (==) (App x1 y1) (App x2 y2) = trace "operator for collection called" operatorForCollection (App x1 y1) (App x2 y2) (==)
   (==) x y = error "== and /= not supported by this type"
 
 operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
@@ -58,7 +61,8 @@ operatorForCollection a b operator = operator (elementsToCompareForCollection a)
 elementsToCompareForCollection :: Expr b -> [Expr b]
 elementsToCompareForCollection expr   | isList expr = removeTypeInformation (getIndividualElementsOfList expr)
                                       | isTuple expr = removeTypeInformation (getIndividualElementsOfTuple expr)
-                                      | otherwise = error "operator not supported: unknown type"
+                                      | isPrimitiveTypeConstructorApp expr = [getLiteralArgument expr]
+                                      | otherwise = error "operator not supported: unknown type: "
 
 
 weakEquals :: Literal -> Literal -> Bool

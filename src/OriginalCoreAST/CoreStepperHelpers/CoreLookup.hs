@@ -16,13 +16,16 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
   ( isTypeInformation,
     varExpressionToString,
     varToString,
+    isPrimitiveTypeConstructorName
   )
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
   ( convertToMultiArgumentFunction,
     deepReplaceMultipleVarWithinExpression,
+    deepReplaceVarWithinExpression
   )
 import OriginalCoreAST.CoreTypeClassInstances ()
 import Utils (showOutputable)
+import GHC.Core.DataCon (dataConName)
 
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 
@@ -78,14 +81,18 @@ findMatchingPatternIgnoreDefault (Var name) ((DataAlt dataCon, _, expression) : 
     then Just expression
     else findMatchingPatternIgnoreDefault (Var name) xs
 findMatchingPatternIgnoreDefault (Lit literal) ((LitAlt patternLiteral, _, expression) : xs) =
-  if (==) literal patternLiteral --can we compare two literals like this?
+  if (==) (Lit literal) (Lit patternLiteral) 
     then Just expression
+    else findMatchingPatternIgnoreDefault (Lit literal) xs
+findMatchingPatternIgnoreDefault (Lit literal) ((DataAlt patternConstructorName, [boundName], expression) : xs) = do
+  if (isPrimitiveTypeConstructorName (dataConName patternConstructorName))
+    then Just (deepReplaceVarWithinExpression boundName (Lit literal) expression)
     else findMatchingPatternIgnoreDefault (Lit literal) xs
 findMatchingPatternIgnoreDefault (App expr argument) ((DataAlt patternConstructorName, boundNames, expression) : xs) = do
   let (function, arguments) = convertToMultiArgumentFunction (App expr argument)
   if (==) (varExpressionToString function) (showOutputable patternConstructorName) --check: is there a more elegant way than "show outputable"
     then Just (deepReplaceMultipleVarWithinExpression boundNames (filter (not . isTypeInformation) arguments) expression)
-    else findMatchingPatternIgnoreDefault (App expr argument) xs
+        else findMatchingPatternIgnoreDefault (App expr argument) xs
 findMatchingPatternIgnoreDefault expression (x : xs) = findMatchingPatternIgnoreDefault expression xs
 
 findMatchingDefaultPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
