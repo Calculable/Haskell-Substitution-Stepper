@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName) where
 
 import Data.List (isPrefixOf, isSuffixOf)
 import GHC.Plugins
@@ -10,8 +10,12 @@ import GHC.Plugins
     collectArgs,
     exprIsHNF,
     getOccString,
+    varType
   )
 import Utils (showOutputable)
+import Debug.Trace(trace)
+import OriginalCoreAST.CoreStepperHelpers.TracerHelper
+import GHC.Core.TyCo.Rep (Type(..))
 
 varExpressionToString :: Expr Var -> String
 varExpressionToString (Var var) = varToString var
@@ -32,13 +36,19 @@ isInHeadNormalForm = exprIsHNF
 
 isTypeInformation :: Expr b -> Bool
 isTypeInformation (Type _) = True
-isTypeInformation (App expr arg) = isTypeInformation expr
+--isTypeInformation (App expr arg) = isTypeInformation expr
 isTypeInformation x = isClassDictionary x
 
 isClassDictionary :: Expr b -> Bool
-isClassDictionary (Var name) = "$" `isPrefixOf` varToString name
+isClassDictionary (Var name) = "$" `isPrefixOf` varName && not (varName == "$" || varName == "$!") --todo: ugly, find better solution
+  where varName = varToString name
 isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
 isClassDictionary x = False
+
+isTyConAppType :: Type -> Bool
+isTyConAppType (TyConApp _ _) = True
+isTyConAppType _ = False
+
 
 isVarExpression :: Expr Var -> Bool
 isVarExpression (Var name) = True
@@ -47,8 +57,9 @@ isVarExpression _ = False
 -- | The "canBeReducedFunction" checks if a Core expression is not yet in head normal form and can further be reduced
 canBeReduced :: Expr Var -> Bool
 canBeReduced exp
-  | isTypeInformation exp = False
   | isBoolVar exp = False
+  | isSupportedVar exp = True
+  | isTypeInformation exp = False --toDo: ignore when it is inside app...
   | otherwise = case exp of --check nested application
     (App (Lam _ _) x) -> True
     (App (Let _ _) x) -> True
@@ -57,6 +68,10 @@ canBeReduced exp
     (Let _ _) -> True
     (App x y) -> canBeReduced (getFunctionOfNestedApplication (App x y)) || not (exprIsHNF exp)
     _ -> not (exprIsHNF exp)
+
+isSupportedVar :: Expr Var -> Bool
+isSupportedVar (Var var) = (varToString var) == "I#" || (varToString var) == "C#"
+isSupportedVar _ = False
 
 isBoolVar :: Expr Var -> Bool
 isBoolVar (Var x) = isBoolVarTrue x || isBoolVarFalse x
@@ -151,6 +166,20 @@ typeOfExpression (Cast _ _) = "Cast"
 typeOfExpression (Tick _ _) = "Tick"
 typeOfExpression (Type _) = "Type"
 typeOfExpression (Coercion _) = "Coercion"
+
+isPrimitiveTypeConstructorApp :: Expr a -> Bool
+isPrimitiveTypeConstructorApp (App (Var var) (Lit literal)) = isPrimitiveTypeConstructorVar var
+isPrimitiveTypeConstructorApp _ = False
+
+isPrimitiveTypeConstructorVar :: Var -> Bool
+isPrimitiveTypeConstructorVar var = "#" `isSuffixOf` (varToString var)
+
+isPrimitiveTypeConstructorName :: Name -> Bool
+isPrimitiveTypeConstructorName name = "#" `isSuffixOf` (showOutputable name)
+
+getLiteralArgument  :: Expr a -> Expr a
+getLiteralArgument (App (Var var) (Lit literal)) = (Lit literal)
+
 
 removeTypeInformation :: [Expr b] -> [Expr b]
 removeTypeInformation list = filter (not . isTypeInformation) list

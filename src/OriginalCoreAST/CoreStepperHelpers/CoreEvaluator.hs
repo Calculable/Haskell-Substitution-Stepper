@@ -80,6 +80,8 @@ evaluateUnsteppableFunctionWithArguments "<=" [x, y] _ = Just (boolToCoreExpress
 evaluateUnsteppableFunctionWithArguments "min" [x, y] _ = Just $ min x y
 evaluateUnsteppableFunctionWithArguments "max" [x, y] _ = Just $ max x y
 evaluateUnsteppableFunctionWithArguments "unpackCString#" [x] _ = Just x
+evaluateUnsteppableFunctionWithArguments "C#" [Lit (LitChar x)] _ = Just $ Lit (LitChar x)
+evaluateUnsteppableFunctionWithArguments "I#" [Lit (LitNumber x y)] _ = Just $ Lit (LitNumber x y)
 evaluateUnsteppableFunctionWithArguments "succ" [x] _ = Just $ succ x
 evaluateUnsteppableFunctionWithArguments "pred" [x] _ = Just $ pred x
 evaluateUnsteppableFunctionWithArguments "fromEnum" [x] _ = Just $ integerToCoreExpression (toInteger (fromEnum x))

@@ -106,7 +106,7 @@ applyStepToNestedApp bindings expr = do
                     (description, simplifiedArguments, newBindings) <- applyStepToOneOfTheArguments bindings [] arguments
                     return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication function simplifiedArguments, newBindings)
                   else do
-                    appliedFunction <- evaluateFunctionWithArguments function arguments (reduceToHeadNormalForm bindings) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function
+                    appliedFunction <- evaluateFunctionWithArguments function arguments (safeReduceToNormalForm bindings) --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefor we cannot apply the arguments one after another but have to simplify all arguments before calling the function
                     return ("Apply " ++ showOutputable function, appliedFunction, bindings)
               )
             else do
@@ -118,7 +118,10 @@ applyStepToNestedApp bindings expr = do
         (Let letBind letExpr) -> do
           (description, reducedLet, newBindings) <- applyStep bindings (Let letBind letExpr)
           return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedLet arguments, newBindings)
-        _ -> trace ("application with unsupported expression type") Nothing
+        exp -> do
+          (description, reducedLet, newBindings) <- applyStep bindings exp
+          return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedLet arguments, newBindings)
+        --_ -> trace ("application with unsupported expression type") Nothing
 
 applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var], [Binding])
 applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =

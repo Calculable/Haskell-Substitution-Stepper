@@ -456,7 +456,126 @@ usageOfCustomTypeClass2Input = sumOfList (fmap (+ 1) myList)
 
 usageOfCustomTypeClass2ExpectedOutput = 9
 
-{-Helper Functions-}
+{-Prelude-}
+
+{-Prelude: Maybe-}
+maybeTypeInput = isNothing (Just 5)
+maybeTypeExpectedOutput = False
+
+fmapOnMaybeJustInput = fmap (+1) (Just 5) == (Just 6)
+fmapOnMaybeJustExpectedOutput = True
+
+
+fmapOnMaybeNothingInput = (fmap (+1) Nothing) == Nothing
+fmapOnMaybeNothingExpectedOutput = True 
+
+maybeAsMonad = do
+  a <- produceMaybe
+  b <- produceMaybe
+  return (a + b)  
+
+maybeAsMonadComparisonInput = maybeAsMonad == (Just 10)
+maybeAsMonadComparisonExpectedOutput = True
+
+produceMaybe :: Maybe Int
+produceMaybe = Just 5
+
+ordOnMaybeInput = (1, 2) < (2, 1)
+ordOnMaybeExpectedOutput = True
+
+{-Prelude: Ordering-}
+
+equalityOnOrderingInput = GT == GT
+equalityOnOrderingExpectedOutput = True 
+
+{-Prelude: Either-}
+
+fromRightFunctionInput = fromRight 42 (Left 10)
+fromRightFunctionExpectedOutput = 42
+
+
+fMapOnEitherInput = fmap (signum) ((Right (5::Int))::Either Int Int) == Right (1::Int)
+fMapOnEitherExpectedOutput = True
+
+isLeftOnRightInput = isLeft (Right 1)
+isLeftOnRightExpectedOutput = False
+
+{-Prelude: Tuple functions-}
+
+firstElementInput = fst (1, 2)
+firstElementExpectedOutput = 1
+
+secondElementInput = snd (1, 2)
+secondElementExpectedOutput = 2
+
+{-Prelude: numeric functions-}
+
+evenOnUnevenNumberInput = even 1
+evenOnUnevenNumberExpectedOutput = False
+
+
+powerOperatorInput = 2^3
+powerOperatorExpectedOutput = 8
+
+{-Prelude: General functions-}
+
+idFunctionInput = id "Hello"
+idFunctionExpectedOutput = "Hello"
+
+concatenatedFunctionsInput = (not.even) 1
+concatenatedFunctionsExpectedOutput = True 
+
+dollarOperatorInput = even $ 1 + 1
+dollarOperatorExpectedOutput = True
+
+
+{-Prelude: Functions on Boolean-}
+
+andOperatorInput = (&&) True True 
+andOperatorExpectedOutput = True 
+
+orOperatorInput = (||) True False
+orOperatorExpectedOutput = True
+
+{-Prelude: List Functions-}
+
+mapOnListInput = map signum [-3, -2, -1, 1, 2, 3] == [-1, -1, -1, 1, 1, 1]
+mapOnListExpectedOutput = True
+
+filterListInput = filter even [-3, -2, -1, 1, 2, 3] == [-2, 2]
+filterListExpectedOutput = True
+
+concatListInput = (++) [1, 2, 3] [4, 5, 6] == [1, 2, 3, 4, 5, 6]
+concatListExpectedOutput = True 
+
+indexOperatorInput = [1, 2, 3] !! 1
+indexOperatorExpectedOutput = 2
+
+foldlFunctionInput = foldl (+) 0 [1, 2, 3]
+foldlFunctionExpectedOutput = 6
+
+iterateFunctionInput = sumOfTheFirstXElements (repeat 1) 3
+iterateFunctionExpectedOutput = 3
+
+zipFunctionInput = (zip [1, 2, 3] [4, 5, 6]) == [(1,4), (2,5), (3,6)]
+zipFunctionExpectedOutput = True
+
+
+{-Prelude: Enum implementation-}
+
+enumFromCharInput = (enumFrom 'a') !! 3 
+enumFromCharExpectedOutput = 'd'
+
+enumFromToCharInput = (enumFromTo 'a' 'c') == ['a', 'b', 'c']
+enumFromToCharExpectedOutput = True
+
+enumFromThenToIntInput = enumFromThenTo (1::Int) (3::Int) (7::Int) == [1, 3, 5, 7]
+enumFromThenToIntExpectedOutput = True
+
+succOnDoubleInput = succ ((5.3::Double) - 6.3) < 0.001
+succOnDoubleExpectedOutput = True
+
+{-Helper Functions for the tests-}
 
 add :: Int -> Int -> Int
 add x y = x + y

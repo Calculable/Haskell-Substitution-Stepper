@@ -11,7 +11,7 @@ import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
 import Test.Hspec
   ( Expectation,
     Spec,
-    before,
+    beforeAll,
     describe,
     it,
     pendingWith,
@@ -21,7 +21,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = before getBindingFinderWithCoreBindings $ do
+spec = beforeAll getBindingFinderWithCoreBindings $ do
   describe "Arithmetic Operators" $ do
     it "can reduce addition" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "addition" bindingFinder coreBindings
@@ -48,7 +48,6 @@ spec = before getBindingFinderWithCoreBindings $ do
   describe "Types" $ do
     it "can reduce basic operation on Boolean" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnBoolean" bindingFinder coreBindings
-      --pendingWith "Boolean type not fully supported"
     it "can reduce basic operation on Char" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnChar" bindingFinder coreBindings
     it "can reduce basic operation on Double" $ \(bindingFinder, coreBindings) -> do
@@ -59,20 +58,16 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "basicOperationOnInteger" bindingFinder coreBindings
     it "can reduce basic operation on Either" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnEither" bindingFinder coreBindings
-      --pendingWith "Either type not fully supported"
     it "can reduce basic operation on Maybe" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnMaybe" bindingFinder coreBindings
-      --pendingWith "Maybe type not fully supported"
     it "can reduce basic operation on  Rational" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnRational" bindingFinder coreBindings
     it "can reduce basic operation on String" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnString" bindingFinder coreBindings
     it "can reduce basic operation on List" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnList" bindingFinder coreBindings
-      --pendingWith "List type not fully supported"
     it "can reduce basic operation on Tuple" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "basicOperationOnTuple" bindingFinder coreBindings
-      --pendingWith "Tuple type not fully supported"
   describe "Support for Num Type" $ do
     it "abs works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "abs" bindingFinder coreBindings
@@ -172,7 +167,6 @@ spec = before getBindingFinderWithCoreBindings $ do
   describe "List Operations" $ do
     it "list operations work" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "listOperations" bindingFinder coreBindings
-      --pendingWith "not all list operations are supported yet"
   describe "Where Bindings" $ do
     it "expressions with where syntax can be reduced" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "where" bindingFinder coreBindings
@@ -185,7 +179,6 @@ spec = before getBindingFinderWithCoreBindings $ do
     it "Tuples as parameter work" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "tupleAsParameter" bindingFinder coreBindings
     it "Equality on Tuple works" $ \(bindingFinder, coreBindings) -> do
-      --pendingWith "tuples are not fully supported yet"
       expectationForExpression "equalsOnTuple" bindingFinder coreBindings
   describe "Infinite List" $ do
     it "Infinite lists works as function parameter" $ \(bindingFinder, coreBindings) -> do
@@ -197,7 +190,6 @@ spec = before getBindingFinderWithCoreBindings $ do
     it "function on custom type works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "functionOnCustomType" bindingFinder coreBindings
     it "equality on custom type works" $ \(bindingFinder, coreBindings) -> do
-      --pendingWith "custom data types are not fully supported yet"
       expectationForExpression "equalityOnCustomType" bindingFinder coreBindings
   describe "Map works" $ do
     it "map on lists works" $ \(bindingFinder, coreBindings) -> do
@@ -216,7 +208,6 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "monadList" bindingFinder coreBindings
   describe "List generator works" $ do
     it "nested list generator works" $ \(bindingFinder, coreBindings) -> do
-      --pendingWith "list generation not supported yet (requires nested let-bindings)"
       expectationForExpression "generator" bindingFinder coreBindings
   describe "Functions that might throw an error are supported" $ do
     it "functions that might throw an error can be called" $ \(bindingFinder, coreBindings) -> do
@@ -230,6 +221,65 @@ spec = before getBindingFinderWithCoreBindings $ do
       expectationForExpression "usageOfAutomaticDerivedTypeClass" bindingFinder coreBindings
     it "custom type classes work" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "usageOfCustomTypeClass2" bindingFinder coreBindings
+  describe "Support for the Standard Prelude from The Haskell 98 Report" $ do
+    it "maybeType" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "maybeType" bindingFinder coreBindings
+    it "fmap on maybe just" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "fmapOnMaybeJust" bindingFinder coreBindings
+    it "fmap on nothing" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "fmapOnMaybeNothing" bindingFinder coreBindings
+    it "maybe monad" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "maybeAsMonadComparison" bindingFinder coreBindings
+    it "ord on maybe" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "ordOnMaybe" bindingFinder coreBindings
+    it "equality on ordering" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "equalityOnOrdering" bindingFinder coreBindings
+    it "either fromRight" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "fromRightFunction" bindingFinder coreBindings
+    it "fmap on either" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "fMapOnEither" bindingFinder coreBindings
+    it "isLeft on either" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "isLeftOnRight" bindingFinder coreBindings
+    it "fst on tuple" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "firstElement" bindingFinder coreBindings
+    it "snd on tuple" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "secondElement" bindingFinder coreBindings
+    it "even" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "evenOnUnevenNumber" bindingFinder coreBindings
+    it "power operator" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "powerOperator" bindingFinder coreBindings
+    it "id" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "idFunction" bindingFinder coreBindings
+    it "concatenated functions" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "concatenatedFunctions" bindingFinder coreBindings
+    it "dollar operator" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "dollarOperator" bindingFinder coreBindings
+    it "and operator" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "andOperator" bindingFinder coreBindings
+    it "or operator" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "orOperator" bindingFinder coreBindings
+    it "map on list" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "mapOnList" bindingFinder coreBindings
+    it "filter on list" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "filterList" bindingFinder coreBindings
+    it "concatenation of lists" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "concatList" bindingFinder coreBindings
+    it "index operator" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "indexOperator" bindingFinder coreBindings
+    it "foldl" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "foldlFunction" bindingFinder coreBindings
+    it "iterate" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "iterateFunction" bindingFinder coreBindings
+    it "zip" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "zipFunction" bindingFinder coreBindings
+    it "enum from char" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "enumFromChar" bindingFinder coreBindings
+    it "enum from to char" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "enumFromToChar" bindingFinder coreBindings
+    it "enum from then to int" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "enumFromThenToInt" bindingFinder coreBindings
+    it "succ on double" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "succOnDouble" bindingFinder coreBindings
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
