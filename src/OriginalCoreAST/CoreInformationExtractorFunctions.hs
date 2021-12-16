@@ -58,7 +58,7 @@ isVarExpression _ = False
 canBeReduced :: Expr Var -> Bool
 canBeReduced exp
   | isBoolVar exp = False
---  | isSupportedVar exp = True
+  | isSupportedVar exp = True
   | isTypeInformation exp = False --toDo: ignore when it is inside app...
   | otherwise = case exp of --check nested application
     (App (Lam _ _) x) -> True
@@ -69,9 +69,9 @@ canBeReduced exp
     (App x y) -> canBeReduced (getFunctionOfNestedApplication (App x y)) || not (exprIsHNF exp)
     _ -> not (exprIsHNF exp)
 
--- isSupportedVar :: Expr Var -> Bool
--- isSupportedVar (Var var) = (varToString var) == "$" || (varToString var) == "$!"
--- isSupportedVar _ = False
+isSupportedVar :: Expr Var -> Bool
+isSupportedVar (Var var) = (varToString var) == "I#" || (varToString var) == "C#"
+isSupportedVar _ = False
 
 isBoolVar :: Expr Var -> Bool
 isBoolVar (Var x) = isBoolVarTrue x || isBoolVarFalse x

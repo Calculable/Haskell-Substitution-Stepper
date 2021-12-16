@@ -11,7 +11,8 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     getLiteralArgument,
     removeTypeInformation,
     getIndividualElementsOfList,
-    getIndividualElementsOfTuple
+    getIndividualElementsOfTuple,
+    typeOfExpression
   )
 import OriginalCoreAST.CoreMakerFunctions
   ( charToCoreLiteral,
@@ -53,7 +54,7 @@ instance Eq (Expr b) where
   (==) (Lit x) (Lit y) = weakEquals x y
   (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
   (==) (App x1 y1) (App x2 y2) = trace "operator for collection called" operatorForCollection (App x1 y1) (App x2 y2) (==)
-  (==) x y = error "== and /= not supported by this type"
+  (==) x y = error ("== and /= not supported by this type: " ++ (typeOfExpression y))
 
 operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
 operatorForCollection a b operator = operator (elementsToCompareForCollection a) (elementsToCompareForCollection b)

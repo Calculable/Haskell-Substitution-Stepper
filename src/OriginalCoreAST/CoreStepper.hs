@@ -118,7 +118,10 @@ applyStepToNestedApp bindings expr = do
         (Let letBind letExpr) -> do
           (description, reducedLet, newBindings) <- applyStep bindings (Let letBind letExpr)
           return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedLet arguments, newBindings)
-        _ -> trace ("application with unsupported expression type") Nothing
+        exp -> do
+          (description, reducedLet, newBindings) <- applyStep bindings exp
+          return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedLet arguments, newBindings)
+        --_ -> trace ("application with unsupported expression type") Nothing
 
 applyStepToOneOfTheArguments :: [Binding] -> [Expr Var] -> [Expr Var] -> Maybe (ReductionStepDescription, [Expr Var], [Binding])
 applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =

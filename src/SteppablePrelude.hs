@@ -563,14 +563,12 @@ customEnumFromThen:: (Enum a) => a -> a -> [a]
 customEnumFromThen n m = n : (customEnumFromThen (succStep n (stepSize n m)) (succStep m (stepSize n m)))
 
 customEnumFromThenTo :: (Enum a, Ord a) => a -> a -> a -> [a]
-customEnumFromThenTo n n' m = takeWhile p (customEnumFromThen n n')
-                                            where
-                                                p   | n' >= n   = (<= m)
-                                                    | otherwise = (>= m)
+customEnumFromThenTo n n' m = if (n > m)
+    then []
+    else n : (customEnumFromThenTo (succStep n (stepSize n n')) (succStep n' (stepSize n n')) m )
 
 succStep :: (Enum a) => a -> Int -> a
-succStep enum 0 = enum
-succStep enum stepsize = succStep (succ enum) (stepsize-1)
+succStep enum stepsize = toEnum ((fromEnum enum) + stepsize)
 
 stepSize :: (Enum a) => a -> a -> Int
 stepSize x y = (fromEnum y) - (fromEnum x)
