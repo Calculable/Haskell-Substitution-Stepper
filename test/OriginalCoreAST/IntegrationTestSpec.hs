@@ -11,7 +11,7 @@ import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
 import Test.Hspec
   ( Expectation,
     Spec,
-    before,
+    beforeAll,
     describe,
     it,
     pendingWith,
@@ -21,7 +21,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = before getBindingFinderWithCoreBindings $ do
+spec = beforeAll getBindingFinderWithCoreBindings $ do
   describe "Arithmetic Operators" $ do
     it "can reduce addition" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "addition" bindingFinder coreBindings
