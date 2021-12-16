@@ -15,7 +15,8 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
     isTypeInformation,
     isVarExpression,
     varToString,
-    typeOfExpression
+    typeOfExpression,
+    isTypeWrapperFunctionName
   )
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
   ( evaluateFunctionWithArguments,

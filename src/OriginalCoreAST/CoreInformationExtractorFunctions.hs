@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName, isTypeWrapperFunctionName) where
 
 import Data.List (isPrefixOf, isSuffixOf)
 import GHC.Plugins
@@ -49,6 +49,9 @@ isTyConAppType :: Type -> Bool
 isTyConAppType (TyConApp _ _) = True
 isTyConAppType _ = False
 
+isTypeWrapperFunctionName :: String -> Bool
+isTypeWrapperFunctionName name = "#" `isSuffixOf` name
+
 
 isVarExpression :: Expr Var -> Bool
 isVarExpression (Var name) = True
@@ -70,7 +73,7 @@ canBeReduced exp
     _ -> not (exprIsHNF exp)
 
 isSupportedVar :: Expr Var -> Bool
-isSupportedVar (Var var) = (varToString var) == "I#" || (varToString var) == "C#"
+isSupportedVar (Var var) = isTypeWrapperFunctionName (varToString var)
 isSupportedVar _ = False
 
 isBoolVar :: Expr Var -> Bool
