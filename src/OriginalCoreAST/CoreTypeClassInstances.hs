@@ -3,9 +3,11 @@ module OriginalCoreAST.CoreTypeClassInstances () where
 import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CoreMakerFunctions
+import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
 import Utils
 import Data.Maybe
 import Debug.Trace
+
 
 instance (OutputableBndr b) => Show (Expr b) where
   show = showOutputable

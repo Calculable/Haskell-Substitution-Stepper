@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper (traceExpression, traceMaybeExpression, varDescription, typeDescription) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper (traceExpression, traceMaybeExpression, varDescription, typeDescription, typeOfExpression) where
 
 import GHC.Plugins
 import GHC.Core.TyCo.Rep
@@ -24,3 +24,15 @@ typeDescription (FunTy _ _ _ _) = "FunTy"
 typeDescription (LitTy _) = "LitTy"
 typeDescription (CastTy _ _) = "CastTy"
 typeDescription (CoercionTy _) = "CohersionTy"  
+
+typeOfExpression :: Expr a -> String --used for tracing / debugging
+typeOfExpression (Var _) = "Var"
+typeOfExpression (Lit _) = "Lit"
+typeOfExpression (App _ _) = "App"
+typeOfExpression (Lam _ _) = "Lam"
+typeOfExpression (Let _ _) = "Let"
+typeOfExpression (Case {}) = "Case"
+typeOfExpression (Cast _ _) = "Cast"
+typeOfExpression (Tick _ _) = "Tick"
+typeOfExpression (Type _) = "Type"
+typeOfExpression (Coercion _) = "Coercion"
