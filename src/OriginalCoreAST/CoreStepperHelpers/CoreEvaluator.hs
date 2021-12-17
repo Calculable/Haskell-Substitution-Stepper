@@ -98,7 +98,6 @@ evaluateUnsteppableFunctionWithArguments "round" [x] _ = Just (integerToCoreExpr
 evaluateUnsteppableFunctionWithArguments "ceiling" [x] _ = Just (integerToCoreExpression (toInteger (ceiling x)))
 evaluateUnsteppableFunctionWithArguments "floor" [x] _ = Just (integerToCoreExpression (toInteger (floor x)))
 evaluateUnsteppableFunctionWithArguments "eqString" [x, y] _ = Just (boolToCoreExpression (x == y))
-evaluateUnsteppableFunctionWithArguments "fmap" [x, y] _ = customFmapForMaybe x y
 evaluateUnsteppableFunctionWithArguments "primError" [x] _ = Nothing
 evaluateUnsteppableFunctionWithArguments "error" [x] _ = Nothing
 evaluateUnsteppableFunctionWithArguments "seq" [x, y] reducer = Just (seq (reducer x) y)
@@ -110,11 +109,11 @@ evaluateUnsteppableFunctionWithArguments functionName [x] reducer | isTypeWrappe
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
 evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
-evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [Type monadType, _, Type ty, value] _ = Just (customReturn monadType ty value)
-evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type ty, _] _ = Just (customFail monadType ty)
-evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, Type newType, argument, function] reducer = customMonadOperator newType argument function reducer
-evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, Type newType, argument, function] reducer = customMonadOperator2 newType argument function reducer
-evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, Type newType, function, argument] _ = customFmapForList newType function argument
+evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [Type monadType, _, Type ty, value] _ = Just (returnForList monadType ty value)
+evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type ty, _] _ = Just (failForList monadType ty)
+evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, Type newType, argument, function] reducer = monadOperatorForList newType argument function reducer
+evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, Type newType, argument, function] reducer = monadOperator2ForList newType argument function reducer
+evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, Type newType, function, argument] _ = fmapForList newType function argument
 evaluateUnsteppableFunctionWithArgumentsAndTypes "minBound" [Type ty, _] _ = minBoundForType ty
 evaluateUnsteppableFunctionWithArgumentsAndTypes "maxBound" [Type ty, _] _ = maxBoundForType ty
 evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing

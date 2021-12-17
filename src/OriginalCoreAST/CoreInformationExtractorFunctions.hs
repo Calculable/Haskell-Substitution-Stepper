@@ -1,9 +1,11 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName, isTypeWrapperFunctionName, canBeReducedToNormalForm) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType) where
 
 import Data.List
 import GHC.Plugins
 import Utils
 import GHC.Core.TyCo.Rep
+
+unsteppableFunctionPrefix = "unsteppableFunction'"
 
 varExpressionToString :: Expr Var -> String
 varExpressionToString (Var var) = varToString var
@@ -210,3 +212,16 @@ canBeReducedToNormalForm (App expr argument) = do
   let (function, arguments) = collectArgs (App expr argument)
   (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
 canBeReducedToNormalForm _ = False
+
+
+varRefersToUnsteppableFunction :: Var -> Bool
+varRefersToUnsteppableFunction name = unsteppableFunctionPrefix `isPrefixOf` varToString name
+
+varsHaveTheSameName :: Var -> Var -> Bool 
+varsHaveTheSameName x y = (==) (varToString x) (varToString y)
+
+varsHaveTheSameType :: Var -> Var -> Bool 
+varsHaveTheSameType x y = (==) (showOutputable (varType x)) (showOutputable (varType y))
+
+varNameEqualsString :: Var -> String -> Bool
+varNameEqualsString var name = (==) (varToString var) name
