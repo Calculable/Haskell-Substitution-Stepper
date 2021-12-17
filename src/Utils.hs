@@ -14,6 +14,7 @@ import GHC.Plugins
     liftIO,
     showSDoc,
   )
+import Data.Maybe
 
 showOutputable :: Outputable a => a -> String
 showOutputable = showSDoc baseDynFlags . ppr
@@ -34,3 +35,6 @@ listTopLevelFunctions :: CoreProgram -> IO ()
 listTopLevelFunctions cp = do
   let topLevelNames = map (takeWhile (/= ' ') . showOutputable . pprCoreBinding) cp
   mapM_ putStrLn topLevelNames
+
+(??) :: Maybe a -> a -> a
+(??) = flip fromMaybe

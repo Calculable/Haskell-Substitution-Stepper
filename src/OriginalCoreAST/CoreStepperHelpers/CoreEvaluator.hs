@@ -1,26 +1,34 @@
 module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments) where
-import GHC.Plugins
+import GHC.Plugins hiding (($$))
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import Data.Maybe
 import OriginalCoreAST.CoreMakerFunctions
+    ( boolToCoreExpression,
+      charToCoreExpression,
+      expressionTupleToCoreTuple,
+      integerToCoreExpression,
+      rationalToCoreExpression )
 import Data.Bifunctor
 import Control.Monad
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
-import OriginalCoreAST.CoreTypeClassInstances
+import OriginalCoreAST.CoreTypeClassInstances ()
 
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
 import Data.Char
+import Utils
 
 type Binding = (Var, Expr Var)
-type Reducer = (Expr Var -> Maybe (Expr Var)) 
+type Reducer = (Expr Var -> Maybe (Expr Var))
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Reducer -> Maybe (Expr Var)
-evaluateFunctionWithArguments (Var functionOrOperatorName) arguments reducer = do
-  let argumentsWithoutApplications = map prepareExpressionArgumentForEvaluation arguments
-  let evaluatedWithTypes = evaluateUnsteppableFunctionWithArgumentsAndTypes (varToString functionOrOperatorName) argumentsWithoutApplications reducer
-  if isNothing evaluatedWithTypes
-    then evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (filter (not . isTypeInformation) argumentsWithoutApplications) reducer --Precondition: function must be in the form of "var". This is already checked by the function which is calling this function.
-    else evaluatedWithTypes
+evaluateFunctionWithArguments (Var functionOrOperatorName) arguments reducer = 
+    if isJust evaluationWithTypes
+      then evaluationWithTypes
+      else evaluationWithoutTypes
+    where
+      evaluationWithTypes = evaluateUnsteppableFunctionWithArgumentsAndTypes (varToString functionOrOperatorName) argumentsWithoutApplications reducer
+      evaluationWithoutTypes = evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (removeTypeInformation argumentsWithoutApplications) reducer
+      argumentsWithoutApplications = map prepareExpressionArgumentForEvaluation arguments
 evaluateFunctionWithArguments _ _ _ = error "function-expression has to be a 'Var'"
 
 
@@ -109,5 +117,5 @@ evaluateUnsteppableFunctionWithArgumentsAndTypes ">>" [_, _, _, Type newType, ar
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fmap" [_, _, _, Type newType, function, argument] _ = customFmapForList newType function argument
 evaluateUnsteppableFunctionWithArgumentsAndTypes "minBound" [Type ty, _] _ = minBoundForType ty
 evaluateUnsteppableFunctionWithArgumentsAndTypes "maxBound" [Type ty, _] _ = maxBoundForType ty
-evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
+evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing
 
