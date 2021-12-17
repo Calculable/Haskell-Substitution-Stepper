@@ -10,21 +10,6 @@ prettyPrint exp = putStr (prettyPrintToString exp)
 prettyPrintToString :: OutputableBndr b => Expr b -> String
 prettyPrintToString = showOutputable
 
-
-printFlatCoreAST :: (OutputableBndr a) => [Bind a] -> IO ()
-printFlatCoreAST = mapM_ printFlatCoreBinding
-
-printFlatCoreBinding :: (OutputableBndr a) => Bind a -> IO ()
-printFlatCoreBinding (NonRec b exp) = printFlatBindingWithExpression (b, exp)
-printFlatCoreBinding (Rec bindings) = mapM_ printFlatBindingWithExpression bindings
-
-printFlatBindingWithExpression :: (OutputableBndr b) => (b, Expr b) -> IO ()
-printFlatBindingWithExpression (b, exp) = do
-  putStr (showOutputable b)
-  putStr " = "
-  printFlatCoreExpression exp
-  putStrLn ""
-
 printFlatCoreExpression :: (OutputableBndr b) => Expr b -> IO ()
 printFlatCoreExpression (Var id) = do
   let name = showOutputable $ varName id
