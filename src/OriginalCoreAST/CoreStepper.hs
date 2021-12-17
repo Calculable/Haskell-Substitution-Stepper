@@ -5,7 +5,7 @@ import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import Utils
 import Data.List
 

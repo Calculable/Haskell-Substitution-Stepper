@@ -11,7 +11,7 @@ import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CorePrettyPrinter
 import OriginalCoreAST.CoreStepper
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 type Binding = (Var, Expr Var)

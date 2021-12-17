@@ -1,30 +1,11 @@
 module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Plugins (Expr (Lit, Var, App, Type), Literal (..), OutputableBndr, Var, Type)
+import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( varToString, 
-    boolValueFromVar, 
-    isBoolVar,
-    isList,
-    isTuple,
-    isPrimitiveTypeConstructorApp,
-    getLiteralArgument,
-    removeTypeInformation,
-    getIndividualElementsOfList,
-    getIndividualElementsOfTuple,
-    typeOfExpression
-  )
 import OriginalCoreAST.CoreMakerFunctions
-  ( charToCoreLiteral,
-    fractionalToCoreLiteral,
-    integerToCoreExpression,
-    integerToCoreLiteral,
-    rationalToCoreExpression,
-    rationalToCoreLiteral,
-  )
-import Utils (showOutputable)
-import Data.Maybe (isNothing, fromJust)
-import Debug.Trace (trace)
+import Utils
+import Data.Maybe
+import Debug.Trace
 
 instance (OutputableBndr b) => Show (Expr b) where
   show = showOutputable

@@ -5,7 +5,7 @@ import DataProvider.DataProvider
   )
 import GHC.Plugins (Expr, Var)
 import OriginalCoreAST.CoreStepper (reduceToNormalForm)
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
   ( prepareExpressionArgumentForEvaluation,
   )
 import Test.Hspec

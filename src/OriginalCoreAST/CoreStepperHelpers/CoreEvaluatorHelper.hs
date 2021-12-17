@@ -4,7 +4,7 @@ import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CoreMakerFunctions
 import Debug.Trace
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import Data.Maybe
 import OriginalCoreAST.CoreInformationExtractorFunctions (removeTypeInformation)
 

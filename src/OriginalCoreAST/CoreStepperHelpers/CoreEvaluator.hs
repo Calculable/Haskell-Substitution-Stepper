@@ -13,7 +13,8 @@ import Control.Monad
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
 import OriginalCoreAST.CoreTypeClassInstances ()
 
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
+
 import Data.Char
 import Utils
 

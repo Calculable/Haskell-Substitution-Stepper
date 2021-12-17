@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.TracerHelper (module OriginalCoreAST.CoreStepperHelpers.TracerHelper) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper (traceExpression, traceMaybeExpression, varDescription, typeDescription) where
 
 import GHC.Plugins
 import GHC.Core.TyCo.Rep

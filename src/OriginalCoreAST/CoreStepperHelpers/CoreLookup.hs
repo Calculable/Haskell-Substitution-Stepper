@@ -4,10 +4,7 @@ import Data.List
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import Data.Maybe
 import Utils
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
-    ( deepReplaceVarWithinExpression,
-      convertToMultiArgumentFunction,
-      deepReplaceMultipleVarWithinExpression )
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 
 import OriginalCoreAST.CoreTypeClassInstances
 
