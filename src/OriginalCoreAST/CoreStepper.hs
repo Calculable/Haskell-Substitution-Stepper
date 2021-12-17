@@ -29,11 +29,16 @@ applyStep bindings (Case expression binding caseType alternatives) = do
     else do
       matchingPattern <- findMatchingPattern expression alternatives
       return ("Replace with matching pattern", matchingPattern, bindings)
-applyStep bindings (Let (NonRec b expr) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, bindings)
-applyStep bindings (Let (Rec [(b, expr)]) expression) = Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, (b, expr) : bindings)
-applyStep bindings (Cast expression cohersion) = Just ("Remove cohersion from cast", expression, bindings)
-applyStep bindings (Tick _ _) = trace "no applicable step found: tick is not supported" Nothing
-applyStep bindings (Coercion _) = trace "no applicable step found: coercion is not supported" Nothing
+applyStep bindings (Let (NonRec b expr) expression) = do
+  Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, bindings)
+applyStep bindings (Let (Rec [(b, expr)]) expression) = do
+  Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, (b, expr) : bindings)
+applyStep bindings (Cast expression cohersion) = do
+  Just ("Remove cohersion from cast", expression, bindings)
+applyStep bindings (Tick _ _) = do
+  trace "no applicable step found: tick is not supported" Nothing
+applyStep bindings (Coercion _) = do
+  trace "no applicable step found: coercion is not supported" Nothing
 applyStep _ _ = trace "no applicable step found" Nothing
 
 applyStepToNestedApp :: [Binding] -> Expr Var -> Maybe StepResult
