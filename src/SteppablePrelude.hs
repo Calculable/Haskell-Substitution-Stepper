@@ -1,4 +1,4 @@
-{-Source: most of the source code is taken from https://www.haskell.org/onlinereport/standard-prelude.html-}
+{-Source: most of the source code is taken from the Haskell Report 2010 Standard Prelude-}
 
 {-Options & Pragmas-}
 {-# OPTIONS -XNoImplicitPrelude #-}

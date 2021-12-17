@@ -1,21 +1,9 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName, isTypeWrapperFunctionName) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varExpressionToString, varToString, nameToString, coreLiteralToFractional, isInHeadNormalForm, isTypeInformation, canBeReduced, isList, isMaybe, isNothingMaybe, isJustMaybe, isListType, isTupleType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, typeOfExpression, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, getLiteralArgument, isPrimitiveTypeConstructorName, isTypeWrapperFunctionName, canBeReducedToNormalForm) where
 
-import Data.List (isPrefixOf, isSuffixOf)
+import Data.List
 import GHC.Plugins
-  ( Expr (..),
-    Literal (LitDouble, LitFloat),
-    Name,
-    Type,
-    Var (varName),
-    collectArgs,
-    exprIsHNF,
-    getOccString,
-    varType
-  )
-import Utils (showOutputable)
-import Debug.Trace(trace)
-import OriginalCoreAST.CoreStepperHelpers.TracerHelper
-import GHC.Core.TyCo.Rep (Type(..))
+import Utils
+import GHC.Core.TyCo.Rep
 
 varExpressionToString :: Expr Var -> String
 varExpressionToString (Var var) = varToString var
@@ -204,10 +192,21 @@ getIndividualElementsOfTuple expr
   | isEmptyTuple expr = []
   | isTuple expr = do
     let (constructor, elements) = collectArgs expr
-    let values = snd (split elements)
+    let values = snd (splitList elements)
     values
   | otherwise = error "expression is not a tuple"
 
 {-this function is taken from: https://stackoverflow.com/questions/19074520/how-to-split-a-list-into-two-in-haskell-}
-split :: [a] -> ([a], [a])
-split myList = splitAt (((length myList) + 1) `div` 2) myList
+splitList :: [a] -> ([a], [a])
+splitList myList = splitAt (((length myList) + 1) `div` 2) myList
+
+extractArgumentsOfNestedApplication :: Expr Var -> [Expr Var]
+extractArgumentsOfNestedApplication expr = snd (collectArgs expr)
+
+
+-- | The "canBeReducedFunction" checks if a Core expression is not yet in normal form and can further be reduced
+canBeReducedToNormalForm :: Expr Var -> Bool
+canBeReducedToNormalForm (App expr argument) = do
+  let (function, arguments) = collectArgs (App expr argument)
+  (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
+canBeReducedToNormalForm _ = False

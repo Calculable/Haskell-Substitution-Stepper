@@ -1,22 +1,10 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTransformator (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceVarWithinAlternative, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction, prepareExpressionArgumentForEvaluation, extractArgumentsOfNestedApplication) where
 
 import GHC.Plugins
-  ( Alt,
-    Bind (..),
-    Expr (App, Case, Cast, Lam, Let, Type, Var),
-    Var,
-    collectArgs,
-  )
+
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( isEmptyList,
-    isList,
-    isNonEmptyTuple,
-    isEmptyTuple,
-    isTypeInformation,
-    varToString,
-    isTuple
-  )
-import Utils (showOutputable)
+import Utils
+
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Expr Var -> [Expr Var] -> Expr Var
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression [] = expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
@@ -59,3 +47,13 @@ deepReplaceMultipleVarWithinExpression (x : xs) (y : ys) expression = deepReplac
 
 convertToMultiArgumentFunction :: Expr Var -> (Expr Var, [Expr Var])
 convertToMultiArgumentFunction = collectArgs
+
+prepareExpressionArgumentForEvaluation :: Expr Var -> Expr Var
+prepareExpressionArgumentForEvaluation (App (Var id) arg) = case varToString id of
+  [_, '#'] -> arg --type constructor, simply return value
+  "unpackCString#" -> arg --argument is simply a String
+  _ -> App (Var id) arg
+prepareExpressionArgumentForEvaluation x = x
+
+extractArgumentsOfNestedApplication :: Expr Var -> [Expr Var]
+extractArgumentsOfNestedApplication expr = snd (convertToMultiArgumentFunction expr)

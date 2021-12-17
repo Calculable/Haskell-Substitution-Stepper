@@ -1,74 +1,19 @@
 module OriginalCoreAST.CoreStepper (applyStep, reduceToHeadNormalForm, reduceToNormalForm, canBeReducedToNormalForm, safeReduceToNormalForm) where
 
-import Data.List (find, isSuffixOf)
-import Data.Maybe (fromJust, isJust, isNothing)
+import Data.Maybe
 import GHC.Plugins
-  ( Bind (NonRec, Rec),
-    Expr (App, Case, Cast, Coercion, Lam, Let, Tick, Var),
-    Var,
-    trace,
-  )
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( canBeReduced,
-    getFunctionOfNestedApplication,
-    isClassDictionary,
-    isTypeInformation,
-    isVarExpression,
-    varToString,
-    typeOfExpression,
-    isTypeWrapperFunctionName
-  )
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
-  ( evaluateFunctionWithArguments,
-  )
 import OriginalCoreAST.CoreStepperHelpers.CoreLookup
-  ( findMatchingPattern,
-    tryFindBinding,
-  )
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
-  ( convertFunctionApplicationWithArgumentListToNestedFunctionApplication,
-    convertToMultiArgumentFunction,
-    deepReplaceVarWithinExpression,
-  )
-import Utils (showOutputable)
+import Utils
+import Data.List
 
 type ReductionStepDescription = String --for example: "replace x with definition"
 
 type Binding = (Var, Expr Var)
 
 type StepResult = (ReductionStepDescription, Expr Var, [Binding])
-
-reduceToNormalForm :: [Binding] -> Expr Var -> Expr Var
-reduceToNormalForm bindings expression = do
-  fromJust (reduceToNormalFormWithMaximumAmountOfReductions (negate 1) bindings expression)
-
-maximumAmoutOfReductionsBeforeError :: Integer
-maximumAmoutOfReductionsBeforeError = 99
-
-safeReduceToNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var)
-safeReduceToNormalForm = reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductionsBeforeError
-
-reduceToNormalFormWithMaximumAmountOfReductions :: Integer -> [Binding] -> Expr Var -> Maybe (Expr Var)
-reduceToNormalFormWithMaximumAmountOfReductions 0 _ _ = trace "infinite loop" Nothing
-reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductions bindings expression = do
-  expressionInHeadNormalForm <- reduceToHeadNormalForm bindings expression
-  if canBeReducedToNormalForm expressionInHeadNormalForm
-    then do
-      let (function, arguments) = convertToMultiArgumentFunction expressionInHeadNormalForm
-      let maybeReducedArguments = map (reduceToNormalFormWithMaximumAmountOfReductions (maximumAmoutOfReductions - 1) bindings) arguments
-      if any isNothing maybeReducedArguments
-        then Nothing
-        else Just $ convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map fromJust maybeReducedArguments)
-    else Just expressionInHeadNormalForm
-
-reduceToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var)
-reduceToHeadNormalForm bindings expression
-  | canBeReduced expression = do
-    let reduction = applyStep bindings expression
-    case reduction of
-      Just (reductionStepDescription, reducedExpression, newBindings) -> reduceToHeadNormalForm newBindings reducedExpression
-      Nothing -> trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression) Nothing
-  | otherwise = Just expression
 
 applyStep :: [Binding] -> Expr Var -> Maybe StepResult
 applyStep bindings (Var name) = do
@@ -133,13 +78,6 @@ applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =
     else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
 applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no reducable argument found" --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
 
--- | The "canBeReducedFunction" checks if a Core expression is not yet in normal form and can further be reduced
-canBeReducedToNormalForm :: Expr Var -> Bool
-canBeReducedToNormalForm (App expr argument) = do
-  let (function, arguments) = convertToMultiArgumentFunction (App expr argument)
-  (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
-canBeReducedToNormalForm _ = False
-
 tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> Expr Var -> Maybe StepResult
 tryApplyStepToApplicationUsingClassDictionary bindings expr = do
   let (function, arguments) = convertToMultiArgumentFunction expr
@@ -157,6 +95,52 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
           return ("replace '" ++ varToString functionName ++ "' with definition from the class dictionary", resultExpression, bindings)
         else Nothing --function call does not contain class dictionary
     else Nothing --function call does not contain class dictionary
+
+
+reduceToNormalForm :: [Binding] -> Expr Var -> Expr Var
+reduceToNormalForm bindings expression = do
+  fromJust (reduceToNormalFormWithMaximumAmountOfReductions (negate 1) bindings expression)
+
+maximumAmoutOfReductionsBeforeError :: Integer
+maximumAmoutOfReductionsBeforeError = 99
+
+safeReduceToNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var)
+safeReduceToNormalForm = reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductionsBeforeError
+
+reduceToNormalFormWithMaximumAmountOfReductions :: Integer -> [Binding] -> Expr Var -> Maybe (Expr Var)
+reduceToNormalFormWithMaximumAmountOfReductions 0 _ _ = trace "infinite loop" Nothing
+reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductions bindings expression = do
+  expressionInHeadNormalForm <- reduceToHeadNormalForm bindings expression
+  if canBeReducedToNormalForm expressionInHeadNormalForm
+    then do
+      let (function, arguments) = convertToMultiArgumentFunction expressionInHeadNormalForm
+      let maybeReducedArguments = map (reduceToNormalFormWithMaximumAmountOfReductions (maximumAmoutOfReductions - 1) bindings) arguments
+      if any isNothing maybeReducedArguments
+        then Nothing
+        else Just $ convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map fromJust maybeReducedArguments)
+    else Just expressionInHeadNormalForm
+
+reduceToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var)
+reduceToHeadNormalForm bindings expression
+  | canBeReduced expression = do
+    let reduction = applyStep bindings expression
+    case reduction of
+      Just (reductionStepDescription, reducedExpression, newBindings) -> reduceToHeadNormalForm newBindings reducedExpression
+      Nothing -> trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression) Nothing
+  | otherwise = Just expression
+
+
+reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplicationToHeadNormalForm bindings expr = do
+  let result = reduceNestedApplication bindings expr
+  maybe (Just expr) (reduceNestedApplicationToHeadNormalForm bindings) result
+
+reduceNestedApplication :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplication bindings (App expr arg) = do
+  let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
+  reducedFunction <- tryFindBinding functionName bindings
+  reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+reduceNestedApplication _ _ = Nothing
 
 extractFunctionFromClassDictionary :: Expr Var -> Expr Var -> [Binding] -> Maybe (Expr Var)
 extractFunctionFromClassDictionary (Var function) (Var classDictionary) bindings = do
@@ -185,15 +169,3 @@ functionNameMatchesFunctionFromDictionary :: Var -> Expr Var -> Bool
 functionNameMatchesFunctionFromDictionary searchFunctionName (Var dictionaryFunctionName) = varToString searchFunctionName `isSuffixOf` varToString dictionaryFunctionName
 functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = functionNameMatchesFunctionFromDictionary searchFunctionName (getFunctionOfNestedApplication (App expr args))
 functionNameMatchesFunctionFromDictionary _ _ = False
-
-reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
-reduceNestedApplicationToHeadNormalForm bindings expr = do
-  let result = reduceNestedApplication bindings expr
-  maybe (Just expr) (reduceNestedApplicationToHeadNormalForm bindings) result
-
-reduceNestedApplication :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
-reduceNestedApplication bindings (App expr arg) = do
-  let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
-  reducedFunction <- tryFindBinding functionName bindings
-  reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
-reduceNestedApplication _ _ = Nothing

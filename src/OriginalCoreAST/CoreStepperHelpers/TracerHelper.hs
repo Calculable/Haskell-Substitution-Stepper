@@ -1,9 +1,9 @@
 module OriginalCoreAST.CoreStepperHelpers.TracerHelper (module OriginalCoreAST.CoreStepperHelpers.TracerHelper) where
 
-import GHC.Plugins (Expr, Var(..), Type(..), OutputableBndr, varName, varType, isId, isTyVar, isTcTyVar)
-import GHC.Core.TyCo.Rep (Type(..))
-import Utils (showOutputable)
-import Debug.Trace(trace)
+import GHC.Plugins
+import GHC.Core.TyCo.Rep
+import Utils
+import Debug.Trace
 
 traceExpression :: String -> Expr Var -> Expr Var --for debugging
 traceExpression comment expr = trace ((comment ++ ": ") ++ (showOutputable expr)) expr

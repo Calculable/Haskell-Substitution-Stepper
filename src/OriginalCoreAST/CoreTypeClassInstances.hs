@@ -1,6 +1,6 @@
 module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Plugins (Expr (Lit, Var, App, Type), Literal (..), OutputableBndr)
+import GHC.Plugins (Expr (Lit, Var, App, Type), Literal (..), OutputableBndr, Var, Type)
 import OriginalCoreAST.CoreInformationExtractorFunctions
   ( varToString, 
     boolValueFromVar, 

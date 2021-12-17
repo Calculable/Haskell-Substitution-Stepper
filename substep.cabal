@@ -27,13 +27,13 @@ library
       Cli
       Compiler
       DynFlags
-      FlatCoreASTPrinter
       IntegrationTestBindings
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CorePrettyPrinter
       OriginalCoreAST.CoreStepper
       OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
+      OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
       OriginalCoreAST.CoreStepperHelpers.CoreLookup
       OriginalCoreAST.CoreStepperHelpers.CoreTransformator
       OriginalCoreAST.CoreStepperHelpers.TracerHelper

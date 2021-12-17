@@ -1,35 +1,8 @@
 module OriginalCoreAST.CoreMakerFunctions (fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral, expressionListToCoreList, expressionTupleToCoreTuple, maybeToCoreExpression, expressionListToCoreListWithType, charToCoreExpression) where
 
-import GHC.Core.TyCo.Rep (TyLit (StrTyLit), Type (LitTy))
+import GHC.Core.TyCo.Rep
 import GHC.Plugins
-  ( DataCon,
-    Expr (Lit, Var),
-    IdDetails (VanillaId),
-    Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
-    Var,
-    charTy,
-    doubleTy,
-    floatTy,
-    intTy,
-    mkCharExpr,
-    mkCoreConApps,
-    mkCoreTup,
-    mkDoubleExpr,
-    mkFastString,
-    mkFloatExpr,
-    mkGlobalVar,
-    mkJustExpr,
-    mkListExpr,
-    mkLitInt64,
-    mkLitString,
-    mkNothingExpr,
-    mkSystemName,
-    mkVarOcc,
-    stringTy,
-    trace,
-    vanillaIdInfo,
-  )
-import GHC.Types.Unique (minLocalUnique)
+import GHC.Types.Unique
 
 integerToCoreLiteral :: Integer -> Literal
 integerToCoreLiteral = mkLitInt64

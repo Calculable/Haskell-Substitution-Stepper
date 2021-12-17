@@ -1,31 +1,12 @@
 module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString) where
-
-import Data.Maybe (fromMaybe, isNothing)
-import Data.List (isPrefixOf)
 import GHC.Plugins
-  ( Alt,
-    AltCon (DEFAULT, DataAlt, LitAlt),
-    Expr (App, Lit, Var),
-    Var(), 
-    varUnique, 
-    varName, 
-    varType,
-    trace,
-  )
+import Data.List
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( isTypeInformation,
-    varExpressionToString,
-    varToString,
-    isPrimitiveTypeConstructorName
-  )
+import Data.Maybe
+import Utils
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
-  ( convertToMultiArgumentFunction,
-    deepReplaceMultipleVarWithinExpression,
-    deepReplaceVarWithinExpression
-  )
-import OriginalCoreAST.CoreTypeClassInstances ()
-import Utils (showOutputable)
-import GHC.Core.DataCon (dataConName)
+
+import OriginalCoreAST.CoreTypeClassInstances
 
 type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
 

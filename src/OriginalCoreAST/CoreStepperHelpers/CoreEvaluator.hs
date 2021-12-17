@@ -1,49 +1,17 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments, prepareExpressionArgumentForEvaluation) where
-
-import Control.Monad (join)
-import Data.Bifunctor (Bifunctor (bimap))
-import Data.Maybe (fromJust, isNothing)
+module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments) where
 import GHC.Plugins
-  ( Expr (App, Lit, Type, Var),
-    Literal (LitNumber, LitChar),
-    Type,
-    Var,
-    trace,
-  )
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( isJustMaybe,
-    isList,
-    isListType,
-    isNothingMaybe,
-    isTypeInformation,
-    varToString,
-    isIntType, 
-    isBoolType, 
-    isCharType,
-    isTupleType,
-    removeTypeInformation,
-    getIndividualElementsOfList,
-    getIndividualElementsOfTuple,
-    isTypeWrapperFunctionName
-  )
+import Data.Maybe
 import OriginalCoreAST.CoreMakerFunctions
-  ( boolToCoreExpression,
-    expressionListToCoreListWithType,
-    expressionTupleToCoreTuple,
-    integerToCoreExpression,
-    maybeToCoreExpression,
-    rationalToCoreExpression,
-    charToCoreExpression
-  )
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
-  ( convertToMultiArgumentFunction
-  )
-import OriginalCoreAST.CoreTypeClassInstances ()
-import Data.Char 
-  ( ord,
-    isSpace 
-  )
+import Data.Bifunctor
+import Control.Monad
+import OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
+import OriginalCoreAST.CoreTypeClassInstances
 
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+import Data.Char
+
+type Binding = (Var, Expr Var)
 type Reducer = (Expr Var -> Maybe (Expr Var)) 
 
 evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Reducer -> Maybe (Expr Var)
@@ -55,12 +23,6 @@ evaluateFunctionWithArguments (Var functionOrOperatorName) arguments reducer = d
     else evaluatedWithTypes
 evaluateFunctionWithArguments _ _ _ = error "function-expression has to be a 'Var'"
 
-prepareExpressionArgumentForEvaluation :: Expr Var -> Expr Var
-prepareExpressionArgumentForEvaluation (App (Var id) arg) = case varToString id of
-  [_, '#'] -> arg --type constructor, simply return value
-  "unpackCString#" -> arg --argument is simply a String
-  _ -> App (Var id) arg
-prepareExpressionArgumentForEvaluation x = x
 
 evaluateUnsteppableFunctionWithArguments :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArguments "+" [x, y] _ = Just ((+) x y)
@@ -139,12 +101,6 @@ evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Li
 evaluateUnsteppableFunctionWithArguments functionName [x] reducer | isTypeWrapperFunctionName functionName = Just x
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
-customFmapForMaybe :: Expr Var -> Expr Var -> Maybe (Expr Var)
-customFmapForMaybe function (App constructor argument)
-  | isNothingMaybe (App constructor argument) = Just (App constructor argument)
-  | isJustMaybe (App constructor argument) = Just (App constructor (App function argument))
-customFmapForMaybe _ _ = trace "fmap not supported for this type" Nothing
-
 evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [Type monadType, _, Type ty, value] _ = Just (customReturn monadType ty value)
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type ty, _] _ = Just (customFail monadType ty)
@@ -155,75 +111,3 @@ evaluateUnsteppableFunctionWithArgumentsAndTypes "minBound" [Type ty, _] _ = min
 evaluateUnsteppableFunctionWithArgumentsAndTypes "maxBound" [Type ty, _] _ = maxBoundForType ty
 evaluateUnsteppableFunctionWithArgumentsAndTypes name arguments _ = Nothing --function not supported
 
-minBoundForType :: Type -> Maybe (Expr Var)
-minBoundForType ty  | isIntType ty = Just $ integerToCoreExpression (toInteger (minBound::Int))
-                    | isBoolType ty = Just $ boolToCoreExpression (minBound::Bool)
-                    | isCharType ty = Just $ charToCoreExpression (minBound::Char)
-                    | otherwise = Nothing
-
-maxBoundForType :: Type -> Maybe (Expr Var)
-maxBoundForType ty  | isIntType ty = Just $ integerToCoreExpression (toInteger (maxBound::Int))
-                    | isBoolType ty = Just $ boolToCoreExpression (maxBound::Bool)
-                    | isCharType ty = Just $ charToCoreExpression (maxBound::Char)
-                    | otherwise = Nothing
-
-customMonadOperator :: Type -> Expr Var -> Expr Var -> Reducer -> Maybe (Expr Var)
-customMonadOperator newType (App constructor argument) function reducer
-  | isNothingMaybe (App constructor argument) = Just (App constructor argument)
-  | isJustMaybe (App constructor argument) = Just (App function argument)
-  | isList (App constructor argument) = do
-    fmappedList <- customFmapForList newType function (App constructor argument)
-    customConcatForList newType fmappedList reducer
-customMonadOperator _ _ _ _ = trace ">>= not supported for this type" Nothing
-
-customMonadOperator2 :: Type -> Expr Var -> Expr Var -> Reducer -> Maybe (Expr Var)
-customMonadOperator2 newType (App constructor argument) function reducer
-  | isNothingMaybe (App constructor argument) = Just (App constructor argument)
-  | isJustMaybe (App constructor argument) = Just function
-  | isList (App constructor argument) = do
-    fmappedList <- repalceAllListItemsWithFunction newType function (App constructor argument)
-    customConcatForList newType fmappedList reducer
-customMonadOperator2 _ _ _ _ = trace ">> not supported for this type" Nothing
-
-customReturn :: Type -> Type -> Expr Var -> Expr Var
-customReturn monadType ty expression = do
-  if isListType monadType
-    then expressionListToCoreListWithType ty [expression]
-    else maybeToCoreExpression (Just expression) ty --is maybe type (could be checked again)
-
-customFail :: Type -> Type -> Expr Var
-customFail monadType ty =
-  if isListType monadType
-    then expressionListToCoreListWithType ty []
-    else maybeToCoreExpression Nothing ty --is maybe type (could be checked again)
-
-repalceAllListItemsWithFunction :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
-repalceAllListItemsWithFunction newType element functorArgument
-  | isList functorArgument = do
-    let listItems = getIndividualElementsOfList functorArgument
-    let listItemsWithoutTypes = removeTypeInformation listItems
-    let mappedListItems = replicate (length listItemsWithoutTypes) element
-    Just (expressionListToCoreListWithType newType mappedListItems)
-  | otherwise = Nothing
-
-customFmapForList :: Type -> Expr Var -> Expr Var -> Maybe (Expr Var)
-customFmapForList newType function functorArgument
-  | isList functorArgument = do
-    let listItems = getIndividualElementsOfList functorArgument
-    let listItemsWithoutTypes = filter (not . isTypeInformation) listItems
-    let mappedListItems = map (App function) listItemsWithoutTypes
-    Just (expressionListToCoreListWithType newType mappedListItems)
-  | otherwise = Nothing
-
-customConcatForList :: Type -> Expr Var -> Reducer -> Maybe (Expr Var)
-customConcatForList newType nestedListExpression reducer = do
-  let (_, subLists) = convertToMultiArgumentFunction nestedListExpression
-  let maybeMappedArguments = map reducer subLists
-  if any isNothing maybeMappedArguments
-    then Nothing
-    else do
-      let flatArguments = concatMap (extractArgumentsOfNestedApplication . fromJust) maybeMappedArguments
-      return (expressionListToCoreListWithType newType (filter (not . isTypeInformation) flatArguments))
-
-extractArgumentsOfNestedApplication :: Expr Var -> [Expr Var]
-extractArgumentsOfNestedApplication expr = snd (convertToMultiArgumentFunction expr)
