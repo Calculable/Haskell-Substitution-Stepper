@@ -30,7 +30,7 @@ applyStep bindings (Var name) = do
   foundBinding <- tryFindBinding name bindings
   return ("Replace '" ++ varToString name ++ "' with definition", foundBinding, bindings {-replace binding reference with actual expression (Delta Reduction)-})
 applyStep bindings (App expr arg) = do
-  applyStepToNestedApplication bindings (App expr arg)
+  applyStepToNestedApplication bindings (App expr arg) --multi-parameter applications are represented as nested applications in haskell Core
 applyStep bindings (Case expression binding caseType alternatives) = do
   if canBeReduced expression
     then do
@@ -70,10 +70,10 @@ tryApplyStepToApplication bindings expr = do
           tryApplyStepToFunctionWithArguments :: [Binding] -> Function -> [Argument] -> Maybe StepResult
           tryApplyStepToFunctionWithArguments bindings (Var var) arguments = do
             if isJust (tryFindBinding var bindings)
-              then do
+              then do --function or operator can be stepped
                 (description, reducedFunction, newBindings) <- applyStep bindings (Var var)
                 return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
-              else do
+              else do --function or operator cannot be stepped
                 applyStepToApplicationWithAnUnsteppableFunction bindings var arguments      
           tryApplyStepToFunctionWithArguments bindings (Lam lamdaParameter lamdaExpression) arguments = do
             let reducedFunction = deepReplaceVarWithinExpression lamdaParameter (head arguments) lamdaExpression
@@ -88,10 +88,10 @@ tryApplyStepToApplication bindings expr = do
 applyStepToApplicationWithAnUnsteppableFunction :: [Binding] -> FunctionReference -> [Argument] -> Maybe StepResult
 applyStepToApplicationWithAnUnsteppableFunction bindings function arguments = do
   if any canBeReduced arguments --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefore we cannot apply the arguments one after another but have to simplify all arguments before calling the function
-    then do
+    then do --reduce one of the arguments
       (description, simplifiedArguments, newBindings) <- applyStepToOneOfTheArguments bindings [] arguments
       return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication (Var function) simplifiedArguments, newBindings)
-    else do
+    else do --finally evaluate the function with the eargerly evaluted arguments
       appliedFunction <- evaluateFunctionWithArguments function arguments (safeReduceToNormalForm bindings) 
       return ("Apply " ++ showOutputable function, appliedFunction, bindings)
   where              
@@ -113,10 +113,9 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
     then do
       let (function, arguments) = convertToMultiArgumentFunction expr
       let (Var functionName) = function
-      let typeInformation = head arguments
-      let classDictionaryExpression = arguments !! 1
+      let classDictionaryExpression = arguments !! 1 --the second argument contains the class dictionary, for example "$fEqInteger"
       extractedFunction <- findFunctionInClassDictionary function classDictionaryExpression bindings
-      let realFunctionArguments = drop 2 arguments
+      let realFunctionArguments = drop 2 arguments --the first two arguments contain the type information. The other arguments are the input for the function
       let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunction realFunctionArguments
       return ("replace '" ++ varToString functionName ++ "' with definition from the class dictionary", resultExpression, bindings)
     else Nothing
@@ -130,7 +129,8 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
       findFunctionInClassDictionaryDefinition bindings (Var function) result
     findFunctionInClassDictionary _ _ _ = Nothing
 
-    findFunctionInClassDictionaryDefinition :: [Binding] -> CoreExpr -> CoreExpr -> Maybe CoreExpr
+  --this function is used, for example to find the implementation of a function/operator (such as "==") inside the class dictionary (such as $fEqInteger)
+    findFunctionInClassDictionaryDefinition :: [Binding] -> CoreExpr -> CoreExpr -> Maybe CoreExpr 
     findFunctionInClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
       let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
       findDictionaryFunctionForFunctionName bindings var dictionaryArguments

@@ -70,26 +70,30 @@ tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
 -- of the matchin pattern is returned.
 findMatchingPattern :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
 findMatchingPattern expression patterns = do
-  let foundPattern = findMatchingPatternIgnoreDefault expression patterns
+  --in Haskell Core, the default pattern is always the first one
+  --this means that patterns can not be checked for a "match"
+  --from "top to bottom", the default pattern has to be
+  --ignored first
+  let foundPattern = findMatchingPatternIgnoreDefault expression patterns 
   if isJust foundPattern
     then foundPattern
     else findMatchingDefaultPattern expression patterns
   where
     findMatchingPatternIgnoreDefault :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
     findMatchingPatternIgnoreDefault expression [] = Nothing
-    findMatchingPatternIgnoreDefault (Var name) ((DataAlt dataCon, _, expression) : xs) =
-      if (==) (varToString name) (nameToString (dataConName dataCon)) --is there a more elegant way than nameToString
+    findMatchingPatternIgnoreDefault (Var name) ((DataAlt dataCon, _, expression) : xs) = --pattern matching on a constructor, for example "True"
+      if (==) (varToString name) (nameToString (dataConName dataCon)) --is there a more elegant way than nameToString?
         then Just expression
         else findMatchingPatternIgnoreDefault (Var name) xs
-    findMatchingPatternIgnoreDefault (Lit literal) ((LitAlt patternLiteral, _, expression) : xs) =
-      if (==) (Lit literal) (Lit patternLiteral)
+    findMatchingPatternIgnoreDefault (Lit literal) ((LitAlt patternLiteral, _, expression) : xs) = --pattern matching on a literal, for example 5
+      if (==) (Lit literal) (Lit patternLiteral) --literals are wrapped inside an expression in order to use the custom equality operator for expressions
         then Just expression
         else findMatchingPatternIgnoreDefault (Lit literal) xs
-    findMatchingPatternIgnoreDefault (Lit literal) ((DataAlt patternConstructorName, [boundName], expression) : xs) = do
+    findMatchingPatternIgnoreDefault (Lit literal) ((DataAlt patternConstructorName, [boundName], expression) : xs) = do --pattern matching on a primitive constructor literal, for example I# 1
       if isPrimitiveTypeConstructorName (dataConName patternConstructorName)
         then Just (deepReplaceVarWithinExpression boundName (Lit literal) expression)
         else findMatchingPatternIgnoreDefault (Lit literal) xs
-    findMatchingPatternIgnoreDefault (App expr argument) ((DataAlt patternConstructorName, boundNames, expression) : xs) = do
+    findMatchingPatternIgnoreDefault (App expr argument) ((DataAlt patternConstructorName, boundNames, expression) : xs) = do --pattern matching on a constructor with arguments, for example for lists: (: a b)
       let (Var var, arguments) = convertToMultiArgumentFunction (App expr argument)
       if (==) (varToString var) (nameToString (dataConName patternConstructorName))
         then Just (deepReplaceMultipleVarWithinExpression boundNames (removeTypeInformation arguments) expression)
