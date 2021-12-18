@@ -31,7 +31,7 @@ maybe n f (Just x) =  f x
 instance  Functor Maybe  where
     fmap f Nothing    =  Nothing
     fmap f (Just x)   =  Just (f x)
-        
+
 instance  Monad Maybe  where
     (Just x) >>= k   =  k x
     Nothing  >>= k   =  Nothing
@@ -79,7 +79,7 @@ mapMaybeFB :: (b -> r -> r) -> (a -> Maybe b) -> a -> r -> r
 mapMaybeFB cons f x next = case f x of
   Nothing -> next
   Just r -> cons r next
-  
+
 {-Type: Ordering-}
 data  Ordering  =  LT | EQ | GT
           deriving (Eq, Ord, Bounded)
@@ -207,7 +207,7 @@ True  && x       =  x
 False && _       =  False
 True  || _       =  True
 False || x       =  x
-                                        
+
 not              :: Bool -> Bool
 not True         =  False
 not False        =  True
@@ -217,7 +217,7 @@ otherwise        =  True
 
 {-Functions: Misc-}
 until            :: (a -> Bool) -> (a -> a) -> a -> a
-until p f x 
+until p f x
      | p x       =  x
      | otherwise =  until p f (f x)
 
@@ -308,13 +308,13 @@ foldr1 _ []      =  error "Prelude.foldr1: empty list"
 scanr             :: (a -> b -> b) -> b -> [a] -> [b]
 scanr f q0 []     =  [q0]
 scanr f q0 (x:xs) =  f x q : qs
-                     where qs@(q:_) = scanr f q0 xs 
+                     where qs@(q:_) = scanr f q0 xs
 
 scanr1          :: (a -> a -> a) -> [a] -> [a]
 scanr1 f []     =  []
 scanr1 f [x]    =  [x]
 scanr1 f (x:xs) =  f x q : qs
-                   where qs@(q:_) = scanr1 f xs 
+                   where qs@(q:_) = scanr1 f xs
 
 iterate          :: (a -> a) -> a -> [a]
 iterate f x      =  x : iterate f (f x)
@@ -344,7 +344,7 @@ splitAt n xs             =  (take n xs, drop n xs)
 
 takeWhile               :: (a -> Bool) -> [a] -> [a]
 takeWhile p []          =  []
-takeWhile p (x:xs) 
+takeWhile p (x:xs)
             | p x       =  x : takeWhile p xs
             | otherwise =  []
 
@@ -356,8 +356,8 @@ dropWhile p xs@(x:xs')
 
 span, break             :: (a -> Bool) -> [a] -> ([a],[a])
 span p []            = ([],[])
-span p xs@(x:xs') 
-            | p x       =  (x:ys,zs) 
+span p xs@(x:xs')
+            | p x       =  (x:ys,zs)
             | otherwise =  ([],xs)
                            where (ys,zs) = span p xs'
 
@@ -405,7 +405,7 @@ lookup key ((x,y):xys)
     | otherwise  =  lookup key xys
 
 sum, product     :: (Num a) => [a] -> a
-sum              =  foldl (+) 0  
+sum              =  foldl (+) 0
 product          =  foldl (*) 1
 
 maximum, minimum :: (Ord a) => [a] -> a
@@ -439,11 +439,11 @@ unzip3           =  foldr (\(a,b,c) ~(as,bs,cs) -> (a:as,b:bs,c:cs))
                           ([],[],[])
 
 {- Functions: monadic-}
-sequence       :: Monad m => [m a] -> m [a] 
+sequence       :: Monad m => [m a] -> m [a]
 sequence       =  foldr mcons (return [])
                     where mcons p q = p >>= \x -> q >>= \y -> return (x:y)
 
-sequence_      :: Monad m => [m a] -> m () 
+sequence_      :: Monad m => [m a] -> m ()
 sequence_      =  foldr (>>) (return ())
 
 mapM             :: Monad m => (a -> m b) -> [a] -> m [b]
@@ -470,7 +470,7 @@ class  Enum a  where
     enumFrom x       =  map toEnum [fromEnum x ..]
     enumFromTo x y   =  map toEnum [fromEnum x .. fromEnum y]
     enumFromThen x y =  map toEnum [fromEnum x, fromEnum y ..]
-    enumFromThenTo x y z = 
+    enumFromThenTo x y z =
                         map toEnum [fromEnum x, fromEnum y .. fromEnum z]
 
 
@@ -528,7 +528,7 @@ instance  Enum Double  where
 instance  Enum Bool  where
     succ False                          = True
     succ True                           = error "Prelude.Enum.Bool.succ: bad argument"
-    pred True                           = False 
+    pred True                           = False
     pred False                          = error "Prelude.Enum.Bool.succ: bad argument"
     fromEnum True                       = 1
     fromEnum False                      = 0
@@ -540,38 +540,38 @@ instance  Enum Bool  where
     enumFromTo True False               = []
     enumFromTo False True               = [False,True]
     enumFromTo False False              = [False]
-    enumFromThen True True              = True : (enumFromThen True True)
+    enumFromThen True True              = True : enumFromThen True True
     enumFromThen True False             = [True,False]
     enumFromThen False True             = [False,True]
-    enumFromThen False False            = False : (enumFromThen False False)       
-    enumFromThenTo True True True       = True : (enumFromThenTo True True True)
-    enumFromThenTo True True False      = []  
+    enumFromThen False False            = False : enumFromThen False False
+    enumFromThenTo True True True       = True : enumFromThenTo True True True
+    enumFromThenTo True True False      = []
     enumFromThenTo True False True      = [True]
     enumFromThenTo True False False     = [True,False]
     enumFromThenTo False True True      = [False,True]
     enumFromThenTo False True False     = [False]
-    enumFromThenTo False False True     = False : (enumFromThenTo False False True)
-    enumFromThenTo False False False    = False : (enumFromThenTo False False False)
+    enumFromThenTo False False True     = False : False : enumFromThenTo False False True
+    enumFromThenTo False False False    = False : enumFromThenTo False False False
 
 customEnumFrom :: Enum a => a -> [a]
-customEnumFrom x = x: (customEnumFrom (succ x))
+customEnumFrom x = x: customEnumFrom (succ x)
 
 customEnumFromTo :: (Enum a, Ord a) => a -> a -> [a]
 customEnumFromTo n m = takeWhile (<= m) (customEnumFrom n) --check: why is original prelude implementation criteria (<= m+1/2)
 
 customEnumFromThen:: (Enum a) => a -> a -> [a]
-customEnumFromThen n m = n : (customEnumFromThen (succStep n (stepSize n m)) (succStep m (stepSize n m)))
+customEnumFromThen n m = n : customEnumFromThen (succStep n (stepSize n m)) (succStep m (stepSize n m))
 
 customEnumFromThenTo :: (Enum a, Ord a) => a -> a -> a -> [a]
-customEnumFromThenTo n n' m = if (n > m)
+customEnumFromThenTo n n' m = if n > m
     then []
-    else n : (customEnumFromThenTo (succStep n (stepSize n n')) (succStep n' (stepSize n n')) m )
+    else n : customEnumFromThenTo (succStep n (stepSize n n')) (succStep n' (stepSize n n')) m
 
 succStep :: (Enum a) => a -> Int -> a
-succStep enum stepsize = toEnum ((fromEnum enum) + stepsize)
+succStep enum stepsize = toEnum (fromEnum enum + stepsize)
 
 stepSize :: (Enum a) => a -> a -> Int
-stepSize x y = (fromEnum y) - (fromEnum x)
+stepSize x y = fromEnum y - fromEnum x
 
 {-Functions that are implemented in the backend. The definitions here are not actualy used in the stepping process but simply added here so there are no compilation errors for this file. Every function that is prefixed with "unsteppableFunction" is not reduced using the definition from this file but with the definition in the Haskell backend-}
 unsteppableFunction'primIntToChar :: Int -> Char
