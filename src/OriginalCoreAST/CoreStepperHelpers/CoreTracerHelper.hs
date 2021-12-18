@@ -1,9 +1,9 @@
-module OriginalCoreAST.CoreStepperHelpers.TracerHelper (module OriginalCoreAST.CoreStepperHelpers.TracerHelper) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper (traceExpression, traceMaybeExpression, varDescription, typeDescription, typeOfExpression) where
 
-import GHC.Plugins (Expr, Var(..), Type(..), OutputableBndr, varName, varType, isId, isTyVar, isTcTyVar)
-import GHC.Core.TyCo.Rep (Type(..))
-import Utils (showOutputable)
-import Debug.Trace(trace)
+import GHC.Plugins
+import GHC.Core.TyCo.Rep
+import Utils
+import Debug.Trace
 
 traceExpression :: String -> Expr Var -> Expr Var --for debugging
 traceExpression comment expr = trace ((comment ++ ": ") ++ (showOutputable expr)) expr
@@ -24,3 +24,15 @@ typeDescription (FunTy _ _ _ _) = "FunTy"
 typeDescription (LitTy _) = "LitTy"
 typeDescription (CastTy _ _) = "CastTy"
 typeDescription (CoercionTy _) = "CohersionTy"  
+
+typeOfExpression :: Expr a -> String --used for tracing / debugging
+typeOfExpression (Var _) = "Var"
+typeOfExpression (Lit _) = "Lit"
+typeOfExpression (App _ _) = "App"
+typeOfExpression (Lam _ _) = "Lam"
+typeOfExpression (Let _ _) = "Let"
+typeOfExpression (Case {}) = "Case"
+typeOfExpression (Cast _ _) = "Cast"
+typeOfExpression (Tick _ _) = "Tick"
+typeOfExpression (Type _) = "Type"
+typeOfExpression (Coercion _) = "Coercion"

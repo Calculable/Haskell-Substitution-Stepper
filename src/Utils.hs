@@ -14,6 +14,7 @@ import GHC.Plugins
     liftIO,
     showSDoc,
   )
+import Data.Maybe
 
 showOutputable :: Outputable a => a -> String
 showOutputable = showSDoc baseDynFlags . ppr
@@ -34,3 +35,10 @@ listTopLevelFunctions :: CoreProgram -> IO ()
 listTopLevelFunctions cp = do
   let topLevelNames = map (takeWhile (/= ' ') . showOutputable . pprCoreBinding) cp
   mapM_ putStrLn topLevelNames
+
+(??) :: Maybe a -> a -> a
+(??) = flip fromMaybe
+
+{-this function is taken from: https://stackoverflow.com/questions/19074520/how-to-split-a-list-into-two-in-haskell-}
+splitList :: [a] -> ([a], [a])
+splitList myList = splitAt (((length myList) + 1) `div` 2) myList

@@ -1,35 +1,8 @@
 module OriginalCoreAST.CoreMakerFunctions (fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral, expressionListToCoreList, expressionTupleToCoreTuple, maybeToCoreExpression, expressionListToCoreListWithType, charToCoreExpression) where
 
-import GHC.Core.TyCo.Rep (TyLit (StrTyLit), Type (LitTy))
+import GHC.Core.TyCo.Rep
 import GHC.Plugins
-  ( DataCon,
-    Expr (Lit, Var),
-    IdDetails (VanillaId),
-    Literal (LitChar, LitDouble, LitFloat, LitNumber, LitString),
-    Var,
-    charTy,
-    doubleTy,
-    floatTy,
-    intTy,
-    mkCharExpr,
-    mkCoreConApps,
-    mkCoreTup,
-    mkDoubleExpr,
-    mkFastString,
-    mkFloatExpr,
-    mkGlobalVar,
-    mkJustExpr,
-    mkListExpr,
-    mkLitInt64,
-    mkLitString,
-    mkNothingExpr,
-    mkSystemName,
-    mkVarOcc,
-    stringTy,
-    trace,
-    vanillaIdInfo,
-  )
-import GHC.Types.Unique (minLocalUnique)
+import GHC.Types.Unique
 
 integerToCoreLiteral :: Integer -> Literal
 integerToCoreLiteral = mkLitInt64
@@ -39,6 +12,9 @@ fractionalToCoreLiteral value = LitDouble (toRational value)
 
 charToCoreLiteral :: Char -> Literal
 charToCoreLiteral = LitChar
+
+rationalToCoreLiteral :: Rational -> Literal
+rationalToCoreLiteral = LitDouble
 
 rationalToCoreExpression :: Rational -> Expr b
 rationalToCoreExpression value = Lit (rationalToCoreLiteral value)
@@ -52,9 +28,6 @@ doubleToCoreExpression = mkDoubleExpr
 charToCoreExpression :: Char -> Expr Var
 charToCoreExpression = mkCharExpr
 
-rationalToCoreLiteral :: Rational -> Literal
-rationalToCoreLiteral = LitDouble
-
 maybeToCoreExpression :: Maybe (Expr Var) -> Type -> Expr Var
 maybeToCoreExpression element customType = maybe (mkNothingExpr customType) (mkJustExpr customType) element
 
@@ -65,8 +38,11 @@ stringToCoreExpression :: String -> Expr b
 stringToCoreExpression value = Lit (mkLitString value)
 
 boolToCoreExpression :: Bool -> Expr Var --this is a hack, we just took the easiest constructors we found to create a "Var"-Instance without understanding what those constructors stand for
-boolToCoreExpression True = Var (mkGlobalVar VanillaId (mkSystemName minLocalUnique (mkVarOcc "True")) (LitTy (StrTyLit (mkFastString "Bool"))) vanillaIdInfo)
-boolToCoreExpression False = Var (mkGlobalVar VanillaId (mkSystemName minLocalUnique (mkVarOcc "False")) (LitTy (StrTyLit (mkFastString "Bool"))) vanillaIdInfo)
+boolToCoreExpression True = makeSimpleConstructorWithContructorNameAndTypeName "True" "Bool"
+boolToCoreExpression False = makeSimpleConstructorWithContructorNameAndTypeName "False" "Bool"
+
+makeSimpleConstructorWithContructorNameAndTypeName :: String -> String -> Expr Var --this is a hack, we just took the easiest constructors we found to create a "Var"-Instance without understanding what those constructors stand for
+makeSimpleConstructorWithContructorNameAndTypeName constructorName typeName = Var (mkGlobalVar VanillaId (mkSystemName minLocalUnique (mkVarOcc constructorName)) (LitTy (StrTyLit (mkFastString typeName))) vanillaIdInfo)
 
 expressionListToCoreTuple :: [Expr Var] -> Expr Var
 expressionListToCoreTuple = mkCoreTup

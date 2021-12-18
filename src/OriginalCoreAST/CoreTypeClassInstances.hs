@@ -1,30 +1,13 @@
 module OriginalCoreAST.CoreTypeClassInstances () where
 
-import GHC.Plugins (Expr (Lit, Var, App, Type), Literal (..), OutputableBndr)
+import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( varToString, 
-    boolValueFromVar, 
-    isBoolVar,
-    isList,
-    isTuple,
-    isPrimitiveTypeConstructorApp,
-    getLiteralArgument,
-    removeTypeInformation,
-    getIndividualElementsOfList,
-    getIndividualElementsOfTuple,
-    typeOfExpression
-  )
 import OriginalCoreAST.CoreMakerFunctions
-  ( charToCoreLiteral,
-    fractionalToCoreLiteral,
-    integerToCoreExpression,
-    integerToCoreLiteral,
-    rationalToCoreExpression,
-    rationalToCoreLiteral,
-  )
-import Utils (showOutputable)
-import Data.Maybe (isNothing, fromJust)
-import Debug.Trace (trace)
+import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
+import Utils
+import Data.Maybe
+import Data.Bifunctor
+import Debug.Trace
 
 instance (OutputableBndr b) => Show (Expr b) where
   show = showOutputable
@@ -54,83 +37,25 @@ instance Eq (Expr b) where
   (==) (Lit x) (Lit y) = weakEquals x y
   (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
   (==) (App x1 y1) (App x2 y2) = trace "operator for collection called" operatorForCollection (App x1 y1) (App x2 y2) (==)
-  (==) x y = error ("== and /= not supported by this type: " ++ (typeOfExpression y))
-
-operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
-operatorForCollection a b operator = operator (elementsToCompareForCollection a) (elementsToCompareForCollection b)
-
-elementsToCompareForCollection :: Expr b -> [Expr b]
-elementsToCompareForCollection expr   | isList expr = removeTypeInformation (getIndividualElementsOfList expr)
-                                      | isTuple expr = removeTypeInformation (getIndividualElementsOfTuple expr)
-                                      | isPrimitiveTypeConstructorApp expr = [getLiteralArgument expr]
-                                      | otherwise = error "operator not supported: unknown type: "
-
-
-weakEquals :: Literal -> Literal -> Bool
-weakEquals (LitChar first) (LitChar second) = (==) first second
-weakEquals (LitNumber _ first) (LitNumber _ second) = (==) first second
-weakEquals (LitString first) (LitString second) = (==) first second
-weakEquals LitNullAddr LitNullAddr = True
-weakEquals LitRubbish LitRubbish = True
-weakEquals (LitFloat first) (LitFloat second) = (==) first second
-weakEquals (LitDouble first) (LitFloat second) = (==) first second
-weakEquals (LitFloat first) (LitDouble second) = (==) first second
-weakEquals (LitDouble first) (LitDouble second) = (==) first second
-weakEquals (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ) = (==) (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ)
-weakEquals (LitNumber _ first) (LitFloat second) = (==) (fromInteger first) (fromRational second)
-weakEquals (LitNumber _ first) (LitDouble second) = (==) (fromInteger first) (fromRational second)
-weakEquals (LitFloat first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
-weakEquals (LitDouble first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
-weakEquals _ _ = False
+  (==) x y = error ("== and /= not supported by this type: " ++ typeOfExpression y)
 
 instance Ord (Expr b) where
   (<=) (Lit x) (Lit y) = lessOrEqualLiteral x y
-  (<=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) <= (boolValueFromVar y)
+  (<=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = boolValueFromVar x <= boolValueFromVar y
   (<=) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (<=)
   (<=) _ _ = error "<= not supported by this type"
   (<) (Lit x) (Lit y) = lessLiteral x y
-  (<) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) < (boolValueFromVar y)
+  (<) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = boolValueFromVar x < boolValueFromVar y
   (<) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (<)
   (<) _ _ = error "< not supported by this type"
   (>=) (Lit x) (Lit y) = greaterEqualLiteral x y
-  (>=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) >= (boolValueFromVar y)
+  (>=) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = boolValueFromVar x >= boolValueFromVar y
   (>=) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (>=)
   (>=) _ _ = error ">= not supported by this type"
   (>) (Lit x) (Lit y) = greaterLiteral x y
-  (>) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = (boolValueFromVar x) > (boolValueFromVar y)
+  (>) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = boolValueFromVar x > boolValueFromVar y
   (>) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (>)
   (>) _ _ = error "> not supported by this type"
-
-compareLiteral :: Literal -> Literal -> Ordering
-compareLiteral leftExpression rightExpression
-  | weakEquals leftExpression rightExpression = EQ
-  | lessOrEqualLiteral leftExpression rightExpression = LT
-  | otherwise = GT
-
-lessOrEqualLiteral :: Literal -> Literal -> Bool
-lessOrEqualLiteral (LitChar x) (LitChar y) = x <= y
-lessOrEqualLiteral (LitNumber _ x) (LitNumber _ y) = x <= y
-lessOrEqualLiteral (LitString x) (LitString y) = x <= y
-lessOrEqualLiteral (LitFloat x) (LitFloat y) = x <= y
-lessOrEqualLiteral (LitDouble x) (LitDouble y) = x <= y
-lessOrEqualLiteral (LitFloat x) (LitDouble y) = x <= y
-lessOrEqualLiteral (LitDouble x) (LitFloat y) = x <= y
-lessOrEqualLiteral (LitNumber _ x) (LitFloat y) = fromInteger x <= y
-lessOrEqualLiteral (LitFloat x) (LitNumber _ y) = x <= fromInteger y
-lessOrEqualLiteral (LitNumber _ x) (LitDouble y) = fromInteger x <= y
-lessOrEqualLiteral (LitDouble x) (LitNumber _ y) = x <= fromInteger y
-lessOrEqualLiteral x y = x <= y --use existing equality operator in literal type
-
-{-implementieren-}
-
-lessLiteral :: Literal -> Literal -> Bool
-lessLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == LT
-
-greaterEqualLiteral :: Literal -> Literal -> Bool
-greaterEqualLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression /= LT
-
-greaterLiteral :: Literal -> Literal -> Bool
-greaterLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == GT
 
 instance Enum (Expr b) where
   succ (Lit x) = Lit (succ x)
@@ -220,10 +145,10 @@ instance Integral (Expr b) where
   mod (Lit x) (Lit y) = Lit (mod x y)
   mod _ _ = error "mod not supported for this type"
 
-  quotRem (Lit x) (Lit y) = (Lit (fst res), Lit (snd res)) where res = quotRem x y
+  quotRem (Lit x) (Lit y) = Data.Bifunctor.bimap Lit Lit res where res = quotRem x y
   quotRem _ _ = error "quotRem not supported"
 
-  divMod (Lit x) (Lit y) = (Lit (fst res), Lit (snd res)) where res = divMod x y
+  divMod (Lit x) (Lit y) = Data.Bifunctor.bimap Lit Lit res where res = divMod x y
   divMod _ _ = error "divMod not supported"
 
   toInteger (Lit x) = toInteger x
@@ -234,7 +159,7 @@ instance Real (Expr b) where
   toRational _ = error "toRational not supported for this type"
 
 instance RealFrac (Expr b) where
-  properFraction (Lit x) = (fst res, Lit (snd res)) where res = properFraction x
+  properFraction (Lit x) = Data.Bifunctor.second Lit res where res = properFraction x
   properFraction _ = error "properFraction not supported for this type"
 
   truncate (Lit x) = truncate x
@@ -465,16 +390,16 @@ instance Integral Literal where
   div _ _ = error "div not supported for this type"
   mod (LitNumber _ x) (LitNumber _ y) = integerToCoreLiteral (mod x y)
   mod _ _ = error "mod not supported for this type"
-  quotRem (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = quotRem x y
+  quotRem (LitNumber _ x) (LitNumber _ y) = Data.Bifunctor.bimap integerToCoreLiteral integerToCoreLiteral res where res = quotRem x y
   quotRem _ _ = error "quotRem not supported for this type"
-  divMod (LitNumber _ x) (LitNumber _ y) = (integerToCoreLiteral (fst res), integerToCoreLiteral (snd res)) where res = divMod x y
+  divMod (LitNumber _ x) (LitNumber _ y) = Data.Bifunctor.bimap integerToCoreLiteral integerToCoreLiteral res where res = divMod x y
   divMod _ _ = error "divMod not supported for this type"
   toInteger (LitNumber _ x) = x
   toInteger _ = error "toInteger not supported for this type"
 
 instance RealFrac Literal where
-  properFraction (LitDouble x) = (fst res, rationalToCoreLiteral (snd res)) where res = properFraction x
-  properFraction (LitFloat y) = (fst res, rationalToCoreLiteral (snd res)) where res = properFraction y
+  properFraction (LitDouble x) = Data.Bifunctor.second rationalToCoreLiteral res where res = properFraction x
+  properFraction (LitFloat y) = Data.Bifunctor.second rationalToCoreLiteral res where res = properFraction y
   properFraction _ = error "properFraction not supported for this type"
   truncate (LitDouble x) = truncate x
   truncate (LitFloat x) = truncate x
@@ -543,3 +468,63 @@ instance RealFloat Literal where
   decodeFloat (LitDouble x) = decodeFloat (fromRational x)
   decodeFloat (LitFloat x) = decodeFloat (fromRational x)
   decodeFloat _ = error "decodeFloat not supported"
+
+
+  {-Helper functions-}
+
+
+operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
+operatorForCollection a b operator = operator (elementsToCompareForCollection a) (elementsToCompareForCollection b)
+
+elementsToCompareForCollection :: Expr b -> [Expr b]
+elementsToCompareForCollection expr   | isList expr = removeTypeInformation (getIndividualElementsOfList expr)
+                                      | isTuple expr = removeTypeInformation (getIndividualElementsOfTuple expr)
+                                      | isPrimitiveTypeConstructorApp expr = [getLiteralArgument expr]
+                                      | otherwise = error "operator not supported: unknown type: "
+
+
+weakEquals :: Literal -> Literal -> Bool
+weakEquals (LitChar first) (LitChar second) = (==) first second
+weakEquals (LitNumber _ first) (LitNumber _ second) = (==) first second
+weakEquals (LitString first) (LitString second) = (==) first second
+weakEquals LitNullAddr LitNullAddr = True
+weakEquals LitRubbish LitRubbish = True
+weakEquals (LitFloat first) (LitFloat second) = (==) first second
+weakEquals (LitDouble first) (LitFloat second) = (==) first second
+weakEquals (LitFloat first) (LitDouble second) = (==) first second
+weakEquals (LitDouble first) (LitDouble second) = (==) first second
+weakEquals (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ) = (==) (LitLabel firstX firstY firstZ) (LitLabel secondX secondY secondZ)
+weakEquals (LitNumber _ first) (LitFloat second) = (==) (fromInteger first) (fromRational second)
+weakEquals (LitNumber _ first) (LitDouble second) = (==) (fromInteger first) (fromRational second)
+weakEquals (LitFloat first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
+weakEquals (LitDouble first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
+weakEquals _ _ = False
+
+compareLiteral :: Literal -> Literal -> Ordering
+compareLiteral leftExpression rightExpression
+  | weakEquals leftExpression rightExpression = EQ
+  | lessOrEqualLiteral leftExpression rightExpression = LT
+  | otherwise = GT
+
+lessOrEqualLiteral :: Literal -> Literal -> Bool
+lessOrEqualLiteral (LitChar x) (LitChar y) = x <= y
+lessOrEqualLiteral (LitNumber _ x) (LitNumber _ y) = x <= y
+lessOrEqualLiteral (LitString x) (LitString y) = x <= y
+lessOrEqualLiteral (LitFloat x) (LitFloat y) = x <= y
+lessOrEqualLiteral (LitDouble x) (LitDouble y) = x <= y
+lessOrEqualLiteral (LitFloat x) (LitDouble y) = x <= y
+lessOrEqualLiteral (LitDouble x) (LitFloat y) = x <= y
+lessOrEqualLiteral (LitNumber _ x) (LitFloat y) = fromInteger x <= y
+lessOrEqualLiteral (LitFloat x) (LitNumber _ y) = x <= fromInteger y
+lessOrEqualLiteral (LitNumber _ x) (LitDouble y) = fromInteger x <= y
+lessOrEqualLiteral (LitDouble x) (LitNumber _ y) = x <= fromInteger y
+lessOrEqualLiteral x y = x <= y --use existing equality operator in literal type
+
+lessLiteral :: Literal -> Literal -> Bool
+lessLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == LT
+
+greaterEqualLiteral :: Literal -> Literal -> Bool
+greaterEqualLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression /= LT
+
+greaterLiteral :: Literal -> Literal -> Bool
+greaterLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == GT

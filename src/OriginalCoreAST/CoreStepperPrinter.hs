@@ -6,26 +6,13 @@ module OriginalCoreAST.CoreStepperPrinter
   )
 where
 
-import Data.Maybe (fromJust, isNothing)
-import GHC.Plugins (Bind (NonRec, Rec), CoreBind, Expr, Var)
+import Data.Maybe
+import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
-  ( canBeReduced,
-    varToString,
-  )
-import OriginalCoreAST.CorePrettyPrinter (prettyPrint)
+import OriginalCoreAST.CorePrettyPrinter
 import OriginalCoreAST.CoreStepper
-  ( applyStep,
-    canBeReducedToNormalForm,
-    safeReduceToNormalForm,
-  )
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformator
-  ( convertFunctionApplicationWithArgumentListToNestedFunctionApplication,
-    convertToMultiArgumentFunction,
-  )
-
-type ReductionStepDescription = String --for example: "replace x with definition"
-
-type Binding = (Var, Expr Var)
+import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
+import OriginalCoreAST.CoreTypeDefinitions
 
 printCoreStepByStepReductionForEveryBinding :: [CoreBind] -> IO ()
 printCoreStepByStepReductionForEveryBinding bindings = do
