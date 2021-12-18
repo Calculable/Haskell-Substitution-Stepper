@@ -21,8 +21,8 @@ import Utils
 type Binding = (Var, Expr Var)
 type Reducer = (Expr Var -> Maybe (Expr Var))
 
-evaluateFunctionWithArguments :: Expr Var -> [Expr Var] -> Reducer -> Maybe (Expr Var)
-evaluateFunctionWithArguments (Var functionOrOperatorName) arguments reducer = 
+evaluateFunctionWithArguments :: Var -> [Expr Var] -> Reducer -> Maybe (Expr Var)
+evaluateFunctionWithArguments functionOrOperatorName arguments reducer = 
     if isJust evaluationWithTypes
       then evaluationWithTypes
       else evaluationWithoutTypes
@@ -30,8 +30,6 @@ evaluateFunctionWithArguments (Var functionOrOperatorName) arguments reducer =
       evaluationWithTypes = evaluateUnsteppableFunctionWithArgumentsAndTypes (varToString functionOrOperatorName) argumentsWithoutApplications reducer
       evaluationWithoutTypes = evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (removeTypeInformation argumentsWithoutApplications) reducer
       argumentsWithoutApplications = map prepareExpressionArgumentForEvaluation arguments
-evaluateFunctionWithArguments _ _ _ = error "function-expression has to be a 'Var'"
-
 
 evaluateUnsteppableFunctionWithArguments :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
 evaluateUnsteppableFunctionWithArguments "+" [x, y] _ = Just ((+) x y)
