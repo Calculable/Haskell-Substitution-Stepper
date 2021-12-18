@@ -1,9 +1,10 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary) where
 
 import Data.List
 import GHC.Plugins
 import Utils
 import GHC.Core.TyCo.Rep
+import OriginalCoreAST.CoreTypeDefinitions
 
 unsteppableFunctionPrefix = "unsteppableFunction'"
 
@@ -154,6 +155,11 @@ isApplicationWithClassDictionary expr = do
   let (function, arguments) = collectArgs expr
   length arguments >= 2 && ((isVarExpression function && isTypeInformation (head arguments)) && isClassDictionary (arguments !! 1))
 
+functionNameMatchesFunctionFromDictionary :: FunctionReference -> Expr Var -> Bool
+functionNameMatchesFunctionFromDictionary searchFunctionName (Var dictionaryFunctionName) = varToString searchFunctionName `isSuffixOf` varToString dictionaryFunctionName
+functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = functionNameMatchesFunctionFromDictionary searchFunctionName (getFunctionOfNestedApplication (App expr args))
+functionNameMatchesFunctionFromDictionary _ _ = False
+
 {-Extracting from expressions-}
 
 getIndividualElementsOfList :: Expr b -> [Expr b]
@@ -189,3 +195,4 @@ extractArgumentsOfNestedApplication expr = snd (collectArgs expr)
 
 removeTypeInformation :: [Expr b] -> [Expr b]
 removeTypeInformation list = filter (not . isTypeInformation) list
+

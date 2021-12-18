@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString, functionNameMatchesFunctionFromDictionary) where
+module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString) where
 import GHC.Plugins
 import Data.List
 import OriginalCoreAST.CoreInformationExtractorFunctions
@@ -77,8 +77,3 @@ findMatchingDefaultPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingDefaultPattern expression [] = trace "no matching pattern found" Nothing
 findMatchingDefaultPattern _ ((DEFAULT, _, expression) : _) = Just expression
 findMatchingDefaultPattern expression (x : xs) = findMatchingDefaultPattern expression xs
-
-functionNameMatchesFunctionFromDictionary :: FunctionReference -> Expr Var -> Bool
-functionNameMatchesFunctionFromDictionary searchFunctionName (Var dictionaryFunctionName) = varToString searchFunctionName `isSuffixOf` varToString dictionaryFunctionName
-functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = functionNameMatchesFunctionFromDictionary searchFunctionName (getFunctionOfNestedApplication (App expr args))
-functionNameMatchesFunctionFromDictionary _ _ = False
