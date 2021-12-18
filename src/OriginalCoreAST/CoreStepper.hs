@@ -130,7 +130,6 @@ reduceToHeadNormalForm bindings expression
       Nothing -> trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression) Nothing
   | otherwise = Just expression
 
-
 reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
 reduceNestedApplicationToHeadNormalForm bindings expr = do
   let result = reduceNestedApplication bindings expr

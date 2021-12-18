@@ -1,5 +1,5 @@
 module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments) where
-import GHC.Plugins hiding (($$))
+import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import Data.Maybe
 import Data.Bifunctor
