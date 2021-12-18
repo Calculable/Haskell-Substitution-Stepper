@@ -1,3 +1,15 @@
+{-|
+Module      : CoreStepperPrinter
+Description : Makes Core expressions and Core literals compatible with type classes from the prelude
+License     : GPL-3
+
+This module makes the type @ Expr @ and the type @ Literal @ compatible with type classes 
+from the prelude: EQ, Fractional, Num, Ord, Enum, Float, Integral, Real, RealFrac
+Other typeclasses are supported as well but their implementation is either integrated in the
+steppable prelude or in the CoreEvaluator module.
+-}
+
+
 module OriginalCoreAST.CoreTypeClassInstances () where
 
 import GHC.Plugins

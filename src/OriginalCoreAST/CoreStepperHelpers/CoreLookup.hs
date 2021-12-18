@@ -1,3 +1,14 @@
+{-|
+Module      : CoreLookup
+Description : Used to find bindings
+License     : GPL-3
+
+A CoreProgramm contains a list of top-level bindings. During the stepping, it is
+sometimes necessary to replace "Var"s that reference a binding with the underlying 
+expression of the binding. This module provides functions to find specific
+bindings.
+-}
+
 module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString) where
 import GHC.Plugins
 import Data.List

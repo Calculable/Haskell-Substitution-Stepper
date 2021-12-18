@@ -1,3 +1,13 @@
+{-|
+Module      : CoreStepper
+Description : Steps through Core expressions by applying reduction rules
+License     : GPL-3
+
+This module contians a set of reduction rules. Expressions can either be reduced until head normal form
+or even more until normal form. For each reduction, a description of the reduction is generated
+which can be useful for printing.
+-}
+
 module OriginalCoreAST.CoreStepper (applyStep, reduceToNormalForm, canBeReducedToNormalForm, safeReduceToNormalForm) where
 
 import Data.Maybe

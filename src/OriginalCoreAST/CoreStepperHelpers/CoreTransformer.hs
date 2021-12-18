@@ -1,3 +1,10 @@
+{-|
+Module      : CoreTransformer
+Description : Transform Core expressions
+License     : GPL-3
+
+This module contains helper functions to manipulate and transform Core expressions.
+-}
 module OriginalCoreAST.CoreStepperHelpers.CoreTransformer (convertFunctionApplicationWithArgumentListToNestedFunctionApplication, deepReplaceVarWithinExpression, deepReplaceMultipleVarWithinExpression, convertToMultiArgumentFunction, prepareExpressionArgumentForEvaluation, extractArgumentsOfNestedApplication) where
 
 import GHC.Plugins

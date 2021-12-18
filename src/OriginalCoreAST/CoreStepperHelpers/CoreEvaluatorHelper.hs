@@ -1,3 +1,12 @@
+{-|
+Module      : CoreEvaluatorHelper
+Description : Helper for the CoreEvaluator module
+License     : GPL-3
+
+This module contains helper functions used for the CoreEvaluator module.
+Most of the the functions are used to add support for the "monad" and "functor" 
+type class for lists as well as to add support for the Bounded typeclass
+-}
 module OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper (minBoundForType, maxBoundForType, monadOperatorForList, monadOperator2ForList, returnForList, failForList, fmapForList) where
 
 import GHC.Plugins

@@ -1,3 +1,10 @@
+{-|
+Module      : CoreMakerFunctions
+Description : Helps to create instances of Core expressions
+License     : GPL-3
+
+This module contains helper functions to create Core expressions and Core literals.
+-}
 module OriginalCoreAST.CoreMakerFunctions (fractionalToCoreLiteral, integerToCoreLiteral, rationalToCoreExpression, integerToCoreExpression, stringToCoreExpression, boolToCoreExpression, charToCoreLiteral, rationalToCoreLiteral, expressionListToCoreList, expressionTupleToCoreTuple, maybeToCoreExpression, expressionListToCoreListWithType, charToCoreExpression) where
 
 import GHC.Core.TyCo.Rep

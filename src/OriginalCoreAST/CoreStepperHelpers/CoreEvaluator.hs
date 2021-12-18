@@ -1,3 +1,14 @@
+{-|
+Module      : CoreEvaluator
+Description : Used to evaluate unsteppable functions
+License     : GPL-3
+
+Not every application in Haskell can be stepped. Some basic/primitive functions
+and operators like (+) or sin (and many more) cannot be represented in pure
+Haskell and thus can not be stepped. Instead this module contains a function 
+to directly evalute such unsteppable expressions. To built this code
+in a safe manner and not using IO, only defined functions are supported (no native 'eval').
+-}
 module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments) where
 import GHC.Plugins
 import OriginalCoreAST.CoreInformationExtractorFunctions

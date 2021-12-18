@@ -1,3 +1,14 @@
+{-|
+Module      : IntegrationTestSpec
+Description : Hspec integration tests
+License     : GPL-3
+
+Each tests loads two expressions defined in "IntegrationTestBindings.hs", an
+Input-Expression and an Exprected-Output-Expression.
+The "Input" binding is reduced to normal form using the CoreStepper.
+Finally, there is an equality check, if the reduced Input-Expression equals the defined
+"ExpectedOutput" expression. If this is not the case, the test fails.
+-}
 module OriginalCoreAST.IntegrationTestSpec where
 
 import DataProvider.DataProvider

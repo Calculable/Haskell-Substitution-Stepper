@@ -1,3 +1,12 @@
+{-|
+Module      : DataProvider
+Description : Provides a "binding finder" which can be used for integratoin test
+License     : GPL-3
+
+The binding finder is a function that can be used to lookup bindings from 
+the IntegrationTestBindings and the SteppablePrelude. It is used during
+the integration tests to optain Haskell Core expressions to work with.
+-}
 module DataProvider.DataProvider (getBindingFinderWithCoreBindings) where
 
 import Compiler

@@ -1,9 +1,18 @@
-{-Source: most of the source code is taken from the Haskell Report 2010 Standard Prelude-}
-
-{-Options & Pragmas-}
 {-# OPTIONS -XNoImplicitPrelude #-}
 {-# LANGUAGE RankNTypes #-}
 
+{-|
+Module      : SteppablePrelude
+Description : Definitions of standart Haskell types, type classes, type class instances and functions
+License     : GPL-3
+
+This customized version of the Haskell Standard prelude is loaded into the stepper 
+together with the input Haskell file defined by the user. It means that users 
+can work with existing types, type classes and functions from the prelude without
+having to define everything by themselves. 
+
+Source: most of the source code is taken from the Haskell Report 2010 Standard Prelude
+-}
 module SteppablePrelude (module SteppablePrelude, module GHC.Maybe, module Data.Char, module Prelude) where
 
 {-Imports-}

@@ -1,3 +1,9 @@
+{-|
+Module      : CorePrettyPrinter
+Description : Printing Core expressions
+License     : GPL-3
+
+-}
 module OriginalCoreAST.CorePrettyPrinter (prettyPrint) where
 
 import GHC.Plugins

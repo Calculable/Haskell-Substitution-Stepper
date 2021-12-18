@@ -1,5 +1,10 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+{-|
+Module      : Compiler
+Description : To compile the users Haskell input file into different GHC stages and finally into Haskell Core
+License     : GPL-3
+-}
 module Compiler (compileToCore, writeDump, getCoreProgram) where
 
 import Control.Monad.IO.Class (MonadIO (liftIO))

@@ -6,6 +6,11 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 
+{-|
+Module      : Cli
+Description : Methods for the Cli-Frontend of the stepper
+License     : GPL-3
+-}
 module Cli (runCli, dispatch) where
 
 import Compiler (compileToCore, getCoreProgram, writeDump)

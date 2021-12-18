@@ -1,3 +1,11 @@
+{-|
+Module      : CoreInformationExtractorFunctions
+Description : Extracts informations and properties out of Core expressions
+License     : GPL-3
+
+This module contains helper functions to extract information inside Core expressions and to 
+check Core expressions for properties and conditions.
+-}
 module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary) where
 
 import Data.List

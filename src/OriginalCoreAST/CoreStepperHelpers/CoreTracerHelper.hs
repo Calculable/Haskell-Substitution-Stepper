@@ -1,3 +1,16 @@
+{-|
+Module      : CoreTracerHelper
+Description : Helper functions for debugging and tracing
+License     : GPL-3
+
+This module contains useful functions to investigate bugs 
+and trace expressions
+
+Note: Tracing statements should not be used in the final version. 
+Tracing statements have side-effects (printing) but do not have the 
+"IO" type signature and are thus not pure
+
+-}
 module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper where
 
 import GHC.Plugins

@@ -1,3 +1,13 @@
+{-|
+Module      : CoreStepperPrinter
+Description : Print step by step reductions for a Core expression
+License     : GPL-3
+
+This module uses the CoreStepper to generate a step by step reduction for
+a core expression. The intermediate-expressions as well as the substep expressions
+are then printed 
+-}
+
 module OriginalCoreAST.CoreStepperPrinter
   ( printCoreStepByStepReductionForBinding,
     printCoreStepByStepReductionForEveryBinding,

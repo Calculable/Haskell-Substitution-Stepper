@@ -1,3 +1,9 @@
+
+{-|
+Module      : Utils
+Description : Contains a bunch of useful functions used by the stepper
+License     : GPL-3
+-}
 module Utils where
 
 import Control.Monad.IO.Class (MonadIO)
