@@ -55,7 +55,7 @@ instance Ord (Expr b) where
   (>) (Lit x) (Lit y) = greaterLiteral x y
   (>) (Var x) (Var y) | isBoolVar (Var x) && isBoolVar (Var y) = boolValueFromVar x > boolValueFromVar y
   (>) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (>)
-  (>) _ _ = error "> not supported by this type"
+  (>) _ _ = error "> not supported by this type"    
 
 instance Enum (Expr b) where
   succ (Lit x) = Lit (succ x)
@@ -475,12 +475,12 @@ instance RealFloat Literal where
 
 operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
 operatorForCollection a b operator = operator (elementsToCompareForCollection a) (elementsToCompareForCollection b)
-
-elementsToCompareForCollection :: Expr b -> [Expr b]
-elementsToCompareForCollection expr   | isList expr = removeTypeInformation (getIndividualElementsOfList expr)
-                                      | isTuple expr = removeTypeInformation (getIndividualElementsOfTuple expr)
-                                      | isPrimitiveTypeConstructorApp expr = [getLiteralArgument expr]
-                                      | otherwise = error "operator not supported: unknown type: "
+  where
+    elementsToCompareForCollection :: Expr b -> [Expr b]
+    elementsToCompareForCollection expr   | isList expr = removeTypeInformation (getIndividualElementsOfList expr)
+                                          | isTuple expr = removeTypeInformation (getIndividualElementsOfTuple expr)
+                                          | isPrimitiveTypeConstructorApp expr = [getLiteralArgument expr]
+                                          | otherwise = error "operator not supported: unknown type: "
 
 
 weakEquals :: Literal -> Literal -> Bool
