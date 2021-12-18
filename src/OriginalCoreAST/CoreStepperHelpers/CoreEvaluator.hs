@@ -13,6 +13,10 @@ import OriginalCoreAST.CoreTypeDefinitions
 import Data.Char
 import Utils
 
+-- |Takes a function (var) and a list of arguments and evaluates the result.
+-- Note that this only works for those functions which are supported in the stepper backend.
+-- All arguments have to be strictly reduced.
+-- This function is used mostly to resolve functions that are unsteppable (for example the + operator)
 evaluateFunctionWithArguments :: FunctionReference -> [Argument] -> Reducer -> Maybe CoreExpr
 evaluateFunctionWithArguments functionOrOperatorName arguments reducer = 
     if isJust evaluationWithTypes

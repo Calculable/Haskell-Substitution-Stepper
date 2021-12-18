@@ -11,6 +11,7 @@ import OriginalCoreAST.CoreTypeDefinitions
 
 overrideFunctionPrefix = "override'"
 
+-- |tries to find the corresponding function-expression inside the list of bindings for a given function reference
 tryFindBinding :: FunctionReference -> [Binding] -> Maybe CoreExpr
 tryFindBinding name bindings = do
   if varRefersToUnsteppableFunction name
@@ -27,15 +28,23 @@ tryFindBinding name bindings = do
         equalityFilter binding = (==) (fst binding) key
         nameAndSignatureFilter binding = (&&) (varsHaveTheSameName (fst binding) key) (varsHaveTheSameType (fst binding) key)     
 
---should only be used for automatic testing
+-- |searches for the corresponding function-expression inside the list of bindings for a given function name
+-- should only be used for automatic testing as it leads to an error if no expression is find
 findBindingForString :: FunctionName -> [Binding] -> CoreExpr
 findBindingForString name bindings = do
   let foundBinding = tryFindBindingForString name bindings
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
+-- |tries to for the corresponding function-expression inside the list of bindings for a given function name
 tryFindBindingForString :: FunctionName -> [Binding] -> Maybe CoreExpr
 tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [(\binding -> varNameEqualsString (fst binding) key)] bindings
 
+-- |tries to find function-expression inside the list of bindings.
+-- the caller provides criteria functions to decide if a binding matches the expectation.
+-- a criteria function returns "True" if a binding matches the search-criteria, otherwise "False"
+-- If there are multiple bindings that match a criteria, only the first "match" is used
+-- If multiple criteria functions are provided, only the first one is used. In no matching 
+-- binding was found, the second criteria gets used and so on
 tryFindBindingForCriteriaCascade :: [Binding -> Bool] -> [Binding] -> Maybe CoreExpr
 tryFindBindingForCriteriaCascade [] bindings = Nothing
 tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
@@ -44,7 +53,10 @@ tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
     0 -> tryFindBindingForCriteriaCascade criterias bindings;
     _ -> Just (snd (head foundBindings));
   }
-      
+
+-- |takes a list of pattern alternatives and decides which alternative
+-- matches a given expression. Only the underlying expression
+-- of the matchin pattern is returned.
 findMatchingPattern :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
 findMatchingPattern expression patterns = do
   let foundPattern = findMatchingPatternIgnoreDefault expression patterns

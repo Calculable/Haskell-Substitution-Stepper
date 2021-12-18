@@ -5,13 +5,17 @@ import GHC.Core.TyCo.Rep
 import Utils
 import Debug.Trace
 
+-- |traces an expression together with a comment string
 traceExpression :: String -> CoreExpr -> CoreExpr
 traceExpression comment expr = trace ((comment ++ ": ") ++ showOutputable expr) expr
 
+-- |traces a maybe expression together with a comment string
 traceMaybeExpression :: String -> Maybe CoreExpr -> Maybe CoreExpr
 traceMaybeExpression comment (Just expr) = trace ((comment ++ ": ") ++ showOutputable expr) (Just expr)
 traceMaybeExpression comment Nothing = trace ((comment ++ ": ") ++ "Nothing") Nothing
 
+-- |provides information about a Var as a printable string. 
+-- This function is used for debugging.
 varDescription :: Var -> String
 varDescription x = do
   concat ["name: ", showOutputable (varName x), " type: ", showOutputable (varType x), " typeDescription: ", typeDescription (varType x), " isId: ", show (isId x), " isTyVar: ", show (isTyVar x), " isTcTyVar: ", show (isTcTyVar x)]
@@ -26,7 +30,9 @@ varDescription x = do
       typeDescription (CastTy _ _) = "CastTy"
       typeDescription (CoercionTy _) = "CohersionTy"  
 
-typeOfExpression :: Expr b -> String --used for tracing / debugging
+-- |provides information about a Type as a printable string. 
+-- This function is used for debugging.
+typeOfExpression :: Expr b -> String 
 typeOfExpression (Var _) = "Var"
 typeOfExpression (Lit _) = "Lit"
 typeOfExpression (App _ _) = "App"

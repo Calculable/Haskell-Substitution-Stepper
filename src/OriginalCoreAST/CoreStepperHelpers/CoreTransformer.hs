@@ -7,6 +7,7 @@ import OriginalCoreAST.CoreTypeDefinitions
 
 import Utils
 
+-- |Replace all occurances of a given var inside an expression with another expression
 deepReplaceVarWithinExpression :: Var -> CoreExpr -> CoreExpr -> CoreExpr
 deepReplaceVarWithinExpression name replaceExpression (Var varName) = 
   if (==) (varToString varName) (varToString name) 
@@ -30,12 +31,14 @@ deepReplaceVarWithinExpression name replaceExpression (Type ty) =
     else Type ty
 deepReplaceVarWithinExpression _ _ expression = expression --nothing to replace
 
+-- |Replace all occurances of a given var inside an alternative with an expression
 deepReplaceVarWithinAlternative :: Var -> CoreExpr -> Alt Var -> Alt Var
 deepReplaceVarWithinAlternative name replaceExpression (altCon, localBoundVars, expression) =
   if varToString name `elem` map varToString localBoundVars
     then (altCon, localBoundVars, expression) --do nothing, use local parameter with the same name (shadowing)
     else (altCon, localBoundVars, deepReplaceVarWithinExpression name replaceExpression expression)
 
+-- |Replace all occurances of a given var inside an binding with an expression
 deepReplaceVarWithinBinding :: Var -> CoreExpr -> Bind Var -> Bind Var
 deepReplaceVarWithinBinding name replaceExpression (NonRec b expression) = NonRec b newExpression
   where
@@ -48,11 +51,16 @@ deepReplaceVarWithinBindingTuple name replaceExpression (b, expression) =
     then (b, expression) --do nothing (shadowing)
     else (b, deepReplaceVarWithinExpression name replaceExpression expression)
 
+-- |Replace all occurances of specific vars inside an expression with other expressions.
+-- The caller has to provide two lists: The fist list contains all Var-occurances that
+-- should be replaced with an expression from the second list. The Var at index 0
+-- gets replaced with the expression at index 0 and so on
 deepReplaceMultipleVarWithinExpression :: [Var] -> [CoreExpr] -> CoreExpr -> CoreExpr
 deepReplaceMultipleVarWithinExpression [] _ expression = expression
 deepReplaceMultipleVarWithinExpression _ [] expression = expression
 deepReplaceMultipleVarWithinExpression (x : xs) (y : ys) expression = deepReplaceMultipleVarWithinExpression xs ys (deepReplaceVarWithinExpression x y expression)
 
+-- |Unwrapps the argument from a type wrapper if necessary
 prepareExpressionArgumentForEvaluation :: CoreExpr -> CoreExpr
 prepareExpressionArgumentForEvaluation (App (Var id) arg) = 
   if isTypeWrapperFunctionName (varToString id)
@@ -60,12 +68,23 @@ prepareExpressionArgumentForEvaluation (App (Var id) arg) =
     else App (Var id) arg
 prepareExpressionArgumentForEvaluation x = x
 
+-- |Extracts all the arguments from a nested application as a list
 extractArgumentsOfNestedApplication :: CoreExpr -> [Argument]
 extractArgumentsOfNestedApplication expr = snd (convertToMultiArgumentFunction expr)
 
+-- |Extracts the function and a list of arguments from a nested application.
+-- Haskell Core does not know the concept of multi-argument function and
+-- uses partial function application instead. For example
+-- an expression like "functionWithThreeArguments 1 2 3" is represented 
+-- in Core like: ((functionWithThreeArguments 1) 2) 3).
+-- With the same example, the result of this function would be the following tuple:
+-- (functionWithThreeArguments, [1, 2, 3])
 convertToMultiArgumentFunction :: CoreExpr -> (Function, [Argument])
 convertToMultiArgumentFunction = collectArgs
 
+-- |Takes a function expression and a list of arguments and converts it into a Core-Like 
+-- nested function application. Haskell Core does not know the concept of multi-argument function and
+-- uses partial function application instead. This function is the inverse-function of "convertToMultiArgumentFunction"
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication :: Function -> [Argument] -> Expr Var
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression [] = expression
 convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression arguments = App (convertFunctionApplicationWithArgumentListToNestedFunctionApplication expression (init arguments)) (last arguments)
