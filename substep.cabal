@@ -39,6 +39,7 @@ library
       OriginalCoreAST.CoreStepperHelpers.CoreTransformer
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
+      OriginalCoreAST.CoreTypeDefinitions
       SteppablePrelude
       TraverseAST
       Utils

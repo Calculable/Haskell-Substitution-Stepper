@@ -12,9 +12,7 @@ import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CorePrettyPrinter
 import OriginalCoreAST.CoreStepper
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
-
-type ReductionStepDescription = String --for example: "replace x with definition"
-type Binding = (Var, Expr Var)
+import OriginalCoreAST.CoreTypeDefinitions
 
 printCoreStepByStepReductionForEveryBinding :: [CoreBind] -> IO ()
 printCoreStepByStepReductionForEveryBinding bindings = do

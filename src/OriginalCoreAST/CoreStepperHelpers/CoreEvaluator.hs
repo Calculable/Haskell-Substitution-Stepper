@@ -2,24 +2,16 @@ module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArg
 import GHC.Plugins hiding (($$))
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import Data.Maybe
-import OriginalCoreAST.CoreMakerFunctions
-    ( boolToCoreExpression,
-      charToCoreExpression,
-      expressionTupleToCoreTuple,
-      integerToCoreExpression,
-      rationalToCoreExpression )
 import Data.Bifunctor
 import Control.Monad
 import OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
-import OriginalCoreAST.CoreTypeClassInstances ()
-
+import OriginalCoreAST.CoreTypeClassInstances
+import OriginalCoreAST.CoreMakerFunctions
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
+import OriginalCoreAST.CoreTypeDefinitions
 
 import Data.Char
 import Utils
-
-type Binding = (Var, Expr Var)
-type Reducer = (Expr Var -> Maybe (Expr Var))
 
 evaluateFunctionWithArguments :: Var -> [Expr Var] -> Reducer -> Maybe (Expr Var)
 evaluateFunctionWithArguments functionOrOperatorName arguments reducer = 

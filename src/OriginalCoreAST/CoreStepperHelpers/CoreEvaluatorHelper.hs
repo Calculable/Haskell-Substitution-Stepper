@@ -7,8 +7,7 @@ import Debug.Trace
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import Data.Maybe
 import OriginalCoreAST.CoreInformationExtractorFunctions (removeTypeInformation)
-
-type Reducer = (Expr Var -> Maybe (Expr Var)) 
+import OriginalCoreAST.CoreTypeDefinitions
 
 {-Functor and Maybe for List-}
 

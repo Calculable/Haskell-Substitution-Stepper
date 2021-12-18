@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString) where
+module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString, functionNameMatchesFunctionFromDictionary) where
 import GHC.Plugins
 import Data.List
 import OriginalCoreAST.CoreInformationExtractorFunctions
@@ -7,8 +7,7 @@ import Utils
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 
 import OriginalCoreAST.CoreTypeClassInstances
-
-type Binding = (Var, Expr Var) --for example x = 2 (x is "var" and 2 is "expr")
+import OriginalCoreAST.CoreTypeDefinitions
 
 overrideFunctionPrefix = "override'"
 
@@ -78,3 +77,8 @@ findMatchingDefaultPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
 findMatchingDefaultPattern expression [] = trace "no matching pattern found" Nothing
 findMatchingDefaultPattern _ ((DEFAULT, _, expression) : _) = Just expression
 findMatchingDefaultPattern expression (x : xs) = findMatchingDefaultPattern expression xs
+
+functionNameMatchesFunctionFromDictionary :: FunctionReference -> Expr Var -> Bool
+functionNameMatchesFunctionFromDictionary searchFunctionName (Var dictionaryFunctionName) = varToString searchFunctionName `isSuffixOf` varToString dictionaryFunctionName
+functionNameMatchesFunctionFromDictionary searchFunctionName (App expr args) = functionNameMatchesFunctionFromDictionary searchFunctionName (getFunctionOfNestedApplication (App expr args))
+functionNameMatchesFunctionFromDictionary _ _ = False

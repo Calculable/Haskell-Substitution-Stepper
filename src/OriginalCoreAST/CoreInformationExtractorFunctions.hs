@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary) where
 
 import Data.List
 import GHC.Plugins
@@ -15,7 +15,7 @@ varToString var =
     then varToSimpleString var
     else showOutputable var
     
-isVarExpression :: Expr Var -> Bool
+isVarExpression :: Expr b -> Bool
 isVarExpression (Var name) = True
 isVarExpression _ = False
 
@@ -148,6 +148,11 @@ isTypeInformation x = isClassDictionary x
 
 isTypeWrapperFunctionName :: String -> Bool
 isTypeWrapperFunctionName name = "#" `isSuffixOf` name
+
+isApplicationWithClassDictionary :: Expr b -> Bool
+isApplicationWithClassDictionary expr = do
+  let (function, arguments) = collectArgs expr
+  length arguments >= 2 && ((isVarExpression function && isTypeInformation (head arguments)) && isClassDictionary (arguments !! 1))
 
 {-Extracting from expressions-}
 
