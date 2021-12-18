@@ -6,6 +6,9 @@ import OriginalCoreAST.CoreStepperHelpers.CoreLookup
 import OriginalCoreAST.CoreStepperPrinter
 import OriginalCoreAST.CoreTypeDefinitions
 
+-- |Provides a function that returns a CoreExpression for a given (function) name
+-- this function is used inside test cases to easily optain individual
+-- Core expressions defined in the File "IntegrationTestBindings"
 getBindingFinderWithCoreBindings :: IO (String -> CoreExpr, [Binding])
 getBindingFinderWithCoreBindings = do
   finder <- bindingFinder
@@ -21,6 +24,9 @@ getBindingFinderWithCoreBindings = do
       bindings <- coreBindings
       return (`findBindingForString` bindings)    
 
+-- |the list of bindings inside the file "IntegrationTestBindings".
+-- the list also contains bindings defined in the "Steppable Prelude"
+-- (represented as Core Bindings)
 coreBindings = do
   program <- coreProgram
   prelude <- corePrelude

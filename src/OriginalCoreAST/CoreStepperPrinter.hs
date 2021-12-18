@@ -14,11 +14,13 @@ import OriginalCoreAST.CoreStepper
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import OriginalCoreAST.CoreTypeDefinitions
 
+-- |takes a list of core bindings and shows a step-by-step reduction for each binding
 printCoreStepByStepReductionForEveryBinding :: [CoreBind] -> IO ()
 printCoreStepByStepReductionForEveryBinding bindings = do
   let allBindings = convertToBindingsList bindings
   mapM_ (printCoreStepByStepReductionForBinding allBindings) allBindings
 
+-- |takes a single core binding and shows a step-by-step reduction of the expression
 printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO CoreExpr
 printCoreStepByStepReductionForBinding bindings (var, exp) = do
   putStr "\n**Reduction of "
@@ -28,6 +30,7 @@ printCoreStepByStepReductionForBinding bindings (var, exp) = do
   prettyPrint exp
   printCoreStepByStepReductionForSingleExpression bindings exp
 
+-- |takes a core expression and shows a step-by-step reduction
 printCoreStepByStepReductionForSingleExpression :: [Binding] -> CoreExpr -> IO CoreExpr
 printCoreStepByStepReductionForSingleExpression bindings expression
   | canBeReduced expression = do
@@ -61,6 +64,7 @@ printCoreStepByStepReductionForSingleExpression bindings expression
         putStrLn "\n{-reduction complete (Normal Form)-}"
         return expression
 
+-- |converts a list of (nested/recursive) CoreBinds into one single flat list of bindings
 convertToBindingsList :: [CoreBind] -> [Binding]
 convertToBindingsList = concatMap convertCoreBindingToBindingList
   where

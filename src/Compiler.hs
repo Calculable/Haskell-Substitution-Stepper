@@ -51,9 +51,11 @@ data CompilationResult = CompilationResult
     debugInfo :: Map Text Text
   }
 
+-- |extracts the Core program from the compilation result
 getCoreProgram :: CompilationResult -> CoreProgram
 getCoreProgram = coreProgram
 
+-- |takes a file and compiles it to Core
 compileToCore :: FilePath -> IO CompilationResult
 compileToCore filePath = runGhc (Just libdir) $ do
   dFlags <- getSessionDynFlags
@@ -99,6 +101,7 @@ compileToCore filePath = runGhc (Just libdir) $ do
 debugDirectoryPath :: String
 debugDirectoryPath = "dump"
 
+-- |writes a cuompilation result into a file
 writeDump :: CompilationResult -> IO ()
 writeDump cr = do
   debugDirExists <- doesDirectoryExist debugDirectoryPath

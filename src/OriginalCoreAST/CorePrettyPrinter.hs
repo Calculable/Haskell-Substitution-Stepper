@@ -4,6 +4,7 @@ import GHC.Plugins
 import Utils
 import Data.List
 
+-- |pretty-prints a Core Expression using GHC's built-in pretty printer
 prettyPrint :: OutputableBndr b => Expr b -> IO ()
 prettyPrint exp = putStr (prettyPrintToString exp)
   where

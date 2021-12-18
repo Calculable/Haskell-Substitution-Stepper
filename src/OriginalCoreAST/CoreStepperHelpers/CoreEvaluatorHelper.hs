@@ -5,7 +5,7 @@ import OriginalCoreAST.CoreMakerFunctions
 import Debug.Trace
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import Data.Maybe
-import OriginalCoreAST.CoreInformationExtractorFunctions (removeTypeInformation)
+import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CoreTypeDefinitions
 
 {-Functor and Maybe for List-}
