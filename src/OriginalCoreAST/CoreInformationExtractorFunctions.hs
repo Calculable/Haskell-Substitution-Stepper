@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isNonEmptyTuple, isEmptyTuple, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary) where
 
 import Data.List
 import GHC.Plugins
@@ -19,10 +19,6 @@ varToString var =
 isVarExpression :: Expr b -> Bool
 isVarExpression (Var name) = True
 isVarExpression _ = False
-
-isSupportedVar :: Expr b -> Bool
-isSupportedVar (Var var) = isTypeWrapperFunctionName (varToString var)
-isSupportedVar _ = False
 
 isBoolVar :: Expr b -> Bool
 isBoolVar (Var x) = isBoolVarTrue x || isBoolVarFalse x
@@ -60,14 +56,11 @@ canBeReducedToNormalForm (App expr argument) = do
   (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
 canBeReducedToNormalForm _ = False
 
-isInHeadNormalForm :: CoreExpr -> Bool
-isInHeadNormalForm = exprIsHNF
-
 -- | The "canBeReducedFunction" checks if a Core expression is not yet in head normal form and can further be reduced
 canBeReduced :: CoreExpr -> Bool
 canBeReduced exp
   | isBoolVar exp = False
-  | isSupportedVar exp = True
+  | isTypeWrapperVar exp = True
   | isTypeInformation exp = False --toDo: ignore when it is inside app...
   | otherwise = case exp of --check nested application
     (App (Lam _ _) x) -> True
@@ -75,9 +68,15 @@ canBeReduced exp
     (Case {}) -> True
     (Cast _ _) -> True
     (Let _ _) -> True
-    (App x y) -> canBeReduced (getFunctionOfNestedApplication (App x y)) || not (exprIsHNF exp)
-    _ -> not (exprIsHNF exp)
+    (App x y) -> canBeReduced (getFunctionOfNestedApplication (App x y)) || not (isInHeadNormalForm exp)
+    _ -> not (isInHeadNormalForm exp)
+    where
+      isInHeadNormalForm :: CoreExpr -> Bool
+      isInHeadNormalForm = exprIsHNF
 
+      isTypeWrapperVar :: Expr b -> Bool
+      isTypeWrapperVar (Var var) = isTypeWrapperFunctionName (varToString var)
+      isTypeWrapperVar _ = False
 {-Predicates on Expressions-}
 
 isClassDictionary :: Expr b -> Bool

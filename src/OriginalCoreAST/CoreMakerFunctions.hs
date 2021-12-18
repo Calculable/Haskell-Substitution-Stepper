@@ -44,11 +44,11 @@ boolToCoreExpression False = makeSimpleConstructorWithContructorNameAndTypeName 
 makeSimpleConstructorWithContructorNameAndTypeName :: String -> String -> CoreExpr --this is a hack, we just took the easiest constructors we found to create a "Var"-Instance without understanding what those constructors stand for
 makeSimpleConstructorWithContructorNameAndTypeName constructorName typeName = Var (mkGlobalVar VanillaId (mkSystemName minLocalUnique (mkVarOcc constructorName)) (LitTy (StrTyLit (mkFastString typeName))) vanillaIdInfo)
 
-expressionListToCoreTuple :: [CoreExpr] -> CoreExpr
-expressionListToCoreTuple = mkCoreTup
-
 expressionTupleToCoreTuple :: (CoreExpr, CoreExpr) -> CoreExpr
 expressionTupleToCoreTuple (first, second) = expressionListToCoreTuple [first, second]
+  where
+    expressionListToCoreTuple :: [CoreExpr] -> CoreExpr
+    expressionListToCoreTuple = mkCoreTup    
 
 expressionListToCoreListWithType :: Type -> [CoreExpr] -> CoreExpr
 expressionListToCoreListWithType = mkListExpr

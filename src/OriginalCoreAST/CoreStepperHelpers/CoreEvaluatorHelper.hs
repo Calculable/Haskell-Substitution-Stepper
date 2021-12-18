@@ -33,16 +33,19 @@ monadOperator2ForList newType (App constructor argument) function reducer
   | isList (App constructor argument) = do
     fmappedList <- repalceAllListItemsWithFunction newType function (App constructor argument)
     concatForList newType fmappedList reducer
+    where
+      repalceAllListItemsWithFunction :: Type -> Function -> CoreExpr -> Maybe CoreExpr
+      repalceAllListItemsWithFunction newType function functorArgument
+        | isList functorArgument = do
+          let listItems = getIndividualElementsOfList functorArgument
+          let listItemsWithoutTypes = removeTypeInformation listItems
+          let mappedListItems = replicate (length listItemsWithoutTypes) function
+          Just (expressionListToCoreListWithType newType mappedListItems)
+        | otherwise = Nothing
+
 monadOperator2ForList _ _ _ _ = trace ">> not supported for this type" Nothing
 
-repalceAllListItemsWithFunction :: Type -> Function -> CoreExpr -> Maybe CoreExpr
-repalceAllListItemsWithFunction newType function functorArgument
-  | isList functorArgument = do
-    let listItems = getIndividualElementsOfList functorArgument
-    let listItemsWithoutTypes = removeTypeInformation listItems
-    let mappedListItems = replicate (length listItemsWithoutTypes) function
-    Just (expressionListToCoreListWithType newType mappedListItems)
-  | otherwise = Nothing
+
 
 
 returnForList :: Type -> Type -> CoreExpr -> CoreExpr

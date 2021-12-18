@@ -1,29 +1,30 @@
-module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper (traceExpression, traceMaybeExpression, varDescription, typeDescription, typeOfExpression) where
+module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper where
 
 import GHC.Plugins
 import GHC.Core.TyCo.Rep
 import Utils
 import Debug.Trace
 
-traceExpression :: String -> CoreExpr -> CoreExpr --for debugging
-traceExpression comment expr = trace ((comment ++ ": ") ++ (showOutputable expr)) expr
+traceExpression :: String -> CoreExpr -> CoreExpr
+traceExpression comment expr = trace ((comment ++ ": ") ++ showOutputable expr) expr
 
-traceMaybeExpression :: String -> Maybe CoreExpr -> Maybe CoreExpr --for debugging
-traceMaybeExpression comment (Just expr) = trace ((comment ++ ": ") ++ (showOutputable expr)) (Just expr)
+traceMaybeExpression :: String -> Maybe CoreExpr -> Maybe CoreExpr
+traceMaybeExpression comment (Just expr) = trace ((comment ++ ": ") ++ showOutputable expr) (Just expr)
 traceMaybeExpression comment Nothing = trace ((comment ++ ": ") ++ "Nothing") Nothing
 
 varDescription :: Var -> String
-varDescription x = concat ["name: ", showOutputable (varName x), " type: ", showOutputable (varType x), " typeDescription: ", typeDescription (varType x), " isId: ", show (isId x), " isTyVar: ", show (isTyVar x), " isTcTyVar: ", show (isTcTyVar x)]
-
-typeDescription :: Type -> String
-typeDescription (TyVarTy _) = "TyVarTy"
-typeDescription (AppTy _ _) = "AppTy"
-typeDescription (TyConApp _ _) = "TyConApp"
-typeDescription (ForAllTy _ wrappedType) = "ForAllTy with wrapped type: " ++ typeDescription wrappedType
-typeDescription (FunTy _ _ _ _) = "FunTy"
-typeDescription (LitTy _) = "LitTy"
-typeDescription (CastTy _ _) = "CastTy"
-typeDescription (CoercionTy _) = "CohersionTy"  
+varDescription x = do
+  concat ["name: ", showOutputable (varName x), " type: ", showOutputable (varType x), " typeDescription: ", typeDescription (varType x), " isId: ", show (isId x), " isTyVar: ", show (isTyVar x), " isTcTyVar: ", show (isTcTyVar x)]
+    where
+      typeDescription :: Type -> String
+      typeDescription (TyVarTy _) = "TyVarTy"
+      typeDescription (AppTy _ _) = "AppTy"
+      typeDescription (TyConApp _ _) = "TyConApp"
+      typeDescription (ForAllTy _ wrappedType) = "ForAllTy with wrapped type: " ++ typeDescription wrappedType
+      typeDescription (FunTy {}) = "FunTy"
+      typeDescription (LitTy _) = "LitTy"
+      typeDescription (CastTy _ _) = "CastTy"
+      typeDescription (CoercionTy _) = "CohersionTy"  
 
 typeOfExpression :: Expr b -> String --used for tracing / debugging
 typeOfExpression (Var _) = "Var"

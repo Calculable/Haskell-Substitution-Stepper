@@ -1,4 +1,4 @@
-module OriginalCoreAST.CorePrettyPrinter (prettyPrint, prettyPrintToString) where
+module OriginalCoreAST.CorePrettyPrinter (prettyPrint) where
 
 import GHC.Plugins
 import Utils
@@ -6,9 +6,9 @@ import Data.List
 
 prettyPrint :: OutputableBndr b => Expr b -> IO ()
 prettyPrint exp = putStr (prettyPrintToString exp)
-
-prettyPrintToString :: OutputableBndr b => Expr b -> String
-prettyPrintToString = showOutputable
+  where
+    prettyPrintToString :: OutputableBndr b => Expr b -> String
+    prettyPrintToString = showOutputable
 
 printFlatCoreBinding :: (OutputableBndr a) => Bind a -> IO ()
 printFlatCoreBinding (NonRec b exp) = printFlatBindingWithExpression (b, exp)
@@ -19,7 +19,7 @@ printFlatBindingWithExpression (b, exp) = do
   putStr (showOutputable b)
   putStr " = "
   printFlatCoreExpression exp
-  putStrLn ""
+  putStrLn ""      
 
 printFlatCoreExpression :: (OutputableBndr b) => Expr b -> IO ()
 printFlatCoreExpression (Var id) = do
@@ -61,13 +61,13 @@ printFlatCoreExpression (Case exp b t alts) = do
   putStr " of {"
   mapM_ printFlatAlt alts
   putStr "};"
+  where
+    printFlatAlt :: (OutputableBndr b) => Alt b -> IO ()
+    printFlatAlt (altCon, b, exp) = do
+      putStr "\n\t"
+      putStr (showOutputable altCon) --either literal or constructor or _
+      putStr (unwords (map showOutputable b))
+      putStr " -> "
+      printFlatCoreExpression exp
 printFlatCoreExpression x = do
   putStr "Unsupported Constructor"
-
-printFlatAlt :: (OutputableBndr b) => Alt b -> IO ()
-printFlatAlt (altCon, b, exp) = do
-  putStr "\n\t"
-  putStr (showOutputable altCon) --either literal or constructor or _
-  putStr (unwords (map showOutputable b))
-  putStr " -> "
-  printFlatCoreExpression exp

@@ -1,4 +1,4 @@
-module OriginalCoreAST.CoreStepper (applyStep, reduceToHeadNormalForm, reduceToNormalForm, canBeReducedToNormalForm, safeReduceToNormalForm) where
+module OriginalCoreAST.CoreStepper (applyStep, reduceToNormalForm, canBeReducedToNormalForm, safeReduceToNormalForm) where
 
 import Data.Maybe
 import GHC.Plugins
