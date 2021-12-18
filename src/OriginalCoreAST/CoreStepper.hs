@@ -11,7 +11,7 @@ import Data.List
 import OriginalCoreAST.CoreTypeDefinitions
 
 
-applyStep :: [Binding] -> Expr Var -> Maybe StepResult
+applyStep :: [Binding] -> CoreExpr -> Maybe StepResult
 applyStep bindings (Var name) = do
   foundBinding <- tryFindBinding name bindings
   return ("Replace '" ++ varToString name ++ "' with definition", foundBinding, bindings {-replace binding reference with actual expression (Delta Reduction)-})
@@ -37,7 +37,7 @@ applyStep bindings (Coercion _) = do
   trace "no applicable step found: coercion is not supported" Nothing
 applyStep _ _ = trace "no applicable step found" Nothing
 
-applyStepToNestedApplication :: [Binding] -> Expr Var -> Maybe StepResult
+applyStepToNestedApplication :: [Binding] -> CoreExpr -> Maybe StepResult
 applyStepToNestedApplication bindings expr = do
   let appliedStepWithClassDictionary = tryApplyStepToApplicationUsingClassDictionary bindings expr
   let appliedStepWithoutClassDictionary = tryApplyStepToApplication bindings expr
@@ -45,7 +45,7 @@ applyStepToNestedApplication bindings expr = do
     then appliedStepWithClassDictionary
     else appliedStepWithoutClassDictionary
     
-tryApplyStepToApplication :: [Binding] -> Expr Var -> Maybe StepResult
+tryApplyStepToApplication :: [Binding] -> CoreExpr -> Maybe StepResult
 tryApplyStepToApplication bindings expr = do
       let (function, arguments) = convertToMultiArgumentFunction expr
       tryApplyStepToFunctionWithArguments bindings function arguments
@@ -84,7 +84,7 @@ applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =
     else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
 applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no reducable argument found" --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
 
-tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> Expr Var -> Maybe StepResult
+tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> CoreExpr -> Maybe StepResult
 tryApplyStepToApplicationUsingClassDictionary bindings expr = do
   if isApplicationWithClassDictionary expr
     then do
@@ -98,17 +98,17 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
       return ("replace '" ++ varToString functionName ++ "' with definition from the class dictionary", resultExpression, bindings)
     else Nothing
 
-reduceToNormalForm :: [Binding] -> Expr Var -> Expr Var
+reduceToNormalForm :: [Binding] -> CoreExpr -> CoreExpr
 reduceToNormalForm bindings expression = do
   fromJust (reduceToNormalFormWithMaximumAmountOfReductions (negate 1) bindings expression)
 
 maximumAmoutOfReductionsBeforeError :: Integer
 maximumAmoutOfReductionsBeforeError = 99
 
-safeReduceToNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var)
+safeReduceToNormalForm :: [Binding] -> CoreExpr -> Maybe CoreExpr
 safeReduceToNormalForm = reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductionsBeforeError
 
-reduceToNormalFormWithMaximumAmountOfReductions :: Integer -> [Binding] -> Expr Var -> Maybe (Expr Var)
+reduceToNormalFormWithMaximumAmountOfReductions :: Integer -> [Binding] -> CoreExpr -> Maybe CoreExpr
 reduceToNormalFormWithMaximumAmountOfReductions 0 _ _ = trace "infinite loop" Nothing
 reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductions bindings expression = do
   expressionInHeadNormalForm <- reduceToHeadNormalForm bindings expression
@@ -121,7 +121,7 @@ reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductions binding
         else Just $ convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map fromJust maybeReducedArguments)
     else Just expressionInHeadNormalForm
 
-reduceToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var)
+reduceToHeadNormalForm :: [Binding] -> CoreExpr -> Maybe CoreExpr
 reduceToHeadNormalForm bindings expression
   | canBeReduced expression = do
     let reduction = applyStep bindings expression
@@ -130,19 +130,19 @@ reduceToHeadNormalForm bindings expression
       Nothing -> trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression) Nothing
   | otherwise = Just expression
 
-reduceNestedApplicationToHeadNormalForm :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplicationToHeadNormalForm :: [Binding] -> CoreExpr -> Maybe CoreExpr --can be removed as soon as canBeReduced detects nested applications where the function is a known var
 reduceNestedApplicationToHeadNormalForm bindings expr = do
   let result = reduceNestedApplication bindings expr
   maybe (Just expr) (reduceNestedApplicationToHeadNormalForm bindings) result
 
-reduceNestedApplication :: [Binding] -> Expr Var -> Maybe (Expr Var) --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+reduceNestedApplication :: [Binding] -> CoreExpr -> Maybe CoreExpr --can be removed as soon as canBeReduced detects nested applications where the function is a known var
 reduceNestedApplication bindings (App expr arg) = do
   let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
   reducedFunction <- tryFindBinding functionName bindings
   reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
 reduceNestedApplication _ _ = Nothing
 
-findFunctionInClassDictionary :: Expr Var -> Expr Var -> [Binding] -> Maybe (Expr Var)
+findFunctionInClassDictionary :: CoreExpr -> CoreExpr -> [Binding] -> Maybe CoreExpr
 findFunctionInClassDictionary (Var function) (Var classDictionary) bindings = do
   classDictionaryDefinition <- tryFindBinding classDictionary bindings
   findFunctionInClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
@@ -151,14 +151,14 @@ findFunctionInClassDictionary (Var function) (App expr args) bindings = do
   findFunctionInClassDictionaryDefinition bindings (Var function) result
 findFunctionInClassDictionary _ _ _ = Nothing
 
-findFunctionInClassDictionaryDefinition :: [Binding] -> Expr Var -> Expr Var -> Maybe (Expr Var)
+findFunctionInClassDictionaryDefinition :: [Binding] -> CoreExpr -> CoreExpr -> Maybe CoreExpr
 findFunctionInClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
   let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
   findDictionaryFunctionForFunctionName bindings var dictionaryArguments
 findFunctionInClassDictionaryDefinition bindings (Var var) (Lam expr arg) = Just (Lam expr arg)
 findFunctionInClassDictionaryDefinition _ _ _ = Nothing
 
-findDictionaryFunctionForFunctionName :: [Binding] -> FunctionReference -> [Expr Var] -> Maybe (Expr Var)
+findDictionaryFunctionForFunctionName :: [Binding] -> FunctionReference -> [CoreExpr] -> Maybe CoreExpr
 findDictionaryFunctionForFunctionName bindings name functionVariables = do
   foundFunction <- find (functionNameMatchesFunctionFromDictionary name) functionVariables
   case foundFunction of

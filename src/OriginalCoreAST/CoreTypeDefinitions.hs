@@ -8,3 +8,4 @@ type ReductionStepDescription = String --for example: "replace x with definition
 type Argument = Expr Var
 type Function = Expr Var
 type FunctionReference = Var
+type FunctionName = String

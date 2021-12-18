@@ -19,7 +19,7 @@ printCoreStepByStepReductionForEveryBinding bindings = do
   let allBindings = convertToBindingsList bindings
   mapM_ (printCoreStepByStepReductionForBinding allBindings) allBindings
 
-printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO (Expr Var)
+printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO CoreExpr
 printCoreStepByStepReductionForBinding bindings (var, exp) = do
   putStr "\n**Reduction of "
   putStr (varToString var)
@@ -28,7 +28,7 @@ printCoreStepByStepReductionForBinding bindings (var, exp) = do
   prettyPrint exp
   printCoreStepByStepReductionForSingleExpression bindings exp
 
-printCoreStepByStepReductionForSingleExpression :: [Binding] -> Expr Var -> IO (Expr Var)
+printCoreStepByStepReductionForSingleExpression :: [Binding] -> CoreExpr -> IO CoreExpr
 printCoreStepByStepReductionForSingleExpression bindings expression
   | canBeReduced expression = do
     let reduction = applyStep bindings expression

@@ -13,7 +13,7 @@ import OriginalCoreAST.CoreTypeDefinitions
 import Data.Char
 import Utils
 
-evaluateFunctionWithArguments :: Var -> [Expr Var] -> Reducer -> Maybe (Expr Var)
+evaluateFunctionWithArguments :: FunctionReference -> [Argument] -> Reducer -> Maybe CoreExpr
 evaluateFunctionWithArguments functionOrOperatorName arguments reducer = 
     if isJust evaluationWithTypes
       then evaluationWithTypes
@@ -23,7 +23,7 @@ evaluateFunctionWithArguments functionOrOperatorName arguments reducer =
       evaluationWithoutTypes = evaluateUnsteppableFunctionWithArguments (varToString functionOrOperatorName) (removeTypeInformation argumentsWithoutApplications) reducer
       argumentsWithoutApplications = map prepareExpressionArgumentForEvaluation arguments
 
-evaluateUnsteppableFunctionWithArguments :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
+evaluateUnsteppableFunctionWithArguments :: FunctionName -> [Argument] -> Reducer -> Maybe CoreExpr
 evaluateUnsteppableFunctionWithArguments "+" [x, y] _ = Just ((+) x y)
 evaluateUnsteppableFunctionWithArguments "-" [x, y] _ = Just ((-) x y)
 evaluateUnsteppableFunctionWithArguments "*" [x, y] _ = Just ((*) x y)
@@ -99,7 +99,7 @@ evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Li
 evaluateUnsteppableFunctionWithArguments functionName [x] reducer | isTypeWrapperFunctionName functionName = Just x
 evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
-evaluateUnsteppableFunctionWithArgumentsAndTypes :: String -> [Expr Var] -> Reducer -> Maybe (Expr Var)
+evaluateUnsteppableFunctionWithArgumentsAndTypes :: FunctionName -> [Argument] -> Reducer -> Maybe CoreExpr
 evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [Type monadType, _, Type ty, value] _ = Just (returnForList monadType ty value)
 evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type ty, _] _ = Just (failForList monadType ty)
 evaluateUnsteppableFunctionWithArgumentsAndTypes ">>=" [_, _, _, Type newType, argument, function] reducer = monadOperatorForList newType argument function reducer

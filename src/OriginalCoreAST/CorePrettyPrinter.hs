@@ -4,7 +4,7 @@ import GHC.Plugins
 import Utils
 import Data.List
 
-prettyPrint :: Expr Var -> IO ()
+prettyPrint :: OutputableBndr b => Expr b -> IO ()
 prettyPrint exp = putStr (prettyPrintToString exp)
 
 prettyPrintToString :: OutputableBndr b => Expr b -> String

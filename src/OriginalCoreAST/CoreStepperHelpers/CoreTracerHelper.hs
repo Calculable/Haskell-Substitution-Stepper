@@ -5,10 +5,10 @@ import GHC.Core.TyCo.Rep
 import Utils
 import Debug.Trace
 
-traceExpression :: String -> Expr Var -> Expr Var --for debugging
+traceExpression :: String -> CoreExpr -> CoreExpr --for debugging
 traceExpression comment expr = trace ((comment ++ ": ") ++ (showOutputable expr)) expr
 
-traceMaybeExpression :: String -> Maybe (Expr Var) -> Maybe (Expr Var) --for debugging
+traceMaybeExpression :: String -> Maybe CoreExpr -> Maybe CoreExpr --for debugging
 traceMaybeExpression comment (Just expr) = trace ((comment ++ ": ") ++ (showOutputable expr)) (Just expr)
 traceMaybeExpression comment Nothing = trace ((comment ++ ": ") ++ "Nothing") Nothing
 
@@ -25,7 +25,7 @@ typeDescription (LitTy _) = "LitTy"
 typeDescription (CastTy _ _) = "CastTy"
 typeDescription (CoercionTy _) = "CohersionTy"  
 
-typeOfExpression :: Expr a -> String --used for tracing / debugging
+typeOfExpression :: Expr b -> String --used for tracing / debugging
 typeOfExpression (Var _) = "Var"
 typeOfExpression (Lit _) = "Lit"
 typeOfExpression (App _ _) = "App"

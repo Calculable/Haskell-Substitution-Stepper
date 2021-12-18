@@ -20,11 +20,11 @@ isVarExpression :: Expr b -> Bool
 isVarExpression (Var name) = True
 isVarExpression _ = False
 
-isSupportedVar :: Expr Var -> Bool
+isSupportedVar :: Expr b -> Bool
 isSupportedVar (Var var) = isTypeWrapperFunctionName (varToString var)
 isSupportedVar _ = False
 
-isBoolVar :: Expr Var -> Bool
+isBoolVar :: Expr b -> Bool
 isBoolVar (Var x) = isBoolVarTrue x || isBoolVarFalse x
 isBoolVar _ = False
 
@@ -54,17 +54,17 @@ varNameEqualsString var name = (==) (varToString var) name
 {-Reduction functions-}
 
 -- | The "canBeReducedFunction" checks if a Core expression is not yet in normal form and can further be reduced
-canBeReducedToNormalForm :: Expr Var -> Bool
+canBeReducedToNormalForm :: CoreExpr -> Bool
 canBeReducedToNormalForm (App expr argument) = do
   let (function, arguments) = collectArgs (App expr argument)
   (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
 canBeReducedToNormalForm _ = False
 
-isInHeadNormalForm :: Expr Var -> Bool
+isInHeadNormalForm :: CoreExpr -> Bool
 isInHeadNormalForm = exprIsHNF
 
 -- | The "canBeReducedFunction" checks if a Core expression is not yet in head normal form and can further be reduced
-canBeReduced :: Expr Var -> Bool
+canBeReduced :: CoreExpr -> Bool
 canBeReduced exp
   | isBoolVar exp = False
   | isSupportedVar exp = True
@@ -86,14 +86,14 @@ isClassDictionary (Var name) = "$" `isPrefixOf` varName && not (varName == "$" |
 isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
 isClassDictionary x = False
 
-isPrimitiveTypeConstructorApp :: Expr a -> Bool
+isPrimitiveTypeConstructorApp :: Expr b -> Bool
 isPrimitiveTypeConstructorApp (App (Var var) (Lit literal)) = isPrimitiveTypeConstructorName (varName var)
 isPrimitiveTypeConstructorApp _ = False
 
 isPrimitiveTypeConstructorName :: Name -> Bool
 isPrimitiveTypeConstructorName name = "#" `isSuffixOf` (nameToString name)
 
-isConstructorApplicationOfType :: Expr a -> String -> Bool
+isConstructorApplicationOfType :: Expr b -> String -> Bool
 isConstructorApplicationOfType (App expr arg) name = do
   let (function, arguments) = collectArgs (App expr arg)
   case function of
@@ -106,16 +106,16 @@ isBoolVarTrue x = (==) (varToSimpleString x) "True"
 isBoolVarFalse :: Var -> Bool
 isBoolVarFalse x = (==) (varToSimpleString x) "False"
 
-isNonEmptyList :: Expr a -> Bool --can this be checked more elegantly?
+isNonEmptyList :: Expr b -> Bool --can this be checked more elegantly?
 isNonEmptyList expr = isConstructorApplicationOfType expr ":"
 
-isEmptyList :: Expr a -> Bool
+isEmptyList :: Expr b -> Bool
 isEmptyList expr = isConstructorApplicationOfType expr "[]"
 
-isList :: Expr a -> Bool
+isList :: Expr b -> Bool
 isList expr = (||) (isNonEmptyList expr) (isEmptyList expr)
 
-isNonEmptyTuple :: Expr a -> Bool --can this be checked more elegantly?
+isNonEmptyTuple :: Expr b -> Bool --can this be checked more elegantly?
 isNonEmptyTuple (App expr arg) = do
   let (function, arguments) = collectArgs (App expr arg)
   case function of
@@ -123,11 +123,11 @@ isNonEmptyTuple (App expr arg) = do
       where constructorName = varToString var
 isNonEmptyTuple _ = False
 
-isEmptyTuple :: Expr a -> Bool  --can this be checked more elegantly?
+isEmptyTuple :: Expr b -> Bool  --can this be checked more elegantly?
 isEmptyTuple (Var var) = varToString var == "()"
 isEmptyTuple _ = False
 
-isTuple :: Expr a -> Bool
+isTuple :: Expr b -> Bool
 isTuple expr = (||) (isNonEmptyTuple expr) (isEmptyTuple expr)
 
 isListType :: Type -> Bool --is there a more elegant solution?
@@ -186,11 +186,11 @@ getIndividualElementsOfTuple expr
 getFunctionOfNestedApplication :: Expr b -> Expr b
 getFunctionOfNestedApplication expr = fst (collectArgs expr)
 
-getLiteralArgument  :: Expr a -> Expr a
+getLiteralArgument  :: Expr b -> Expr b
 getLiteralArgument (App (Var var) (Lit literal)) = (Lit literal)
 getLiteralArgument _ = error "function expects (App Var Lit)"
 
-extractArgumentsOfNestedApplication :: Expr Var -> [Expr Var]
+extractArgumentsOfNestedApplication :: Expr b -> [Expr b]
 extractArgumentsOfNestedApplication expr = snd (collectArgs expr)
 
 removeTypeInformation :: [Expr b] -> [Expr b]

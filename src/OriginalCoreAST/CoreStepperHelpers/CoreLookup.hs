@@ -11,7 +11,7 @@ import OriginalCoreAST.CoreTypeDefinitions
 
 overrideFunctionPrefix = "override'"
 
-tryFindBinding :: Var -> [Binding] -> Maybe (Expr Var)
+tryFindBinding :: FunctionReference -> [Binding] -> Maybe CoreExpr
 tryFindBinding name bindings = do
   if varRefersToUnsteppableFunction name
     then Nothing --use implementation from stepper backend
@@ -22,21 +22,21 @@ tryFindBinding name bindings = do
         else overrideBindings
 
 --should only be used for automatic testing
-findBindingForString :: String -> [Binding] -> Expr Var
+findBindingForString :: FunctionName -> [Binding] -> CoreExpr
 findBindingForString name bindings = do
   let foundBinding = tryFindBindingForString name bindings
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
-tryFindBindingForVar :: Var -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForVar :: FunctionReference -> [Binding] -> Maybe CoreExpr
 tryFindBindingForVar key bindings = tryFindBindingForCriteriaCascade [equalityFilter, nameAndSignatureFilter] bindings
   where
     equalityFilter binding = (==) (fst binding) key
     nameAndSignatureFilter binding = (&&) (varsHaveTheSameName (fst binding) key) (varsHaveTheSameType (fst binding) key) 
       
-tryFindBindingForString :: String -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForString :: FunctionName -> [Binding] -> Maybe CoreExpr
 tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [(\binding -> varNameEqualsString (fst binding) key)] bindings
 
-tryFindBindingForCriteriaCascade :: [Binding -> Bool] -> [Binding] -> Maybe (Expr Var)
+tryFindBindingForCriteriaCascade :: [Binding -> Bool] -> [Binding] -> Maybe CoreExpr
 tryFindBindingForCriteriaCascade [] bindings = Nothing
 tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
   let foundBindings = filter criteria bindings
@@ -45,14 +45,14 @@ tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
     _ -> Just (snd (head foundBindings));
   }
 
-findMatchingPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
+findMatchingPattern :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
 findMatchingPattern expression patterns = do
   let foundPattern = findMatchingPatternIgnoreDefault expression patterns
   if isJust foundPattern
     then foundPattern
     else findMatchingDefaultPattern expression patterns
 
-findMatchingPatternIgnoreDefault :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
+findMatchingPatternIgnoreDefault :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
 findMatchingPatternIgnoreDefault expression [] = Nothing
 findMatchingPatternIgnoreDefault (Var name) ((DataAlt dataCon, _, expression) : xs) =
   if (==) (varToString name) (nameToString (dataConName dataCon)) --is there a more elegant way than nameToString
@@ -73,7 +73,7 @@ findMatchingPatternIgnoreDefault (App expr argument) ((DataAlt patternConstructo
         else findMatchingPatternIgnoreDefault (App expr argument) xs
 findMatchingPatternIgnoreDefault expression (x : xs) = findMatchingPatternIgnoreDefault expression xs
 
-findMatchingDefaultPattern :: Expr Var -> [Alt Var] -> Maybe (Expr Var)
+findMatchingDefaultPattern :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
 findMatchingDefaultPattern expression [] = trace "no matching pattern found" Nothing
 findMatchingDefaultPattern _ ((DEFAULT, _, expression) : _) = Just expression
 findMatchingDefaultPattern expression (x : xs) = findMatchingDefaultPattern expression xs
