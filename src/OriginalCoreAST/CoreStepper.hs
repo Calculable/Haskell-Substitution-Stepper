@@ -10,6 +10,8 @@ import Utils
 import Data.List
 import OriginalCoreAST.CoreTypeDefinitions
 
+maximumAmoutOfReductions :: Integer
+maximumAmoutOfReductions = 99
 
 applyStep :: [Binding] -> CoreExpr -> Maybe StepResult
 applyStep bindings (Var name) = do
@@ -49,21 +51,21 @@ tryApplyStepToApplication :: [Binding] -> CoreExpr -> Maybe StepResult
 tryApplyStepToApplication bindings expr = do
       let (function, arguments) = convertToMultiArgumentFunction expr
       tryApplyStepToFunctionWithArguments bindings function arguments
-
-tryApplyStepToFunctionWithArguments :: [Binding] -> Function -> [Argument] -> Maybe StepResult
-tryApplyStepToFunctionWithArguments bindings (Var var) arguments = do
-  if isJust (tryFindBinding var bindings)
-    then do
-      (description, reducedFunction, newBindings) <- applyStep bindings (Var var)
-      return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
-    else do
-      evaluateUnsteppableFunction bindings var arguments      
-tryApplyStepToFunctionWithArguments bindings (Lam lamdaParameter lamdaExpression) arguments = do
-   let reducedFunction = deepReplaceVarWithinExpression lamdaParameter (head arguments) lamdaExpression
-   Just ("Lamda Application", convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), bindings)
-tryApplyStepToFunctionWithArguments bindings expression arguments = do
-  (description, reducedFunction, newBindings) <- applyStep bindings expression
-  return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
+        where
+          tryApplyStepToFunctionWithArguments :: [Binding] -> Function -> [Argument] -> Maybe StepResult
+          tryApplyStepToFunctionWithArguments bindings (Var var) arguments = do
+            if isJust (tryFindBinding var bindings)
+              then do
+                (description, reducedFunction, newBindings) <- applyStep bindings (Var var)
+                return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
+              else do
+                evaluateUnsteppableFunction bindings var arguments      
+          tryApplyStepToFunctionWithArguments bindings (Lam lamdaParameter lamdaExpression) arguments = do
+            let reducedFunction = deepReplaceVarWithinExpression lamdaParameter (head arguments) lamdaExpression
+            Just ("Lamda Application", convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), bindings)
+          tryApplyStepToFunctionWithArguments bindings expression arguments = do
+            (description, reducedFunction, newBindings) <- applyStep bindings expression
+            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
 
 evaluateUnsteppableFunction :: [Binding] -> FunctionReference -> [Argument] -> Maybe StepResult
 evaluateUnsteppableFunction bindings function arguments = do
@@ -74,15 +76,15 @@ evaluateUnsteppableFunction bindings function arguments = do
     else do
       appliedFunction <- evaluateFunctionWithArguments function arguments (safeReduceToNormalForm bindings) 
       return ("Apply " ++ showOutputable function, appliedFunction, bindings)
-                
-applyStepToOneOfTheArguments :: [Binding] -> [Argument] -> [Argument] -> Maybe (ReductionStepDescription, [Argument], [Binding])
-applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =
-  if canBeReduced x
-    then do
-      (description, reducedArgument, newBindings) <- applyStep bindings x
-      return (description, (alreadyReducedArguments ++ [reducedArgument]) ++ xs, newBindings)
-    else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
-applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no reducable argument found" --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
+  where              
+    applyStepToOneOfTheArguments :: [Binding] -> [Argument] -> [Argument] -> Maybe (ReductionStepDescription, [Argument], [Binding])
+    applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =
+      if canBeReduced x
+        then do
+          (description, reducedArgument, newBindings) <- applyStep bindings x
+          return (description, (alreadyReducedArguments ++ [reducedArgument]) ++ xs, newBindings)
+        else applyStepToOneOfTheArguments bindings (alreadyReducedArguments ++ [x]) xs
+    applyStepToOneOfTheArguments bindings alreadyReducedArguments [] = error "no reducable argument found" --no argument that can be reduced was found. this should not happen because this condition gets checked earlier in the code
 
 tryApplyStepToApplicationUsingClassDictionary :: [Binding] -> CoreExpr -> Maybe StepResult
 tryApplyStepToApplicationUsingClassDictionary bindings expr = do
@@ -97,25 +99,45 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
       let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunction realFunctionArguments
       return ("replace '" ++ varToString functionName ++ "' with definition from the class dictionary", resultExpression, bindings)
     else Nothing
+  where
+    findFunctionInClassDictionary :: CoreExpr -> CoreExpr -> [Binding] -> Maybe CoreExpr
+    findFunctionInClassDictionary (Var function) (Var classDictionary) bindings = do
+      classDictionaryDefinition <- tryFindBinding classDictionary bindings
+      findFunctionInClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
+    findFunctionInClassDictionary (Var function) (App expr args) bindings = do
+      result <- reduceNestedApplicationToHeadNormalForm bindings (App expr args)
+      findFunctionInClassDictionaryDefinition bindings (Var function) result
+    findFunctionInClassDictionary _ _ _ = Nothing
+
+    findFunctionInClassDictionaryDefinition :: [Binding] -> CoreExpr -> CoreExpr -> Maybe CoreExpr
+    findFunctionInClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
+      let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
+      findDictionaryFunctionForFunctionName bindings var dictionaryArguments
+    findFunctionInClassDictionaryDefinition bindings (Var var) (Lam expr arg) = Just (Lam expr arg)
+    findFunctionInClassDictionaryDefinition _ _ _ = Nothing
+
+    findDictionaryFunctionForFunctionName :: [Binding] -> FunctionReference -> [CoreExpr] -> Maybe CoreExpr
+    findDictionaryFunctionForFunctionName bindings name functionVariables = do
+      foundFunction <- find (functionNameMatchesFunctionFromDictionary name) functionVariables
+      case foundFunction of
+        (Var function) -> tryFindBinding function bindings
+        (App expr arg) -> reduceNestedApplicationToHeadNormalForm bindings (App expr arg)
 
 reduceToNormalForm :: [Binding] -> CoreExpr -> CoreExpr
 reduceToNormalForm bindings expression = do
   fromJust (reduceToNormalFormWithMaximumAmountOfReductions (negate 1) bindings expression)
 
-maximumAmoutOfReductionsBeforeError :: Integer
-maximumAmoutOfReductionsBeforeError = 99
-
 safeReduceToNormalForm :: [Binding] -> CoreExpr -> Maybe CoreExpr
-safeReduceToNormalForm = reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductionsBeforeError
+safeReduceToNormalForm = reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductions
 
 reduceToNormalFormWithMaximumAmountOfReductions :: Integer -> [Binding] -> CoreExpr -> Maybe CoreExpr
 reduceToNormalFormWithMaximumAmountOfReductions 0 _ _ = trace "infinite loop" Nothing
-reduceToNormalFormWithMaximumAmountOfReductions maximumAmoutOfReductions bindings expression = do
+reduceToNormalFormWithMaximumAmountOfReductions maximumAmountOfReductionsLeft bindings expression = do
   expressionInHeadNormalForm <- reduceToHeadNormalForm bindings expression
   if canBeReducedToNormalForm expressionInHeadNormalForm
     then do
       let (function, arguments) = convertToMultiArgumentFunction expressionInHeadNormalForm
-      let maybeReducedArguments = map (reduceToNormalFormWithMaximumAmountOfReductions (maximumAmoutOfReductions - 1) bindings) arguments
+      let maybeReducedArguments = map (reduceToNormalFormWithMaximumAmountOfReductions (maximumAmountOfReductionsLeft - 1) bindings) arguments
       if any isNothing maybeReducedArguments
         then Nothing
         else Just $ convertFunctionApplicationWithArgumentListToNestedFunctionApplication function (map fromJust maybeReducedArguments)
@@ -134,34 +156,12 @@ reduceNestedApplicationToHeadNormalForm :: [Binding] -> CoreExpr -> Maybe CoreEx
 reduceNestedApplicationToHeadNormalForm bindings expr = do
   let result = reduceNestedApplication bindings expr
   maybe (Just expr) (reduceNestedApplicationToHeadNormalForm bindings) result
+  where
+    reduceNestedApplication :: [Binding] -> CoreExpr -> Maybe CoreExpr --can be removed as soon as canBeReduced detects nested applications where the function is a known var
+    reduceNestedApplication bindings (App expr arg) = do
+      let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
+      reducedFunction <- tryFindBinding functionName bindings
+      reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
+    reduceNestedApplication _ _ = Nothing
 
-reduceNestedApplication :: [Binding] -> CoreExpr -> Maybe CoreExpr --can be removed as soon as canBeReduced detects nested applications where the function is a known var
-reduceNestedApplication bindings (App expr arg) = do
-  let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
-  reducedFunction <- tryFindBinding functionName bindings
-  reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
-reduceNestedApplication _ _ = Nothing
-
-findFunctionInClassDictionary :: CoreExpr -> CoreExpr -> [Binding] -> Maybe CoreExpr
-findFunctionInClassDictionary (Var function) (Var classDictionary) bindings = do
-  classDictionaryDefinition <- tryFindBinding classDictionary bindings
-  findFunctionInClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
-findFunctionInClassDictionary (Var function) (App expr args) bindings = do
-  result <- reduceNestedApplicationToHeadNormalForm bindings (App expr args)
-  findFunctionInClassDictionaryDefinition bindings (Var function) result
-findFunctionInClassDictionary _ _ _ = Nothing
-
-findFunctionInClassDictionaryDefinition :: [Binding] -> CoreExpr -> CoreExpr -> Maybe CoreExpr
-findFunctionInClassDictionaryDefinition bindings (Var var) (App dictionaryApplication argument) = do
-  let (function, dictionaryArguments) = convertToMultiArgumentFunction (App dictionaryApplication argument)
-  findDictionaryFunctionForFunctionName bindings var dictionaryArguments
-findFunctionInClassDictionaryDefinition bindings (Var var) (Lam expr arg) = Just (Lam expr arg)
-findFunctionInClassDictionaryDefinition _ _ _ = Nothing
-
-findDictionaryFunctionForFunctionName :: [Binding] -> FunctionReference -> [CoreExpr] -> Maybe CoreExpr
-findDictionaryFunctionForFunctionName bindings name functionVariables = do
-  foundFunction <- find (functionNameMatchesFunctionFromDictionary name) functionVariables
-  case foundFunction of
-    (Var function) -> tryFindBinding function bindings
-    (App expr arg) -> reduceNestedApplicationToHeadNormalForm bindings (App expr arg)
 

@@ -63,7 +63,7 @@ printCoreStepByStepReductionForSingleExpression bindings expression
 
 convertToBindingsList :: [CoreBind] -> [Binding]
 convertToBindingsList = concatMap convertCoreBindingToBindingList
-
-convertCoreBindingToBindingList :: CoreBind -> [Binding]
-convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
-convertCoreBindingToBindingList (Rec bindings) = bindings
+  where
+    convertCoreBindingToBindingList :: CoreBind -> [Binding]
+    convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
+    convertCoreBindingToBindingList (Rec bindings) = bindings

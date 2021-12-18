@@ -42,10 +42,7 @@ monadOperator2ForList newType (App constructor argument) function reducer
           let mappedListItems = replicate (length listItemsWithoutTypes) function
           Just (expressionListToCoreListWithType newType mappedListItems)
         | otherwise = Nothing
-
 monadOperator2ForList _ _ _ _ = trace ">> not supported for this type" Nothing
-
-
 
 
 returnForList :: Type -> Type -> CoreExpr -> CoreExpr
@@ -59,7 +56,6 @@ failForList monadType ty =
   if isListType monadType
     then expressionListToCoreListWithType ty []
     else maybeToCoreExpression Nothing ty --is maybe type (could be checked again)
-
 
 concatForList :: Type -> CoreExpr -> Reducer -> Maybe CoreExpr
 concatForList newType nestedListExpression reducer = do
