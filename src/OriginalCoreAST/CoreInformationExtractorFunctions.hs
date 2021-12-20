@@ -74,11 +74,11 @@ varNameEqualsString var name = (==) (varToString var) name
 
 -- | checks if a Core expression is not yet in normal form and can further be reduced
 canBeReducedToNormalForm :: CoreExpr -> Bool
-canBeReducedToNormalForm (Lam b expr) = canBeReducedToNormalForm expr 
+--canBeReducedToNormalForm (Lam b expr) = canBeReducedToNormalForm expr 
 canBeReducedToNormalForm (App expr argument) = do
   let (function, arguments) = collectArgs (App expr argument)
-  (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
-canBeReducedToNormalForm _ = False
+  (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function || canBeReducedToNormalForm function 
+canBeReducedToNormalForm expr = canBeReduced expr
 
 -- | checks if a Core expression is not yet in head normal form and can further be reduced
 canBeReduced :: CoreExpr -> Bool
@@ -144,8 +144,9 @@ isBoolVarFalse :: Var -> Bool
 isBoolVarFalse x = (==) (varToSimpleString x) "False"
 
 -- |checks if a Core expression represents a non-empty list
-isNonEmptyList :: Expr b -> Bool --can this be checked more elegantly?
-isNonEmptyList expr = isConstructorApplicationOfType expr ":"
+isNonEmptyList :: Expr b -> Bool --can this be checked more elegantly
+isNonEmptyList (App expr arg) = isConstructorApplicationOfType (App expr arg) ":" && isList arg
+isNonEmptyList _ = False
 
 -- |checks if a Core expression represents an empty list
 isEmptyList :: Expr b -> Bool

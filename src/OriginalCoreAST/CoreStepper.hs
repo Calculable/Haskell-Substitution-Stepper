@@ -21,6 +21,7 @@ import Data.List
 import OriginalCoreAST.CoreTypeDefinitions
 
 -- |the maximum amount of reductions to make for the conversion from head normal form to normal form until an error is shown (infinite-loop prevention) 
+
 maximumAmoutOfReductions :: Integer
 maximumAmoutOfReductions = 99
 
