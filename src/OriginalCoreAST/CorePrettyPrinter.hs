@@ -6,7 +6,7 @@ License     : GPL-3
 -}
 module OriginalCoreAST.CorePrettyPrinter (prettyPrint) where
 
--- toDo: inline operator, man muss prüfen ob nur ein Typ übergeben wurde damit ich nicht mehrmals die gleichen ausdrücke ausgebe
+-- toDo: inline operator, man muss prüfen ob nur ein Typ übergeben wurde damit ich nicht mehrmals die gleichen ausdrücke ausgebe (Type Application muss eigenen Type bekommen)
 
 import GHC.Plugins
 import Utils
@@ -49,10 +49,21 @@ prettyPrintLikeHaskell showTypes expr =
         showLikeHaskell showTypes isOutermostLevel (Lam bind expr) = showLam showTypes isOutermostLevel (convertToMultiArgumentLamda (Lam bind expr))
         showLikeHaskell showTypes _ (Let bind expr) = showLet showTypes (convertToMultiLet (Let bind expr))
         showLikeHaskell showTypes _ (Case expression binding caseType alternatives) = showCase showTypes expression binding caseType alternatives
-        showLikeHaskell showTypes _ (Cast expression _) = showCast showTypes expression 
-        showLikeHaskell showTypes _ (Tick _ expression ) = showTick showTypes expression 
+        showLikeHaskell showTypes isOutermostLevel (Cast expression _) = showCast showTypes isOutermostLevel expression 
+        showLikeHaskell showTypes isOutermostLevel (Tick _ expression ) = showTick showTypes isOutermostLevel expression 
         showLikeHaskell _ _ (Type ty) = showType ty 
         showLikeHaskell _ _ (Coercion _) = showCohercion
+
+        -- |checks if a printed expression expands over multiple lines or one single long line. 
+        -- this check is used to pretty print expressions and add additional line breaks where useful
+        isMultiLineOrLongExpression :: CoreExpr -> Bool
+        isMultiLineOrLongExpression expression = do
+          let expressionString = showLikeHaskell showTypes False expression
+          isMultiLineOrLongString expressionString
+
+          where
+            isMultiLineOrLongString :: String -> Bool
+            isMultiLineOrLongString text = ('\n' `elem` text) || (length text > 40)
 
         showVar :: Var -> String
         showVar var = showOutputable (Var var :: CoreExpr)
@@ -61,9 +72,9 @@ prettyPrintLikeHaskell showTypes expr =
         showCase :: Bool -> CoreExpr -> Var -> Type -> [Alt Var] -> String
         showCase showTypes expr binding caseType alternatives = do
           let resortedAlternatives = resortAlternatives [] alternatives --default case has to be the last not the first
-          let expressionString = showLikeHaskell showTypes False expr
+          let expressionString = showLikeHaskell showTypes True expr
           let alternativesString = intercalate ";\n" (map showAlternative resortedAlternatives)
-          if isMultiLineOrLongString expressionString
+          if isMultiLineOrLongExpression expr
             then  "case\n" ++ increaseIndentation 1 expressionString ++ "\nof {\n" ++ increaseIndentation 1 alternativesString ++ "\n}" 
             else "case " ++ expressionString ++ " of {\n" ++ increaseIndentation 1 alternativesString ++ "\n}"
           where
@@ -84,7 +95,7 @@ prettyPrintLikeHaskell showTypes expr =
                                         then ""
                                         else unwords (map showVar bindings) ++ " "
               let expressionString = showLikeHaskell showTypes False expr
-              if isMultiLineOrLongString expressionString 
+              if isMultiLineOrLongExpression expr
                 then constructorString ++ " " ++ letBindingsString ++ "->\n" ++ increaseIndentation 1 expressionString
                 else constructorString ++ " " ++ letBindingsString ++ "-> " ++ expressionString
               where
@@ -97,7 +108,7 @@ prettyPrintLikeHaskell showTypes expr =
 
         showLet :: Bool -> ([(Var, CoreExpr)], CoreExpr) -> String
         showLet showTypes (bindings, expr)  = do
-          let expressionString = showLikeHaskell showTypes False expr
+          let expressionString = showLikeHaskell showTypes True expr
           let bindingExpressionStrings = map showBinding bindings
           expressionString ++ "\n  where\n" ++ increaseIndentation 2 (intercalate "\n" bindingExpressionStrings)
           where
@@ -105,17 +116,17 @@ prettyPrintLikeHaskell showTypes expr =
             showBinding :: (Var, CoreExpr) -> String
             showBinding (var, expr) = do
               let expressionString = showLikeHaskell showTypes False expr
-              if isMultiLineOrLongString expressionString
+              if isMultiLineOrLongExpression expr
                 then showVar var ++ " =\n" ++ increaseIndentation 1 expressionString
                 else showVar var ++ " = " ++ expressionString
 
         showLam :: Bool -> Bool -> ([Var], CoreExpr) -> String
         showLam showTypes isOutermostLevel (bindings, expr) = do
-          let expressionString = showLikeHaskell showTypes False expr
+          let expressionString = showLikeHaskell showTypes True expr
           let cleanUpBindings = optionallyRemoveTypeVars showTypes bindings
           let parameterStrings = map showVar cleanUpBindings
           let parameterListString = unwords parameterStrings
-          let result = if isMultiLineOrLongString expressionString
+          let result = if isMultiLineOrLongExpression expr
                         then "\\" ++  parameterListString ++ " ->\n" ++ increaseIndentation 1 expressionString
                         else "\\" ++  parameterListString ++ " -> " ++ expressionString
           if isOutermostLevel
@@ -128,20 +139,19 @@ prettyPrintLikeHaskell showTypes expr =
         showCohercion :: String
         showCohercion = "(Coercion: not supported)"
 
-        showTick :: Bool -> CoreExpr -> String
-        showTick showTypes expr = showLikeHaskell showTypes False expr
+        showTick :: Bool -> Bool -> CoreExpr -> String
+        showTick showTypes isOutermostLevel expr = showLikeHaskell showTypes isOutermostLevel expr
 
-        showCast :: Bool -> CoreExpr -> String
-        showCast showTypes expr = showLikeHaskell showTypes False expr
+        showCast :: Bool -> Bool -> CoreExpr -> String
+        showCast showTypes isOutermostLevel expr = showLikeHaskell showTypes isOutermostLevel expr
 
         showApplication :: Bool -> Bool -> (Function, [Argument]) -> String
         showApplication showTypes isOutermostLevel (function, arguments) = do
           let cleanUpArguments = optionallyRemoveTypeInformation showTypes arguments
           let functionExpression = showLikeHaskell showTypes False function
-          let argumentsExpression = map (showLikeHaskell showTypes False) cleanUpArguments
-          let result = if any isMultiLineOrLongString (functionExpression:argumentsExpression) 
-                          then showMultiLineAppliation functionExpression  argumentsExpression
-                          else showOneLineApplication functionExpression  argumentsExpression
+          let result = if any isMultiLineOrLongExpression (function:arguments) 
+                          then showMultiLineAppliation functionExpression (map (showLikeHaskell showTypes True) cleanUpArguments)
+                          else showOneLineApplication functionExpression (map (showLikeHaskell showTypes False) cleanUpArguments)
           if isOutermostLevel
             then result
             else "(" ++ result ++ ")" 
@@ -157,8 +167,8 @@ prettyPrintLikeHaskell showTypes expr =
         showTuple :: Bool -> [CoreExpr] -> String
         showTuple showTypes tupleArguments = do
           let cleanUpArguments = optionallyRemoveTypeInformation showTypes tupleArguments
-          let argumentsExpression = map (showLikeHaskell showTypes False) cleanUpArguments
-          if any isMultiLineOrLongString argumentsExpression 
+          let argumentsExpression = map (showLikeHaskell showTypes True) cleanUpArguments
+          if any isMultiLineOrLongExpression tupleArguments 
             then showMultiLineTuple argumentsExpression
             else showOneLineTuple argumentsExpression
           where
@@ -174,8 +184,8 @@ prettyPrintLikeHaskell showTypes expr =
         showCoreList :: Bool -> [CoreExpr] -> String
         showCoreList showTypes listArguments = do
           let cleanUpArguments = optionallyRemoveTypeInformation showTypes listArguments
-          let argumentsExpression = map (showLikeHaskell showTypes False) cleanUpArguments
-          if any isMultiLineOrLongString argumentsExpression 
+          let argumentsExpression = map (showLikeHaskell showTypes True) cleanUpArguments
+          if any isMultiLineOrLongExpression listArguments 
             then showMultiLineList argumentsExpression
             else showOneLineList argumentsExpression
           where
@@ -198,10 +208,6 @@ optionallyRemoveTypeVars :: Bool -> [Var] -> [Var]
 optionallyRemoveTypeVars False vars = removeTypeVars vars
 optionallyRemoveTypeVars True vars = vars
 
--- |checks if a string expands over multiple lines or one single long line. 
--- this check is used to pretty print expressions and add additional line breaks where useful
-isMultiLineOrLongString :: String -> Bool
-isMultiLineOrLongString text = ('\n' `elem` text) || (length text > 40)
 
 -- |takes a multi-line string and adds spaces before each line
 increaseIndentation :: Integer -> String -> String
