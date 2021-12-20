@@ -1,3 +1,8 @@
+{-|
+Module      : CoreTypeDefinitions
+Description : Contains Type aliases
+License     : GPL-3
+-}
 module OriginalCoreAST.CoreTypeDefinitions where
 import GHC.Plugins
 

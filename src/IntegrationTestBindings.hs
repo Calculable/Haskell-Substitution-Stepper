@@ -1,5 +1,18 @@
 {-# OPTIONS -XNoImplicitPrelude #-}
 
+{-|
+Module      : IntegrationTestBindings
+Description : Contains functions and expressions used in integration tests
+License     : GPL-3
+
+The expression- and function bindings in this file are used for integration test.
+There is always a pair of two bindings. One binding has the suffix "Input",
+the other binding has the same name but the suffix "ExpectedOutput". During the integration
+tests, each binding pair is loaded into the test context. Both bindings are then converted
+to Haskell Core. Next, the "Input" binding is reduced to normal form using the CoreStepper.
+Finally, there is an equality check, if the reduced Input-Expression equals the defined
+"Expected" expression. If this is not the case, the test fails.
+-}
 module IntegrationTestBindings where
 
 import SteppablePrelude

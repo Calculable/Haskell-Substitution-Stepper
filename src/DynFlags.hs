@@ -1,8 +1,12 @@
 {-# OPTIONS_GHC -Wno-missing-fields #-}
 
--- basic dynflags for use with the standalone parser
--- https://github.com/tweag/ormolu/blob/f55ab70bff8aabc8f57f3c51035df7e48af5ae25/src/GHC/DynFlags.hs
+{-|
+Module      : Compiler
+Description : basic dynflags for use with the standalone parser
+License     : GPL-3
 
+Source and description: https://github.com/tweag/ormolu/blob/f55ab70bff8aabc8f57f3c51035df7e48af5ae25/src/GHC/DynFlags.hs
+-}
 module DynFlags
   ( baseDynFlags,
   )

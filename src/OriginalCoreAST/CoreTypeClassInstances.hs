@@ -1,3 +1,13 @@
+{-|
+Module      : CoreStepperPrinter
+Description : Makes Core expressions and Core literals compatible with type classes from the prelude
+License     : GPL-3
+
+This module makes the type @ Expr @ and the type @ Literal @ compatible with type classes 
+from the prelude: EQ, Fractional, Num, Ord, Enum, Float, Integral, Real, RealFrac
+Other typeclasses are supported as well but their implementation is either integrated in the
+steppable prelude or in the CoreEvaluator module.
+-}
 module OriginalCoreAST.CoreTypeClassInstances () where
 
 import GHC.Plugins
@@ -469,10 +479,19 @@ instance RealFloat Literal where
   decodeFloat (LitFloat x) = decodeFloat (fromRational x)
   decodeFloat _ = error "decodeFloat not supported"
 
+instance Show Literal where
+  show (LitChar charValue) = show charValue
+  show (LitNumber _ integerValue) = show integerValue
+  show (LitString stringValue) = show stringValue
+  show (LitFloat floatValue) = show floatValue
+  show (LitDouble doubleValue) = show doubleValue
+  show (LitNullAddr) = "NULL"
+  show (LitRubbish) = "(LitRubbish)"
+  show (LitLabel fastString _ _) = "(LitLabel)"
 
-  {-Helper functions-}
+{-Helper functions-}
 
-
+-- |takes two expression representing a list- or tuple-type and a boolean operator and applies the expression to the operator
 operatorForCollection :: Expr b -> Expr b -> ([Expr b] -> [Expr b] -> Bool) -> Bool
 operatorForCollection a b operator = operator (elementsToCompareForCollection a) (elementsToCompareForCollection b)
   where
@@ -482,7 +501,9 @@ operatorForCollection a b operator = operator (elementsToCompareForCollection a)
                                           | isPrimitiveTypeConstructorApp expr = [getLiteralArgument expr]
                                           | otherwise = error "operator not supported: unknown type: "
 
-
+-- |compares two literal instances for equalty. 
+-- Note that the Literal type implements the EQ typeclass. 
+-- This comparison however is less strict (only the underlaying value is compared)
 weakEquals :: Literal -> Literal -> Bool
 weakEquals (LitChar first) (LitChar second) = (==) first second
 weakEquals (LitNumber _ first) (LitNumber _ second) = (==) first second
@@ -500,12 +521,18 @@ weakEquals (LitFloat first) (LitNumber _ second) = (==) (fromRational first) (fr
 weakEquals (LitDouble first) (LitNumber _ second) = (==) (fromRational first) (fromInteger second)
 weakEquals _ _ = False
 
+-- |compares two literal instances. 
+-- Note that the Literal type implements the ORD typeclass. 
+-- This comparison however is less strict (only the underlaying value is compared)
 compareLiteral :: Literal -> Literal -> Ordering
 compareLiteral leftExpression rightExpression
   | weakEquals leftExpression rightExpression = EQ
   | lessOrEqualLiteral leftExpression rightExpression = LT
   | otherwise = GT
 
+-- |checks if a literal is less or equal (<=) than the other literal.
+-- Note that the Literal type implements the ORD typeclass. 
+-- This comparison however is less strict (only the underlaying value is compared)
 lessOrEqualLiteral :: Literal -> Literal -> Bool
 lessOrEqualLiteral (LitChar x) (LitChar y) = x <= y
 lessOrEqualLiteral (LitNumber _ x) (LitNumber _ y) = x <= y
@@ -520,11 +547,20 @@ lessOrEqualLiteral (LitNumber _ x) (LitDouble y) = fromInteger x <= y
 lessOrEqualLiteral (LitDouble x) (LitNumber _ y) = x <= fromInteger y
 lessOrEqualLiteral x y = x <= y --use existing equality operator in literal type
 
+-- |checks if a literal is less (<) than the other literal.
+-- Note that the Literal type implements the ORD typeclass. 
+-- This comparison however is less strict (only the underlaying value is compared)
 lessLiteral :: Literal -> Literal -> Bool
 lessLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == LT
 
+-- |checks if a literal is greater or equal (>=) than the other literal.
+-- Note that the Literal type implements the ORD typeclass. 
+-- This comparison however is less strict (only the underlaying value is compared)
 greaterEqualLiteral :: Literal -> Literal -> Bool
 greaterEqualLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression /= LT
 
+-- |checks if a literal is greater (>) than the other literal.
+-- Note that the Literal type implements the ORD typeclass. 
+-- This comparison however is less strict (only the underlaying value is compared)
 greaterLiteral :: Literal -> Literal -> Bool
 greaterLiteral leftExpression rightExpression = compareLiteral leftExpression rightExpression == GT
