@@ -6,8 +6,6 @@ License     : GPL-3
 -}
 module OriginalCoreAST.CorePrettyPrinter (prettyPrint) where
 
--- toDo: inline operator, man muss prüfen ob nur ein Typ übergeben wurde damit ich nicht mehrmals die gleichen ausdrücke ausgebe (Type Application muss eigenen Type bekommen)
-
 import GHC.Plugins
 import Utils
 import Data.List
@@ -45,7 +43,10 @@ prettyPrintLikeHaskell showTypes expr =
         showLikeHaskell _ _ (Lit literal) = show literal
         showLikeHaskell showTypes _ (App expr arg) | isList (App expr arg) = showCoreList showTypes (getIndividualElementsOfList (App expr arg))
         showLikeHaskell showTypes _ (App expr arg) | isTuple (App expr arg) = showTuple showTypes (getIndividualElementsOfTuple (App expr arg))
-        showLikeHaskell showTypes isOutermostLevel (App expr arg) = showApplication showTypes isOutermostLevel (convertToMultiArgumentFunction (App expr arg))
+        showLikeHaskell showTypes isOutermostLevel (App expr arg) = do
+          if isPrimitiveTypeConstructorApp (App expr arg)
+            then showLikeHaskell showTypes isOutermostLevel arg 
+            else showApplication showTypes isOutermostLevel (convertToMultiArgumentFunction (App expr arg))
         showLikeHaskell showTypes isOutermostLevel (Lam bind expr) = showLam showTypes isOutermostLevel (convertToMultiArgumentLamda (Lam bind expr))
         showLikeHaskell showTypes _ (Let bind expr) = showLet showTypes (convertToMultiLet (Let bind expr))
         showLikeHaskell showTypes _ (Case expression binding caseType alternatives) = showCase showTypes expression binding caseType alternatives
@@ -66,8 +67,10 @@ prettyPrintLikeHaskell showTypes expr =
             isMultiLineOrLongString text = ('\n' `elem` text) || (length text > 40)
 
         showVar :: Var -> String
-        showVar var = showOutputable (Var var :: CoreExpr)
-        --showVar var = varDescription var
+        showVar var = do
+          if isBoolVar (Var var) --find better solution for boolean workaround
+            then varToSimpleString var
+            else showOutputable (Var var :: CoreExpr)
 
         showCase :: Bool -> CoreExpr -> Var -> Type -> [Alt Var] -> String
         showCase showTypes expr binding caseType alternatives = do
@@ -148,10 +151,15 @@ prettyPrintLikeHaskell showTypes expr =
         showApplication :: Bool -> Bool -> (Function, [Argument]) -> String
         showApplication showTypes isOutermostLevel (function, arguments) = do
           let cleanUpArguments = optionallyRemoveTypeInformation showTypes arguments
-          let functionExpression = showLikeHaskell showTypes False function
-          let result = if any isMultiLineOrLongExpression (function:arguments) 
+          let makeInlineFunctionApplication = isOperator function && (length cleanUpArguments == 2)
+          let makeMultiLineApplication = any isMultiLineOrLongExpression (function:arguments) 
+          let functionExpression = if makeInlineFunctionApplication && not makeMultiLineApplication
+                                                          then showOperatorWithoutBrackets function
+                                                          else showLikeHaskell showTypes False function
+
+          let result = if makeMultiLineApplication
                           then showMultiLineAppliation functionExpression (map (showLikeHaskell showTypes True) cleanUpArguments)
-                          else showOneLineApplication functionExpression (map (showLikeHaskell showTypes False) cleanUpArguments)
+                          else showOneLineApplication makeInlineFunctionApplication functionExpression (map (showLikeHaskell showTypes False) cleanUpArguments)
           if isOutermostLevel
             then result
             else "(" ++ result ++ ")" 
@@ -159,10 +167,11 @@ prettyPrintLikeHaskell showTypes expr =
 
             showMultiLineAppliation :: String -> [String] -> String
             showMultiLineAppliation functionExpression argumentsExpression = functionExpression ++ "\n" ++ increaseIndentation 1 (intercalate "\n" argumentsExpression)
-
-            showOneLineApplication :: String -> [String] -> String
-            showOneLineApplication functionExpression argumentsExpression = unwords (functionExpression:argumentsExpression)
-
+            
+            showOneLineApplication :: Bool -> String -> [String] -> String
+            showOneLineApplication False functionExpression argumentsExpression = unwords (functionExpression:argumentsExpression)
+            showOneLineApplication True functionExpression [firstArgument, secondArgument] = firstArgument ++ " " ++ functionExpression ++ " " ++ secondArgument
+            showOneLineApplication True _ _ = error "inline function application needs exactly two arguments"
 
         showTuple :: Bool -> [CoreExpr] -> String
         showTuple showTypes tupleArguments = do

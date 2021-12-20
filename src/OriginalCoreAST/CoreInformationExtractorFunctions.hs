@@ -6,7 +6,7 @@ License     : GPL-3
 This module contains helper functions to extract information inside Core expressions and to 
 check Core expressions for properties and conditions.
 -}
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet, removeTypeVars) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet, removeTypeVars, showOperatorWithoutBrackets, isOperator, varToSimpleString) where
 
 import Data.List
 import GHC.Plugins
@@ -74,6 +74,7 @@ varNameEqualsString var name = (==) (varToString var) name
 
 -- | checks if a Core expression is not yet in normal form and can further be reduced
 canBeReducedToNormalForm :: CoreExpr -> Bool
+canBeReducedToNormalForm (Lam b expr) = canBeReducedToNormalForm expr 
 canBeReducedToNormalForm (App expr argument) = do
   let (function, arguments) = collectArgs (App expr argument)
   (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
@@ -272,3 +273,15 @@ removeTypeInformation list = filter (not . isTypeInformation) list
 -- |takes a list of vars and returns all vars that are not type information. 
 removeTypeVars :: [Var] -> [Var]
 removeTypeVars list = filter (not . isTyVar) list
+
+-- |checks if an expression is an operator function
+-- operator functions would be (+) (-) and other functions with brackets
+isOperator :: CoreExpr -> Bool
+isOperator (Var var) = ("(" `isPrefixOf` expressionString) && (")" `isSuffixOf` expressionString)
+  where expressionString = showOutputable (Var var :: CoreExpr)
+isOperator _ = False
+
+-- |gives the printable representation for an operator without brackets
+showOperatorWithoutBrackets :: CoreExpr -> String
+showOperatorWithoutBrackets (Var var) = varToString var
+showOperatorWithoutBrackets _ = error "is not an operator"
