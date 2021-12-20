@@ -47,9 +47,12 @@ printCoreStepByStepReductionForSingleExpression bindings expression
     let reduction = applyStep bindings expression
     case reduction of
       Just (reductionStepDescription, reducedExpression, newBindings) -> do
-        putStrLn ("\n{-" ++ reductionStepDescription ++ "-}")
-        prettyPrint reducedExpression
-        printCoreStepByStepReductionForSingleExpression newBindings reducedExpression
+        if shouldShowReductionStep reductionStepDescription
+          then do          
+            putStrLn ("\n{-" ++ show reductionStepDescription ++ "-}")
+            prettyPrint reducedExpression
+            printCoreStepByStepReductionForSingleExpression newBindings reducedExpression
+          else printCoreStepByStepReductionForSingleExpression newBindings reducedExpression
       Nothing -> do
         putStrLn "\n{-no reduction rule implemented for this expression-}"
         return expression
@@ -57,21 +60,20 @@ printCoreStepByStepReductionForSingleExpression bindings expression
     --check if it can be reduced even more to normal form
     if canBeReducedToNormalForm expression
       then do
-        putStrLn "\n{-reduction is complete in head normal form. I will try to reduce to normal Form-}"
         let (function, arguments) = convertToMultiArgumentFunction expression
         let maybeArgumentsInNormalForm = map (safeReduceToNormalForm bindings) arguments
         if any isNothing maybeArgumentsInNormalForm
           then do
-            putStrLn "\n{reduction to normal form is not possible. This can be the case if reduction to normal form would lead to an infinite loop}"
             return expression
           else do
             let argumentsInNormalForm = map fromJust maybeArgumentsInNormalForm
             let result = convertFunctionApplicationWithArgumentListToNestedFunctionApplication function argumentsInNormalForm
+            putStrLn "\n{-reduction complete - reduce constructor arguments for better visualization-}"
             prettyPrint result
-            putStrLn "\n{-reduction complete (Normal Form)-}"
+            putStrLn "\n{-reduction complete-}"
             return result
       else do
-        putStrLn "\n{-reduction complete (Normal Form)-}"
+        putStrLn "\n{-reduction complete-}"
         return expression
 
 -- |converts a list of (nested/recursive) CoreBinds into one single flat list of bindings
@@ -81,3 +83,10 @@ convertToBindingsList = concatMap convertCoreBindingToBindingList
     convertCoreBindingToBindingList :: CoreBind -> [Binding]
     convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
     convertCoreBindingToBindingList (Rec bindings) = bindings
+
+
+shouldShowReductionStep :: ReductionStepDescription -> Bool
+shouldShowReductionStep (EvaluationStep _) = True
+shouldShowReductionStep PatternMatchStep = True
+shouldShowReductionStep StrictApplicationArgumentStep = True
+shouldShowReductionStep _ = False

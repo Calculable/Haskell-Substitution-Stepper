@@ -25,30 +25,28 @@ import OriginalCoreAST.CoreTypeDefinitions
 maximumAmoutOfReductions :: Integer
 maximumAmoutOfReductions = 99
 
+
 -- |takes an expression and applies one single reduction rule (if possible)
 applyStep :: [Binding] -> CoreExpr -> Maybe StepResult
 applyStep bindings (Var name) = do
   foundBinding <- tryFindBinding name bindings
-  return ("Replace '" ++ varToString name ++ "' with definition", foundBinding, bindings {-replace binding reference with actual expression (Delta Reduction)-})
+  return (DeltaReductionStep name, foundBinding, bindings)
 applyStep bindings (App expr arg) = do
-  applyStepToNestedApplication bindings (App expr arg) --multi-parameter applications are represented as nested applications in haskell Core
+  applyStepToNestedApplication bindings (App expr arg) --multi-parameter applications are represented as nested applications in Haskell Core
 applyStep bindings (Case expression binding caseType alternatives) = do
   if canBeReduced expression
     then do
-      (description, reducedExpression, newBindings) <- applyStep bindings expression
-      return (description, Case reducedExpression binding caseType alternatives, newBindings)
+      (reductionStep, reducedExpression, newBindings) <- applyStep bindings expression
+      return (NestedReduction [CaseExpressionStep, reductionStep], Case reducedExpression binding caseType alternatives, newBindings)
     else do
       matchingPattern <- findMatchingPattern expression alternatives
-      return ("Replace with matching pattern", matchingPattern, bindings)
-applyStep bindings (Lam b expression) = do
-  (description, reducedExpression, newBindings) <- applyStep bindings expression
-  return (description, Lam b reducedExpression, newBindings)
+      return (PatternMatchStep, matchingPattern, bindings)
 applyStep bindings (Let (NonRec b expr) expression) = do
-  Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, bindings)
+  Just (ReplaceLetStep b, deepReplaceVarWithinExpression b expr expression, bindings)
 applyStep bindings (Let (Rec [(b, expr)]) expression) = do
-  Just ("Replace '" ++ varToString b ++ "' with definition", deepReplaceVarWithinExpression b expr expression, (b, expr) : bindings)
+  Just (ReplaceLetStep b, deepReplaceVarWithinExpression b expr expression, (b, expr) : bindings)
 applyStep bindings (Cast expression cohersion) = do
-  Just ("Remove cohersion from cast", expression, bindings)
+  Just (RemoveCohersionStep, expression, bindings)
 applyStep bindings (Tick _ _) = do
   trace "no applicable step found: tick is not supported" Nothing
 applyStep bindings (Coercion _) = do
@@ -75,16 +73,16 @@ tryApplyStepToApplication bindings expr = do
           tryApplyStepToFunctionWithArguments bindings (Var var) arguments = do
             if isJust (tryFindBinding var bindings)
               then do --function or operator can be stepped
-                (description, reducedFunction, newBindings) <- applyStep bindings (Var var)
-                return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
+                (reductionStep, reducedFunction, newBindings) <- applyStep bindings (Var var)
+                return (NestedReduction [ApplicationExpressionStep, reductionStep], convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
               else do --function or operator cannot be stepped
                 applyStepToApplicationWithAnUnsteppableFunction bindings var arguments      
           tryApplyStepToFunctionWithArguments bindings (Lam lamdaParameter lamdaExpression) arguments = do
             let reducedFunction = deepReplaceVarWithinExpression lamdaParameter (head arguments) lamdaExpression
-            Just ("Lamda Application", convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), bindings)
+            Just (ApplicationStep (head arguments), convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction (tail arguments), bindings)
           tryApplyStepToFunctionWithArguments bindings expression arguments = do
-            (description, reducedFunction, newBindings) <- applyStep bindings expression
-            return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
+            (reductionStep, reducedFunction, newBindings) <- applyStep bindings expression
+            return (NestedReduction [ApplicationExpressionStep, reductionStep], convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
 
 -- |takes an expression containing a (nested) application. If at least one of the arguments to the function can be 
 -- reduced, one argumen gets reduced. Please note that this is strict behaviour. If all arguments are at least in 
@@ -93,11 +91,11 @@ applyStepToApplicationWithAnUnsteppableFunction :: [Binding] -> FunctionReferenc
 applyStepToApplicationWithAnUnsteppableFunction bindings function arguments = do
   if any canBeReduced arguments --all arguments are reduced, eval function. This is stric behaviour! We have to use strict behaviour here because we are trying to evaluate a function whose definition we do not know. therefore we cannot apply the arguments one after another but have to simplify all arguments before calling the function
     then do --reduce one of the arguments
-      (description, simplifiedArguments, newBindings) <- applyStepToOneOfTheArguments bindings [] arguments
-      return (description, convertFunctionApplicationWithArgumentListToNestedFunctionApplication (Var function) simplifiedArguments, newBindings)
+      (reductionStep, simplifiedArguments, newBindings) <- applyStepToOneOfTheArguments bindings [] arguments
+      return (NestedReduction [StrictApplicationArgumentStep, reductionStep], convertFunctionApplicationWithArgumentListToNestedFunctionApplication (Var function) simplifiedArguments, newBindings)
     else do --finally evaluate the function with the eargerly evaluted arguments
       appliedFunction <- evaluateFunctionWithArguments function arguments (safeReduceToNormalForm bindings) 
-      return ("Apply " ++ showOutputable function, appliedFunction, bindings)
+      return (EvaluationStep function, appliedFunction, bindings)
   where              
     applyStepToOneOfTheArguments :: [Binding] -> [Argument] -> [Argument] -> Maybe (ReductionStepDescription, [Argument], [Binding])
     applyStepToOneOfTheArguments bindings alreadyReducedArguments (x : xs) =
@@ -118,10 +116,11 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
       let (function, arguments) = convertToMultiArgumentFunction expr
       let (Var functionName) = function
       let classDictionaryExpression = arguments !! 1 --the second argument contains the class dictionary, for example "$fEqInteger"
+      let classDictionaryName = getClassDictionaryVar classDictionaryExpression
       extractedFunction <- findFunctionInClassDictionary function classDictionaryExpression bindings
       let realFunctionArguments = drop 2 arguments --the first two arguments contain the type information. The other arguments are the input for the function
       let resultExpression = convertFunctionApplicationWithArgumentListToNestedFunctionApplication extractedFunction realFunctionArguments
-      return ("replace '" ++ varToString functionName ++ "' with definition from the class dictionary", resultExpression, bindings)
+      return (ClassDictionaryLookupStep functionName classDictionaryName, resultExpression, bindings)
     else Nothing
   where
     findFunctionInClassDictionary :: CoreExpr -> CoreExpr -> [Binding] -> Maybe CoreExpr

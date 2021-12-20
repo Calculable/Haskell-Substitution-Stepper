@@ -66,3 +66,9 @@ replace s find repl =
     if take (length find) s == find
         then repl ++ (replace (drop (length find) s) find repl)
         else [head s] ++ (replace (tail s) find repl)
+
+-- |takes a multi-line string and adds spaces before each line
+increaseIndentation :: Integer -> String -> String
+increaseIndentation 0 text = text
+increaseIndentation x text = increaseIndentation (x-1) indentedText
+  where indentedText = "  " ++ replace text "\n" "\n  "
