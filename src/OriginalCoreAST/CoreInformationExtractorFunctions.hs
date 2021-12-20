@@ -77,8 +77,8 @@ canBeReducedToNormalForm :: CoreExpr -> Bool
 canBeReducedToNormalForm (Lam b expr) = canBeReducedToNormalForm expr 
 canBeReducedToNormalForm (App expr argument) = do
   let (function, arguments) = collectArgs (App expr argument)
-  (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function
-canBeReducedToNormalForm _ = False
+  (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function || canBeReducedToNormalForm function 
+canBeReducedToNormalForm expr = trace ("canBeReduced " ++ show (canBeReduced expr)) $ canBeReduced expr
 
 -- | checks if a Core expression is not yet in head normal form and can further be reduced
 canBeReduced :: CoreExpr -> Bool
