@@ -6,7 +6,7 @@ License     : GPL-3
 -}
 module OriginalCoreAST.CorePrettyPrinter (prettyPrint) where
 
--- toDo: Typen entfernen, Cases vereinfachen, Nested, inline operator, alternativen umsortieren
+-- toDo: Typen entfernen, inline operator, alternativen umsortieren
 
 import GHC.Plugins
 import Utils
@@ -69,27 +69,39 @@ prettyPrintLikeHaskell expr =
 
         showCase :: CoreExpr -> Var -> Type -> [Alt Var] -> String
         showCase expr binding caseType alternatives = do
+          let resortedAlternatives = resortAlternatives [] alternatives --default case has to be the last not the first
           let expressionString = showLikeHaskellWithoutIndentation False expr
-          let alternativesString = intercalate ";\n" (map showAlternative alternatives)
+          let alternativesString = intercalate ";\n" (map showAlternative resortedAlternatives)
           if isMultiLineOrLongString expressionString
             then  "case\n" ++ increaseIndentation 1 expressionString ++ "\nof {\n" ++ increaseIndentation 1 alternativesString ++ "\n}" 
             else "case " ++ expressionString ++ " of {\n" ++ increaseIndentation 1 alternativesString ++ "\n}"
           where
 
+            resortAlternatives :: [Alt Var] -> [Alt Var] -> [Alt Var]
+            resortAlternatives previous ((altCon, bindings, expression) :rest) = 
+              case altCon of {
+                DEFAULT -> (previous ++ rest) ++ [(altCon, bindings, expression)]; --put default case last
+                _ -> resortAlternatives (previous ++ [(altCon, bindings, expression)]) rest --search for default case
+              }
+            resortAlternatives previous [] = previous --there is not default case
+
+
             showAlternative :: Alt Var -> String
             showAlternative (con, bindings, expr) = do
               let constructorString = showAlternativConstructor con
-              let letBindingsString = unwords (map showVar bindings)
+              let letBindingsString = if null bindings 
+                                        then ""
+                                        else unwords (map showVar bindings) ++ " "
               let expressionString = showLikeHaskellWithoutIndentation False expr
               if isMultiLineOrLongString expressionString 
-                then constructorString ++ " " ++ letBindingsString ++ " ->\n" ++ increaseIndentation 1 expressionString
-                else constructorString ++ " " ++ letBindingsString ++ " -> " ++ expressionString
+                then constructorString ++ " " ++ letBindingsString ++ "->\n" ++ increaseIndentation 1 expressionString
+                else constructorString ++ " " ++ letBindingsString ++ "-> " ++ expressionString
               where
 
                 showAlternativConstructor :: AltCon -> String
                 showAlternativConstructor (LitAlt lit) = showLikeHaskellWithoutIndentation False (Lit lit)
                 showAlternativConstructor (DataAlt dataCon) = showOutputable dataCon
-                showAlternativConstructor DEFAULT = "otherwise"
+                showAlternativConstructor DEFAULT = "_"
 
 
         showLet :: ([(Var, CoreExpr)], CoreExpr) -> String
