@@ -6,7 +6,7 @@ License     : GPL-3
 This module contains helper functions to extract information inside Core expressions and to 
 check Core expressions for properties and conditions.
 -}
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet, removeTypeVars, showOperatorWithoutBrackets, isOperator, varToSimpleString) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet, removeTypeVars, showOperatorWithoutBrackets, isOperator, varToSimpleString, getClassDictionaryVar) where
 
 import Data.List
 import GHC.Plugins
@@ -111,6 +111,11 @@ isClassDictionary (Var name) = "$" `isPrefixOf` varName && not (varName == "$" |
   where varName = varToString name
 isClassDictionary (App expr args) = isClassDictionary (getFunctionOfNestedApplication (App expr args))
 isClassDictionary x = False
+
+-- |unwrapps var from an expression. Precondition: expression is a var
+getVar :: Expr b -> Var
+getVar (Var var) = var
+getVar _ = error "expression is not a var"
 
 -- |checks if an expression is an application of a primitive type constructor. For example 
 -- "I# 3" or "C# 'a'" would be such primitive type constructor applications
@@ -235,6 +240,12 @@ getIndividualElementsOfTuple expr
     let values = snd (splitList elements)
     values
   | otherwise = error "expression is not a tuple"
+
+-- |extracts the var (function binding) of a class dictionary from an expression
+getClassDictionaryVar :: Expr b -> Var
+getClassDictionaryVar (Var var) = var
+getClassDictionaryVar (App expr arg) = getClassDictionaryVar expr
+getClassDictionaryVar _ = error "type dictionary has unexpected type"
 
 -- |extracts the left-most innermost function of a nested function application
 getFunctionOfNestedApplication :: Expr b -> Expr b

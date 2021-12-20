@@ -18,7 +18,7 @@ import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
 
 -- |pretty-prints a Core Expression
 prettyPrint :: CoreExpr -> IO ()
-prettyPrint exp = prettyPrintLikeHaskell False exp --alternative prettyPrint exp = prettyPrintOriginalHaskellCore exp
+prettyPrint exp = prettyPrintLikeHaskell False exp --alternative: prettyPrint exp = prettyPrintOriginalHaskellCore exp
 
 -- |pretty-prints a Core Expression using GHC's built-in pretty printer
 prettyPrintOriginalHaskellCore :: CoreExpr -> IO ()
@@ -217,9 +217,3 @@ optionallyRemoveTypeVars :: Bool -> [Var] -> [Var]
 optionallyRemoveTypeVars False vars = removeTypeVars vars
 optionallyRemoveTypeVars True vars = vars
 
-
--- |takes a multi-line string and adds spaces before each line
-increaseIndentation :: Integer -> String -> String
-increaseIndentation 0 text = text
-increaseIndentation x text = increaseIndentation (x-1) indentedText
-  where indentedText = "  " ++ replace text "\n" "\n  "
