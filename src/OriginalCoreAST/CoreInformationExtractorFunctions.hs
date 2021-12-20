@@ -6,7 +6,7 @@ License     : GPL-3
 This module contains helper functions to extract information inside Core expressions and to 
 check Core expressions for properties and conditions.
 -}
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary) where
+module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet) where
 
 import Data.List
 import GHC.Plugins
@@ -131,6 +131,7 @@ isConstructorApplicationOfType (App expr arg) name = do
   let (function, arguments) = collectArgs (App expr arg)
   case function of
     (Var var) -> (==) (varToString var) name
+    _ -> False
 isConstructorApplicationOfType _ _ = False
 
 -- |checks if a Var represents the boolean value "True"
@@ -160,6 +161,7 @@ isNonEmptyTuple (App expr arg) = do
   case function of
     (Var var) -> (("(" `isPrefixOf` constructorName) && (")" `isSuffixOf` constructorName)) && (',' `elem` constructorName)
       where constructorName = varToString var
+    _ -> False
 isNonEmptyTuple _ = False
 
 -- |checks if a Core expression represents a empty tuple
@@ -220,7 +222,7 @@ getIndividualElementsOfList expr
       else do
         let [ty, first, nestedList] = take 3 elements
         [ty, first] ++ getIndividualElementsOfList nestedList
-  | otherwise = error "expression is not a list"
+  | otherwise = [expr]
 
 -- |takes a tuple represented as a Core expression and returns all the elements as a list
 getIndividualElementsOfTuple :: Expr b -> [Expr b]
@@ -244,6 +246,23 @@ getLiteralArgument _ = error "function expects (App Var Lit)"
 -- |takes a nested application in Core and returns all the arguments as a one dimensional list
 extractArgumentsOfNestedApplication :: Expr b -> [Expr b]
 extractArgumentsOfNestedApplication expr = snd (collectArgs expr)
+
+-- |takes a nested lamda expression and returns a list of lamda bindings with an expression
+convertToMultiArgumentLamda :: Expr b -> ([b], Expr b)
+convertToMultiArgumentLamda (Lam bind expr) = do
+  let (nestedBindings, nestedExpression) = convertToMultiArgumentLamda expr
+  (bind:nestedBindings, nestedExpression)
+convertToMultiArgumentLamda expr = ([], expr)  
+
+-- |takes a nested let expression and returns a list of bindings with an expression
+convertToMultiLet :: Expr b -> ([(b, Expr b)], Expr b)
+convertToMultiLet (Let (NonRec b bindingExpression) expr) = do
+  let (nestedBindings, nestedExpression) = convertToMultiLet expr
+  ((b, bindingExpression):nestedBindings, nestedExpression)
+convertToMultiLet (Let (Rec bindings) expr) = do
+  let (nestedBindings, nestedExpression) = convertToMultiLet expr
+  (bindings ++ nestedBindings, nestedExpression)
+convertToMultiLet expr = ([], expr)  
 
 -- |takes a list of expressions and returns all expressions that are not type information. 
 -- this is useful for function evaluation where the type information is not needed

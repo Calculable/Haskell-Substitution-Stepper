@@ -479,6 +479,16 @@ instance RealFloat Literal where
   decodeFloat (LitFloat x) = decodeFloat (fromRational x)
   decodeFloat _ = error "decodeFloat not supported"
 
+instance Show Literal where
+  show (LitChar charValue) = show charValue
+  show (LitNumber _ integerValue) = show integerValue
+  show (LitString stringValue) = show stringValue
+  show (LitFloat floatValue) = show floatValue
+  show (LitDouble doubleValue) = show doubleValue
+  show (LitNullAddr) = "NULL"
+  show (LitRubbish) = "(LitRubbish)"
+  show (LitLabel fastString _ _) = "(LitLabel)"
+
 {-Helper functions-}
 
 -- |takes two expression representing a list- or tuple-type and a boolean operator and applies the expression to the operator

@@ -52,7 +52,17 @@ listTopLevelFunctions cp = do
 (??) :: Maybe a -> a -> a
 (??) = flip fromMaybe
 
--- #splits a list in two halves
+-- |splits a list in two halves
 -- this function is taken from: https://stackoverflow.com/questions/19074520/how-to-split-a-list-into-two-in-haskell
 splitList :: [a] -> ([a], [a])
 splitList myList = splitAt (((length myList) + 1) `div` 2) myList
+
+-- |replaces a sequence of elements in a list with another sequence
+-- this is especially useful for string replacements
+-- taken from source: https://bluebones.net/2007/01/replace-in-haskell/
+replace :: Eq a => [a] -> [a] -> [a] -> [a]
+replace [] _ _ = []
+replace s find repl =
+    if take (length find) s == find
+        then repl ++ (replace (drop (length find) s) find repl)
+        else [head s] ++ (replace (tail s) find repl)
