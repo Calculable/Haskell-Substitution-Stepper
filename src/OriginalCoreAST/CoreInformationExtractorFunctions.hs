@@ -74,7 +74,7 @@ varNameEqualsString var name = (==) (varToString var) name
 
 -- | checks if a Core expression is not yet in normal form and can further be reduced
 canBeReducedToNormalForm :: CoreExpr -> Bool
-canBeReducedToNormalForm (Lam b expr) = canBeReducedToNormalForm expr 
+--canBeReducedToNormalForm (Lam b expr) = canBeReducedToNormalForm expr 
 canBeReducedToNormalForm (App expr argument) = do
   let (function, arguments) = collectArgs (App expr argument)
   (any canBeReduced arguments || any canBeReducedToNormalForm arguments) || canBeReduced function || canBeReducedToNormalForm function 
