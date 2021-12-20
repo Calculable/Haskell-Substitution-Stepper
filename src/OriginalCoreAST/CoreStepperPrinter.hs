@@ -31,7 +31,7 @@ printCoreStepByStepReductionForEveryBinding bindings = do
   mapM_ (printCoreStepByStepReductionForBinding allBindings) allBindings
 
 -- |takes a single core binding and shows a step-by-step reduction of the expression
-printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO CoreExpr
+printCoreStepByStepReductionForBinding :: [Binding] -> Binding -> IO ()
 printCoreStepByStepReductionForBinding bindings (var, exp) = do
   putStr "\n**Reduction of "
   putStr (varToString var)
@@ -41,40 +41,43 @@ printCoreStepByStepReductionForBinding bindings (var, exp) = do
   printCoreStepByStepReductionForSingleExpression bindings exp
 
 -- |takes a core expression and shows a step-by-step reduction
-printCoreStepByStepReductionForSingleExpression :: [Binding] -> CoreExpr -> IO CoreExpr
-printCoreStepByStepReductionForSingleExpression bindings expression
-  | canBeReduced expression = do
-    let reduction = applyStep bindings expression
-    case reduction of
-      Just (reductionStepDescription, reducedExpression, newBindings) -> do
-        if shouldShowReductionStep reductionStepDescription
-          then do          
-            putStrLn ("\n{-" ++ show reductionStepDescription ++ "-}")
-            prettyPrint reducedExpression
-            printCoreStepByStepReductionForSingleExpression newBindings reducedExpression
-          else printCoreStepByStepReductionForSingleExpression newBindings reducedExpression
-      Nothing -> do
-        putStrLn "\n{-no reduction rule implemented for this expression-}"
-        return expression
-  | otherwise = do
-    --check if it can be reduced even more to normal form
-    if canBeReducedToNormalForm expression
-      then do
-        let (function, arguments) = convertToMultiArgumentFunction expression
-        let maybeArgumentsInNormalForm = map (safeReduceToNormalForm bindings) arguments
-        if any isNothing maybeArgumentsInNormalForm
-          then do
-            return expression
-          else do
-            let argumentsInNormalForm = map fromJust maybeArgumentsInNormalForm
-            let result = convertFunctionApplicationWithArgumentListToNestedFunctionApplication function argumentsInNormalForm
-            putStrLn "\n{-reduction complete - reduce constructor arguments for better visualization-}"
-            prettyPrint result
-            putStrLn "\n{-reduction complete-}"
-            return result
-      else do
-        putStrLn "\n{-reduction complete-}"
-        return expression
+printCoreStepByStepReductionForSingleExpression :: [Binding] -> CoreExpr -> IO ()
+printCoreStepByStepReductionForSingleExpression bindings expression = do
+  let (stepResults, reductionSuccessfulFlag) = getAllSteps bindings expression
+  let filteredStepResults = filter (\(stepDescription, _, _) -> shouldShowReductionStep stepDescription) stepResults
+  printStepResultList (filteredStepResults, reductionSuccessfulFlag)
+
+printStepResultList :: ([StepResult], ReductionSuccessfulFlag) -> IO ()
+printStepResultList ([], True) = putStrLn "{- reduction completed successfully -}"
+printStepResultList ([], False) = putStrLn "{- reduction completed: no reduction rule implemented for this expression -}"
+printStepResultList ((stepDescription, expression, _):xs, successFlat) = do
+  putStrLn ("{- " ++ show stepDescription ++ " -}")
+  prettyPrint expression
+  printStepResultList (xs, successFlat)
+
+getAllSteps :: [Binding] -> CoreExpr -> ([StepResult], ReductionSuccessfulFlag)
+getAllSteps bindings expression = do
+  if canBeReduced expression
+    then do
+      let maybeReduction = applyStep bindings expression
+      case maybeReduction of
+        Just (reductionStep, reducedExpression, newBindings) -> do
+          let (stepDescription, reductionSuccessfulFlat) = getAllSteps newBindings reducedExpression
+          ((reductionStep, reducedExpression, newBindings) : stepDescription, reductionSuccessfulFlat)
+        Nothing -> ([], False)
+    else do --try to reduce even more (only for visualization)
+       if canBeReducedToNormalForm expression
+        then do
+          let (function, arguments) = convertToMultiArgumentFunction expression
+          let maybeArgumentsInNormalForm = map (safeReduceToNormalForm bindings) arguments
+          if any isNothing maybeArgumentsInNormalForm
+            then  ([], True) 
+            else do
+              let argumentsInNormalForm = map fromJust maybeArgumentsInNormalForm
+              let result = convertFunctionApplicationWithArgumentListToNestedFunctionApplication function argumentsInNormalForm
+              ([(ConstructorArgumentReductionForVisualization, result, [])], True)
+        else ([], True)
+           
 
 -- |converts a list of (nested/recursive) CoreBinds into one single flat list of bindings
 convertToBindingsList :: [CoreBind] -> [Binding]
@@ -86,7 +89,5 @@ convertToBindingsList = concatMap convertCoreBindingToBindingList
 
 
 shouldShowReductionStep :: ReductionStepDescription -> Bool
-shouldShowReductionStep (EvaluationStep _) = True
-shouldShowReductionStep PatternMatchStep = True
-shouldShowReductionStep StrictApplicationArgumentStep = True
-shouldShowReductionStep _ = False
+shouldShowReductionStep _ = True
+
