@@ -42,8 +42,7 @@ data StepperOutputConfiguration = StepperOutputConfiguration {
     showReplaceLetStep :: Bool,
     showRemoveCohersionStep :: Bool ,
     showApplicationExpressionStep :: Bool,
-    showClassDictionaryLookupStep :: Bool,
-    showStrictApplicationArgumentStep :: Bool
+    showClassDictionaryLookupStep :: Bool
   }
 
 instance Show ReductionStepDescription where
