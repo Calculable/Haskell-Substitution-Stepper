@@ -113,6 +113,7 @@ shouldShowReductionStep :: StepperOutputConfiguration -> ReductionStepDescriptio
 shouldShowReductionStep _ (EvaluationStep _) = True
 shouldShowReductionStep _ PatternMatchStep = True
 shouldShowReductionStep _ ConstructorArgumentReductionForVisualization = True
+shouldShowReductionStep configuration StrictApplicationArgumentStep = True
 shouldShowReductionStep configuration (DeltaReductionStep _) = showDeltaReductionStep configuration
 shouldShowReductionStep configuration (ApplicationStep _) = showLamdaApplicationStep configuration
 shouldShowReductionStep configuration CaseExpressionStep = showCaseExpressionStep configuration
@@ -120,5 +121,4 @@ shouldShowReductionStep configuration (ReplaceLetStep _) = showReplaceLetStep co
 shouldShowReductionStep configuration RemoveCohersionStep = showRemoveCohersionStep configuration
 shouldShowReductionStep configuration ApplicationExpressionStep = showApplicationExpressionStep configuration
 shouldShowReductionStep configuration (ClassDictionaryLookupStep _ _) = showClassDictionaryLookupStep configuration
-shouldShowReductionStep configuration StrictApplicationArgumentStep = showStrictApplicationArgumentStep configuration
-shouldShowReductionStep configuration (NestedReduction nestedReductions) = shouldShowReductionStep configuration (head nestedReductions)
+shouldShowReductionStep configuration (NestedReduction nestedReductions) = shouldShowReductionStep configuration (head nestedReductions) && shouldShowReductionStep configuration (last nestedReductions)

@@ -54,7 +54,7 @@ evaluateFunctionWithArguments functionOrOperatorName arguments reducer = do
           evaluateUnsteppableFunctionWithArguments "negate" [x] _ = Just (negate x)
           evaluateUnsteppableFunctionWithArguments "fromInteger" [Lit (LitNumber _ x)] _ = Just (fromInteger x)
           evaluateUnsteppableFunctionWithArguments "/=" [x, y] _ = Just (boolToCoreExpression ((/=) x y))
-          evaluateUnsteppableFunctionWithArguments "==" [x, y] reducer = Just (boolToCoreExpression ((==) (reducer x) (reducer y)))
+          evaluateUnsteppableFunctionWithArguments "==" [x, y] _ = Just (boolToCoreExpression ((==) x y))
           evaluateUnsteppableFunctionWithArguments "<" [x, y] _ = Just (boolToCoreExpression ((<) x y))
           evaluateUnsteppableFunctionWithArguments ">" [x, y] _ = Just (boolToCoreExpression ((>) x y))
           evaluateUnsteppableFunctionWithArguments ">=" [x, y] _ = Just (boolToCoreExpression ((>=) x y))
@@ -112,11 +112,11 @@ evaluateFunctionWithArguments functionOrOperatorName arguments reducer = do
           evaluateUnsteppableFunctionWithArguments "primError" [x] _ = Nothing
           evaluateUnsteppableFunctionWithArguments "error" [x] _ = Nothing
           evaluateUnsteppableFunctionWithArguments "seq" [x, y] reducer = Just (seq (reducer x) y)
-          evaluateUnsteppableFunctionWithArguments "ord" [Lit (LitChar input)] reducer = Just (integerToCoreExpression (toInteger (ord input)))
-          evaluateUnsteppableFunctionWithArguments "isSpace" [Lit (LitChar input)] reducer = Just (boolToCoreExpression (isSpace input))
-          evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primIntToChar" [Lit (LitNumber _ input)] reducer = Just (charToCoreExpression (toEnum (fromIntegral input)))
-          evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Lit (LitChar input)] reducer = Just (integerToCoreExpression (toInteger (fromEnum input)))
-          evaluateUnsteppableFunctionWithArguments functionName [x] reducer | isTypeWrapperFunctionName functionName = Just x
+          evaluateUnsteppableFunctionWithArguments "ord" [Lit (LitChar input)] _ = Just (integerToCoreExpression (toInteger (ord input)))
+          evaluateUnsteppableFunctionWithArguments "isSpace" [Lit (LitChar input)] _ = Just (boolToCoreExpression (isSpace input))
+          evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primIntToChar" [Lit (LitNumber _ input)] _ = Just (charToCoreExpression (toEnum (fromIntegral input)))
+          evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Lit (LitChar input)] _ = Just (integerToCoreExpression (toInteger (fromEnum input)))
+          evaluateUnsteppableFunctionWithArguments functionName [x] _ | isTypeWrapperFunctionName functionName = Just x
           evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
 
           evaluateUnsteppableFunctionWithArgumentsAndTypes :: FunctionName -> [Argument] -> Reducer -> Maybe CoreExpr
