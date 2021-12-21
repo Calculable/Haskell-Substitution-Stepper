@@ -110,7 +110,7 @@ stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
   spr <- compileToCore "src/SteppablePrelude.hs"
-  printCoreStepByStepReductionForEveryBinding verboseOutputConfiguration (getCoreProgram cr ++ getCoreProgram spr)
+  printCoreStepByStepReductionForEveryBinding verboseOutputConfiguration (getCoreProgram cr) (getCoreProgram spr)
 
 -- |standard configurations
 -- todo: make output configurable by user

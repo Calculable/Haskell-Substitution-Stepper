@@ -25,11 +25,13 @@ import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import OriginalCoreAST.CoreTypeDefinitions
 
 
--- |takes a list of core bindings and shows a step-by-step reduction for each binding
-printCoreStepByStepReductionForEveryBinding :: StepperOutputConfiguration -> [CoreBind] -> IO ()
-printCoreStepByStepReductionForEveryBinding configuration bindings = do
-  let allBindings = convertToBindingsList bindings
-  mapM_ (printCoreStepByStepReductionForBinding configuration allBindings) allBindings
+-- |takes a list of core bindings (from the user), a list of core bindings (from the prelude) and shows a step-by-step reduction for each binding
+printCoreStepByStepReductionForEveryBinding :: StepperOutputConfiguration -> [CoreBind] -> [CoreBind] -> IO ()
+printCoreStepByStepReductionForEveryBinding configuration userBindings preludeBindings = do
+  let userBindingsList = convertToBindingsList userBindings
+  let preludeBindingsList = convertToBindingsList preludeBindings
+  let allBindings = userBindingsList ++ preludeBindingsList
+  mapM_ (printCoreStepByStepReductionForBinding configuration allBindings) userBindingsList
 
 -- |takes a single core binding and shows a step-by-step reduction of the expression
 printCoreStepByStepReductionForBinding :: StepperOutputConfiguration -> [Binding] -> Binding -> IO ()
