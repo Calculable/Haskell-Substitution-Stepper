@@ -89,5 +89,6 @@ convertToBindingsList = concatMap convertCoreBindingToBindingList
 
 
 shouldShowReductionStep :: ReductionStepDescription -> Bool
+shouldShowReductionStep (ApplicationStep argument) = not (isTypeInformation argument) --do not show application of type variables, those informations are not shown when pretty printing haskell-like code
+shouldShowReductionStep (EvaluationStep function) = not (isPrimitiveTypeConstructorName (varName function))
 shouldShowReductionStep _ = True
-
