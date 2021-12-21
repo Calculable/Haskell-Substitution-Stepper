@@ -16,7 +16,6 @@ import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import Data.Maybe
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CoreTypeDefinitions
-
 {-Functor and Maybe for List-}
 
 -- |applies a function to every element inside a Core list
@@ -29,12 +28,13 @@ fmapForList newType function functorArgument
     Just (expressionListToCoreListWithType newType mappedListItems)
   | otherwise = Nothing
 
+
 -- |applies the >>= operator to a Core list
 monadOperatorForList :: Type -> CoreExpr -> CoreExpr -> Reducer -> Maybe CoreExpr
 monadOperatorForList newType (App constructor argument) function reducer
   | isList (App constructor argument) = do
-    fmappedList <- fmapForList newType function (App constructor argument)
-    concatForList newType fmappedList reducer
+      fmappedList <- fmapForList newType function (App constructor argument)
+      concatForList newType fmappedList reducer
 monadOperatorForList _ _ _ _ = trace ">>= not supported for this type" Nothing
 
 -- |applies the >> operator to a Core list
@@ -65,13 +65,15 @@ failForList monadType ty = expressionListToCoreListWithType ty []
 -- |concatenates nested Core lists
 concatForList :: Type -> CoreExpr -> Reducer -> Maybe CoreExpr
 concatForList newType nestedListExpression reducer = do
-  let (_, subLists) = convertToMultiArgumentFunction nestedListExpression
-  let maybeMappedArguments = map reducer subLists
-  if any isNothing maybeMappedArguments
-    then Nothing
+  let listElements = getIndividualElementsOfList nestedListExpression
+  let reducedMaybeListArguments = map reducer listElements
+
+  if any isNothing reducedMaybeListArguments
+    then trace "cannot reduce list argument" Nothing
     else do
-      let flatArguments = concatMap (extractArgumentsOfNestedApplication . fromJust) maybeMappedArguments
-      return (expressionListToCoreListWithType newType (removeTypeInformation flatArguments))
+      let reducedListArguments = map fromJust reducedMaybeListArguments
+      let concatenatedElements = concatMap getIndividualElementsOfList reducedListArguments
+      Just $ expressionListToCoreListWithType newType (removeTypeInformation concatenatedElements)
 
 {-Bounded Typeclass Helper-}
 

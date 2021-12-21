@@ -16,6 +16,9 @@ type Function = Expr Var
 type FunctionReference = Var
 type FunctionName = String
 type ReductionSuccessfulFlag = Bool
+data PrintingStyle 
+  = CoreStyle 
+  | HaskellStyle
 
 data ReductionStepDescription
   = DeltaReductionStep FunctionReference
@@ -29,12 +32,12 @@ data ReductionStepDescription
   | ClassDictionaryLookupStep FunctionReference FunctionReference
   | StrictApplicationArgumentStep --not real Core behaviour but used for unsteppable functions
   | ConstructorArgumentReductionForVisualization --not real Core behaviour but used for Visualization, for example to reduce expressions like (Maybe (1 + 1))
-
   | NestedReduction [ReductionStepDescription]
+
 
 instance Show ReductionStepDescription where
   show (DeltaReductionStep var) = "Replace '" ++ showOutputable var ++ "' with definition"
-  show (ApplicationStep _) = "Application"
+  show (ApplicationStep _) = "Lamda Application"
   show (EvaluationStep var) = "Evaluate unsteppable function/operator " ++ showOutputable var
   show CaseExpressionStep = "Reduce Case Expression"
   show PatternMatchStep = "Replace with matching pattern"
@@ -42,6 +45,6 @@ instance Show ReductionStepDescription where
   show RemoveCohersionStep = "Remove Cohersion part from expression"
   show ApplicationExpressionStep = "Reduce function of application"
   show (ClassDictionaryLookupStep function classDictionary) = "Replace '" ++ showOutputable function ++ "' with definition from class dictionary '" ++ showOutputable classDictionary ++ "'"
-  show StrictApplicationArgumentStep = "Reduce application argument"
+  show StrictApplicationArgumentStep = "(Strict) reduce application argument"
   show (NestedReduction descriptions) = intercalate " -> " (map show descriptions)
   show (ConstructorArgumentReductionForVisualization) = "reduction complete - reduce constructor arguments for better visualization"

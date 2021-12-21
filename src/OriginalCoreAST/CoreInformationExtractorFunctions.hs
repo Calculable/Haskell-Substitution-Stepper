@@ -200,6 +200,7 @@ isCharType ty = showOutputable ty == "Char"
 -- |checks if a Core expression contains type information (either is a "Type" expression or a reference to a type class dictionary)
 isTypeInformation :: Expr b -> Bool
 isTypeInformation (Type _) = True
+isTypeInformation (Var var) = isClassDictionary (Var var) || isTyVar var
 isTypeInformation x = isClassDictionary x
 
 -- |checks if an expression is an application of a function defined inside a class dictionary

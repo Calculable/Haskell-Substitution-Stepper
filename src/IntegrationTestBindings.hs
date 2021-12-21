@@ -406,8 +406,9 @@ monadMaybeExpectedOutput = "Hallo"
 
 {-Monad list-}
 
-monadListInput = head monadicListFunction == 3
+monadListInput = (monadicListFunction !! 1) == 2
 
+monadListExpectedOutput :: Bool
 monadListExpectedOutput = True
 
 {-Functions that can throw errors-}

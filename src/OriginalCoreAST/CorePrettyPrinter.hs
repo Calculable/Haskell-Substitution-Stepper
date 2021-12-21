@@ -17,8 +17,9 @@ import GHC.Core.DataCon
 import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
 
 -- |pretty-prints a Core Expression
-prettyPrint :: CoreExpr -> IO ()
-prettyPrint exp = prettyPrintLikeHaskell False exp --alternative: prettyPrint exp = prettyPrintOriginalHaskellCore exp
+prettyPrint :: PrintingStyle -> CoreExpr -> IO ()
+prettyPrint HaskellStyle exp = prettyPrintLikeHaskell False exp --alternative: prettyPrint exp = prettyPrintOriginalHaskellCore exp
+prettyPrint CoreStyle exp = prettyPrintOriginalHaskellCore exp
 
 -- |pretty-prints a Core Expression using GHC's built-in pretty printer
 prettyPrintOriginalHaskellCore :: CoreExpr -> IO ()
@@ -64,7 +65,7 @@ prettyPrintLikeHaskell showTypes expr =
 
           where
             isMultiLineOrLongString :: String -> Bool
-            isMultiLineOrLongString text = ('\n' `elem` text) || (length text > 40)
+            isMultiLineOrLongString text = ('\n' `elem` text) || (length text > 100)
 
         showVar :: Var -> String
         showVar var = do
