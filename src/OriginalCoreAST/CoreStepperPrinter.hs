@@ -24,7 +24,6 @@ import OriginalCoreAST.CoreStepper
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import OriginalCoreAST.CoreTypeDefinitions
 
-
 -- |takes a list of core bindings (from the user), a list of core bindings (from the prelude) and shows a step-by-step reduction for each binding
 printCoreStepByStepReductionForEveryBinding :: StepperOutputConfiguration -> [CoreBind] -> [CoreBind] -> IO ()
 printCoreStepByStepReductionForEveryBinding configuration userBindings preludeBindings = do
@@ -50,6 +49,7 @@ printCoreStepByStepReductionForSingleExpression configuration bindings expressio
   let filteredStepResults = filter (\(stepDescription, _, _) -> not (shouldFilterOutReductionStepForPrintingStyle (printingStyle configuration) stepDescription)) stepResults
   printStepResultList 0 configuration filteredStepResults reductionSuccessfulFlag
 
+-- |takes a a list of substeps and prints the step-by-step reduction
 printStepResultList :: Int -> StepperOutputConfiguration -> [StepResult] -> ReductionSuccessfulFlag -> IO ()
 printStepResultList _ _ [] True = putStrLn "\n{- reduction completed successfully -}"
 printStepResultList _ _ [] False = putStrLn "\n{- reduction completed: no reduction rule implemented for this expression -}"
@@ -66,6 +66,7 @@ printStepResultList amountOfSkippedSteps configuration ((stepDescription, expres
     else
       printStepResultList (amountOfSkippedSteps + 1) configuration xs successFlat
 
+-- |reducdes an expression and makes a record of all sub-steps
 getAllSteps :: [Binding] -> CoreExpr -> ([StepResult], ReductionSuccessfulFlag)
 getAllSteps bindings expression = do
   if canBeReduced expression
@@ -98,13 +99,16 @@ convertToBindingsList = concatMap convertCoreBindingToBindingList
     convertCoreBindingToBindingList (NonRec binding exp) = [(binding, exp)]
     convertCoreBindingToBindingList (Rec bindings) = bindings
 
-
+-- |filters out specific substeps when the result-output looks exactly like the result-input 
+-- this is because when we pretty print an expression in a core like manner, some information (like types) 
+-- are not shown. It would not make sense for example to show an application when the argument is a type.
 shouldFilterOutReductionStepForPrintingStyle :: PrintingStyle -> ReductionStepDescription -> Bool
 shouldFilterOutReductionStepForPrintingStyle HaskellStyle (ApplicationStep argument) = isTypeInformation argument --do not show application of type variables, those informations are not shown when pretty printing haskell-like code
 shouldFilterOutReductionStepForPrintingStyle HaskellStyle (EvaluationStep function) = isPrimitiveTypeConstructorName (varName function)
 shouldFilterOutReductionStepForPrintingStyle style (NestedReduction nestedReduction) = shouldFilterOutReductionStepForPrintingStyle style (last nestedReduction)
 shouldFilterOutReductionStepForPrintingStyle _ _ = False
 
+-- |decides if a reductionstep should be shown, depending on the users configuration
 shouldShowReductionStep :: StepperOutputConfiguration -> ReductionStepDescription -> Bool
 shouldShowReductionStep _ (EvaluationStep _) = True
 shouldShowReductionStep _ PatternMatchStep = True
