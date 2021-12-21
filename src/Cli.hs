@@ -34,6 +34,7 @@ import OriginalCoreAST.CoreStepperPrinter
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
+import OriginalCoreAST.CoreTypeDefinitions (PrintingStyle(HaskellStyle))
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
@@ -108,4 +109,4 @@ stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
   spr <- compileToCore "src/SteppablePrelude.hs"
-  printCoreStepByStepReductionForEveryBinding ((getCoreProgram cr) ++ (getCoreProgram spr))
+  printCoreStepByStepReductionForEveryBinding HaskellStyle ((getCoreProgram cr) ++ (getCoreProgram spr))
