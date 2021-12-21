@@ -34,6 +34,17 @@ data ReductionStepDescription
   | ConstructorArgumentReductionForVisualization --not real Core behaviour but used for Visualization, for example to reduce expressions like (Maybe (1 + 1))
   | NestedReduction [ReductionStepDescription]
 
+data StepperOutputConfiguration = StepperOutputConfiguration { 
+    printingStyle :: PrintingStyle,
+    showDeltaReductionStep :: Bool,
+    showLamdaApplicationStep :: Bool,
+    showCaseExpressionStep :: Bool,
+    showReplaceLetStep :: Bool,
+    showRemoveCohersionStep :: Bool ,
+    showApplicationExpressionStep :: Bool,
+    showClassDictionaryLookupStep :: Bool,
+    showStrictApplicationArgumentStep :: Bool
+  }
 
 instance Show ReductionStepDescription where
   show (DeltaReductionStep var) = "Replace '" ++ showOutputable var ++ "' with definition"

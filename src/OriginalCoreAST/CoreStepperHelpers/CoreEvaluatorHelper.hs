@@ -16,6 +16,7 @@ import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import Data.Maybe
 import OriginalCoreAST.CoreInformationExtractorFunctions
 import OriginalCoreAST.CoreTypeDefinitions
+
 {-Functor and Maybe for List-}
 
 -- |applies a function to every element inside a Core list

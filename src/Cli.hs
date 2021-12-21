@@ -14,6 +14,7 @@ License     : GPL-3
 module Cli (runCli, dispatch) where
 
 import Compiler (compileToCore, getCoreProgram, writeDump)
+
 import Options.Generic
   ( Generic,
     Modifiers (shortNameModifier),
@@ -34,11 +35,11 @@ import OriginalCoreAST.CoreStepperPrinter
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
-import OriginalCoreAST.CoreTypeDefinitions (PrintingStyle(HaskellStyle))
+import OriginalCoreAST.CoreTypeDefinitions
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
-type FunctionName = Maybe String <?> "Top level function to step through"
+type FunctionIdentifier = Maybe String <?> "Top level function to step through"
 
 type VerbosityLevel = Maybe Integer <?> "Verbosity level between 1 and 3"
 
@@ -48,12 +49,12 @@ subStepDescription = "The Haskell Substitution Stepper"
 data SubStep w
   = Step
       { path :: w ::: FilePath,
-        function :: w ::: FunctionName,
+        function :: w ::: FunctionIdentifier,
         verbose :: w ::: VerbosityLevel
       }
   | Print
       { path :: w ::: FilePath,
-        function :: w ::: FunctionName
+        function :: w ::: FunctionIdentifier
       }
   | List
       { path :: w ::: FilePath
@@ -109,4 +110,9 @@ stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
   spr <- compileToCore "src/SteppablePrelude.hs"
-  printCoreStepByStepReductionForEveryBinding HaskellStyle ((getCoreProgram cr) ++ (getCoreProgram spr))
+  printCoreStepByStepReductionForEveryBinding verboseOutputConfiguration (getCoreProgram cr) (getCoreProgram spr)
+
+-- |standard configurations
+-- todo: make output configurable by user
+nonVerboseOutputConfiguration = StepperOutputConfiguration {printingStyle = HaskellStyle, showDeltaReductionStep = False, showLamdaApplicationStep = False, showCaseExpressionStep = False, showReplaceLetStep = False, showRemoveCohersionStep = False, showApplicationExpressionStep = False, showClassDictionaryLookupStep = False, showStrictApplicationArgumentStep = False}  
+verboseOutputConfiguration = StepperOutputConfiguration {printingStyle = CoreStyle, showDeltaReductionStep = True, showLamdaApplicationStep = True, showCaseExpressionStep = True, showReplaceLetStep = True, showRemoveCohersionStep = True, showApplicationExpressionStep = True, showClassDictionaryLookupStep = True, showStrictApplicationArgumentStep = True}  
