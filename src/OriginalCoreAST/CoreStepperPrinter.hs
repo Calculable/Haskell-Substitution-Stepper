@@ -45,26 +45,20 @@ printCoreStepByStepReductionForBinding configuration bindings (var, exp) = do
 printCoreStepByStepReductionForSingleExpression :: StepperOutputConfiguration -> [Binding] -> CoreExpr -> IO ()
 printCoreStepByStepReductionForSingleExpression configuration bindings expression = do
   let (stepResults, reductionSuccessfulFlag) = getAllSteps bindings expression
-
-  let stepResultsExceptLast = if null stepResults
-                                then []
-                                else init stepResults
-  let stepResultsLast = ([last stepResults | not (null stepResults)])
-
-  let filteredStepResults = (filter (\(stepDescription, _, _) -> not (shouldFilterOutReductionStepForPrintingStyle (printingStyle configuration) stepDescription)) stepResultsExceptLast) ++ stepResultsLast 
+  let filteredStepResults = filter (\(stepDescription, _, _) -> not (shouldFilterOutReductionStepForPrintingStyle (printingStyle configuration) stepDescription)) stepResults
   printStepResultList 0 configuration filteredStepResults reductionSuccessfulFlag
 
 printStepResultList :: Int -> StepperOutputConfiguration -> [StepResult] -> ReductionSuccessfulFlag -> IO ()
-printStepResultList _ _ [] True = putStrLn "{- reduction completed successfully -}"
-printStepResultList _ _ [] False = putStrLn "{- reduction completed: no reduction rule implemented for this expression -}"
+printStepResultList _ _ [] True = putStrLn "\n{- reduction completed successfully -}"
+printStepResultList _ _ [] False = putStrLn "\n{- reduction completed: no reduction rule implemented for this expression -}"
 printStepResultList amountOfSkippedSteps configuration ((stepDescription, expression, _):xs) successFlat = do
   
   if shouldShowReductionStep configuration stepDescription || null xs
     then do
       if amountOfSkippedSteps > 0
-        then putStrLn ("{- skipping " ++ show amountOfSkippedSteps ++ " substeps -}")
+        then putStrLn ("\n{- skipping " ++ show amountOfSkippedSteps ++ " substeps -}")
         else putStr ""
-      putStrLn ("{- " ++ show stepDescription ++ " -}")
+      putStrLn ("\n{- " ++ show stepDescription ++ " -}")
       prettyPrint (printingStyle configuration) expression
       printStepResultList 0 configuration xs successFlat
     else
@@ -113,4 +107,12 @@ shouldShowReductionStep :: StepperOutputConfiguration -> ReductionStepDescriptio
 shouldShowReductionStep _ (EvaluationStep _) = True
 shouldShowReductionStep _ PatternMatchStep = True
 shouldShowReductionStep _ ConstructorArgumentReductionForVisualization = True
-shouldShowReductionStep configuration _ = False
+shouldShowReductionStep configuration (DeltaReductionStep _) = showDeltaReductionStep configuration
+shouldShowReductionStep configuration (ApplicationStep _) = showLamdaApplicationStep configuration
+shouldShowReductionStep configuration CaseExpressionStep = showCaseExpressionStep configuration
+shouldShowReductionStep configuration (ReplaceLetStep _) = showReplaceLetStep configuration
+shouldShowReductionStep configuration RemoveCohersionStep = showRemoveCohersionStep configuration
+shouldShowReductionStep configuration ApplicationExpressionStep = showApplicationExpressionStep configuration
+shouldShowReductionStep configuration (ClassDictionaryLookupStep _ _) = showClassDictionaryLookupStep configuration
+shouldShowReductionStep configuration StrictApplicationArgumentStep = showStrictApplicationArgumentStep configuration
+shouldShowReductionStep configuration (NestedReduction nestedReductions) = shouldShowReductionStep configuration (head nestedReductions)
