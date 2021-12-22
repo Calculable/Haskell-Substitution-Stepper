@@ -39,68 +39,68 @@ spec :: Spec
 spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForApplyStepTest.hs") $ do
   describe "Apply Step" $ do
     it "apply step to function reference var" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "functionReference")
+      let originalExpression = bindingFinder "functionReference"
       let (reductionStepDescription, reductedExpression, _) = fromJust (applyStep coreBindings originalExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isALamda
+      reductedExpression `shouldSatisfy` isALamda
       reductionStepDescription `shouldSatisfy` isDeltaReductionStep
     it "apply step to lamda application" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "lamdaApplication")
+      let originalExpression = bindingFinder "lamdaApplication"
       let (_, reductedExpression, _) = fromJust (applyStep coreBindings originalExpression)
       let (_, twoTimesReductedExpression, _) = fromJust (applyStep coreBindings reductedExpression)
       let (thirdReductionStepDescription, threeTimesReductedExpression, _) = fromJust (applyStep coreBindings twoTimesReductedExpression)
-      traceExpression "reduced expression" threeTimesReductedExpression `shouldSatisfy` isLiteral
+      threeTimesReductedExpression `shouldSatisfy` isLiteral
       thirdReductionStepDescription `shouldSatisfy` isApplicationStep      
     it "apply step to case" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "caseWithNonReducedExpression")
+      let originalExpression = bindingFinder "caseWithNonReducedExpression"
       let (_, reductedExpression, _) = fromJust (applyStep coreBindings originalExpression)
       let (secondReductionStepDescription, reductedTwiceExpression, _) = fromJust (applyStep coreBindings reductedExpression)
-      traceExpression "reduced expression" reductedTwiceExpression `shouldSatisfy` isCase
+      reductedTwiceExpression `shouldSatisfy` isCase
       secondReductionStepDescription `shouldSatisfy` isCaseExpressionStep   
       let (thirdReductionStepDescription, reductedThreeTimesExpression, _) = fromJust (applyStep coreBindings reductedTwiceExpression)
-      traceExpression "reduced expression" reductedThreeTimesExpression `shouldSatisfy` isVar
+      reductedThreeTimesExpression `shouldSatisfy` isVar
       thirdReductionStepDescription `shouldSatisfy` isPatternMatchStep   
     it "apply step to non-recursive let" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "nonRecursiveLetExpression")
+      let originalExpression = bindingFinder "nonRecursiveLetExpression"
       let (firstReductionStepDescription, reductedExpression, _) = fromJust (applyStep coreBindings originalExpression)
       let (secondReductionStepDescription, secondReductedExpression, _) = fromJust (applyStep coreBindings reductedExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isApp
-      traceExpression "reduced expression" secondReductedExpression `shouldSatisfy` isLiteral
+      reductedExpression `shouldSatisfy` isApp
+      secondReductedExpression `shouldSatisfy` isLiteral
       firstReductionStepDescription `shouldSatisfy` isStrictApplicationArgumentStep  
       secondReductionStepDescription `shouldSatisfy` isEvaluationStep   
     it "apply step to recursive let" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "recursiveLetExpression")
+      let originalExpression = bindingFinder "recursiveLetExpression"
       let (reductionStepDescription, reductedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isApp
+      reductedExpression `shouldSatisfy` isApp
       reductionStepDescription `shouldSatisfy` isReplaceLetStep         
       length coreBindings + 1 `shouldBe` length newBindings
     it "apply step to nested unsteppable expression" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "nestedUnsteppableExpression")
+      let originalExpression = bindingFinder "nestedUnsteppableExpression"
       let (reductionStepDescription, reductedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isApp
+      reductedExpression `shouldSatisfy` isApp
       reductionStepDescription `shouldSatisfy` isStrictApplicationArgumentStep         
     it "evaluate unsteppable expression" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "unsteppableExpression")
+      let originalExpression = bindingFinder "unsteppableExpression"
       let (reductionStepDescription, reductedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isLiteral
+      reductedExpression `shouldSatisfy` isLiteral
       reductionStepDescription `shouldSatisfy` isEvaluationStep      
     it "apply step to expression with reducable function" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "expressionWithReducableFunction")
+      let originalExpression = bindingFinder "expressionWithReducableFunction"
       let (reductionStepDescription, reductedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isApp
+      reductedExpression `shouldSatisfy` isApp
       reductionStepDescription `shouldSatisfy` isApplicationExpressionStep    
     it "apply step to expression with function from class dictionary" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "applicationWithFunctionFromClassDictionary")
+      let originalExpression = bindingFinder "applicationWithFunctionFromClassDictionary"
       let (reductionStepDescription, reductedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
-      traceExpression "reduced expression" reductedExpression `shouldSatisfy` isApp
+      reductedExpression `shouldSatisfy` isApp
       reductionStepDescription `shouldSatisfy` isClassDictionaryLookupStep    
     it "does not apply step to full reduced expression" $ \(bindingFinder, coreBindings) -> do
-      let originalExpression = traceExpression "original expression: " (bindingFinder "fullyReducedExpression")
+      let originalExpression = bindingFinder "fullyReducedExpression"
       let result = applyStep coreBindings originalExpression
       isNothing result `shouldBe` True  
 
   where      
 
-    {-Helper criteria functions -}
+    {-Helper predicate functions -}
 
     isALamda :: CoreExpr -> Bool
     isALamda Lam {} = True
