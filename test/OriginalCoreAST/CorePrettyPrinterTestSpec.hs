@@ -1,13 +1,10 @@
 {-|
-Module      : IntegrationTestSpec
-Description : Hspec integration tests
+Module      : CorePrettyPrinterTestSpec
+Description : Hspec tests for the pretty printer
 License     : GPL-3
 
-Each tests loads two expressions defined in "IntegrationTestBindings.hs", an
-Input-Expression and an Exprected-Output-Expression.
-The "Input" binding is reduced to normal form using the CoreStepper.
-Finally, there is an equality check, if the reduced Input-Expression equals the defined
-"ExpectedOutput" expression. If this is not the case, the test fails.
+Each tests loads an expressions defined in "IntegrationTestBindingsForPrettyPrinterTest.hs".
+The "Input" expression is then shown as a string and compared with the expected result.
 -}
 module OriginalCoreAST.CorePrettyPrinterTestSpec where
 

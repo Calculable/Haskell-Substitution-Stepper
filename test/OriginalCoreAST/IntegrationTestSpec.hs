@@ -212,7 +212,7 @@ spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindings.
       expectationForExpression "fmapOnNothing" bindingFinder coreBindings
     it "fmap on List works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "fmapOnList" bindingFinder coreBindings
-  describe "Some Monads are supported" $ do
+  describe "Monads are supported" $ do
     it "maybe monad works (success case)" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "monadMaybe" bindingFinder coreBindings
     it "list monad works (success case)" $ \(bindingFinder, coreBindings) -> do
