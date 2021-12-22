@@ -30,7 +30,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForPrettyPrinter.hs") $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForPrettyPrinterTest.hs") $ do
   describe "Pretty Print like Haskell" $ do
     it "pretty-prints multi argument lamda" $ \(bindingFinder, coreBindings) -> do
       let expressionString = toHaskellLikeString False (bindingFinder "multiArgumentLamda")

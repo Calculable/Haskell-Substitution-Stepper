@@ -19,7 +19,7 @@ import Data.Maybe
 import Data.Bifunctor
 import Debug.Trace
 
-instance (OutputableBndr b) => Show (Expr b) where
+instance OutputableBndr b => Show (Expr b) where
   show = showOutputable
 
 instance Num (Expr b) where
