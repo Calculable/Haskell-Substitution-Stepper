@@ -17,6 +17,19 @@ module IntegrationTestBindings where
 
 import SteppablePrelude
 
+{-Examples from the Task Description -}
+example1 = sumList [1, 2, 3]
+example2 = reverseList [1, 2, 3]
+example3 = do {n <- pure 10; m <- pure 2; safeDiv n m}
+
+safeDiv :: Integer -> Integer -> Maybe Integer
+safeDiv x 0 = Nothing
+safeDiv x y = Just (x `div` y)
+
+sumList :: [Integer] -> Integer
+sumList [] = 0
+sumList (x:xs) = x + sumList xs
+
 {-Arithmetic-}
 additionInput = 1 + 1
 
