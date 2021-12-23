@@ -29,7 +29,7 @@ maximumAmoutOfReductions = 99
 -- |takes an expression and applies one single reduction rule (if possible)
 applyStep :: [Binding] -> CoreExpr -> Maybe StepResult
 applyStep bindings (Var name) = do
-  foundBinding <- tryFindBinding name bindings
+  foundBinding <- tryFindExpression name bindings
   return (DeltaReductionStep name, foundBinding, bindings)
 applyStep bindings (App expr arg) = do
   applyStepToNestedApplication bindings (App expr arg) --multi-parameter applications are represented as nested applications in Haskell Core
@@ -71,7 +71,7 @@ tryApplyStepToApplication bindings expr = do
         where
           tryApplyStepToFunctionWithArguments :: [Binding] -> Function -> [Argument] -> Maybe StepResult
           tryApplyStepToFunctionWithArguments bindings (Var var) arguments = do
-            if isJust (tryFindBinding var bindings)
+            if isJust (tryFindExpression var bindings)
               then do --function or operator can be stepped
                 (reductionStep, reducedFunction, newBindings) <- applyStep bindings (Var var)
                 return (NestedReduction [ApplicationExpressionStep, reductionStep], convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments, newBindings)
@@ -125,7 +125,7 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
   where
     findFunctionInClassDictionary :: CoreExpr -> CoreExpr -> [Binding] -> Maybe CoreExpr
     findFunctionInClassDictionary (Var function) (Var classDictionary) bindings = do
-      classDictionaryDefinition <- tryFindBinding classDictionary bindings
+      classDictionaryDefinition <- tryFindExpression classDictionary bindings
       findFunctionInClassDictionaryDefinition bindings (Var function) classDictionaryDefinition
     findFunctionInClassDictionary (Var function) (App expr args) bindings = do
       result <- reduceNestedApplicationToHeadNormalForm bindings (App expr args)
@@ -144,7 +144,7 @@ tryApplyStepToApplicationUsingClassDictionary bindings expr = do
     findDictionaryFunctionForFunctionName bindings name functionVariables = do
       foundFunction <- find (functionNameMatchesFunctionFromDictionary name) functionVariables
       case foundFunction of
-        (Var function) -> tryFindBinding function bindings
+        (Var function) -> tryFindExpression function bindings
         (App expr arg) -> reduceNestedApplicationToHeadNormalForm bindings (App expr arg)
 
 -- |takes an expression and reduces it until normal form without showing substeps.
@@ -195,7 +195,7 @@ reduceNestedApplicationToHeadNormalForm bindings expr = do
     reduceNestedApplication :: [Binding] -> CoreExpr -> Maybe CoreExpr --can be removed as soon as canBeReduced detects nested applications where the function is a known var
     reduceNestedApplication bindings (App expr arg) = do
       let (Var functionName, arguments) = convertToMultiArgumentFunction (App expr arg)
-      reducedFunction <- tryFindBinding functionName bindings
+      reducedFunction <- tryFindExpression functionName bindings
       reduceToHeadNormalForm bindings (convertFunctionApplicationWithArgumentListToNestedFunctionApplication reducedFunction arguments)
     reduceNestedApplication _ _ = Nothing
 

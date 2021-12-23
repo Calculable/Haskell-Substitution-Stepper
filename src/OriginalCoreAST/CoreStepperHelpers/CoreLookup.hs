@@ -9,7 +9,7 @@ expression of the binding. This module provides functions to find specific
 bindings.
 -}
 
-module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindBinding, findMatchingPattern, findBindingForString) where
+module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindExpression, findMatchingPattern, findExpressionForString, tryFindBindingForString) where
 import GHC.Plugins
 import Data.List
 import OriginalCoreAST.CoreInformationExtractorFunctions
@@ -23,32 +23,51 @@ import OriginalCoreAST.CoreTypeDefinitions
 overrideFunctionPrefix = "override'"
 
 -- |tries to find the corresponding function-expression inside the list of bindings for a given function reference
-tryFindBinding :: FunctionReference -> [Binding] -> Maybe CoreExpr
-tryFindBinding name bindings = do
+tryFindExpression :: FunctionReference -> [Binding] -> Maybe CoreExpr
+tryFindExpression name bindings = do
   if varRefersToUnsteppableFunction name
     then Nothing --use implementation from stepper backend
     else do
-      let overrideBindings = tryFindBindingForString (overrideFunctionPrefix ++ varToString name) bindings
+      let overrideBindings = tryFindExpressionForString (overrideFunctionPrefix ++ varToString name) bindings
       if isNothing overrideBindings
         then tryFindBindingForVar name bindings
         else overrideBindings
   where
     tryFindBindingForVar :: FunctionReference -> [Binding] -> Maybe CoreExpr
-    tryFindBindingForVar key bindings = tryFindBindingForCriteriaCascade [equalityFilter, nameAndSignatureFilter] bindings
+    tryFindBindingForVar key bindings = tryFindExpressionForCriteriaCascade [equalityFilter, nameAndSignatureFilter] bindings
       where
         equalityFilter binding = (==) (fst binding) key
         nameAndSignatureFilter binding = (&&) (varsHaveTheSameName (fst binding) key) (varsHaveTheSameType (fst binding) key)     
 
 -- |searches for the corresponding function-expression inside the list of bindings for a given function name
 -- should only be used for automatic testing as it leads to an error if no expression is find
-findBindingForString :: FunctionName -> [Binding] -> CoreExpr
-findBindingForString name bindings = do
-  let foundBinding = tryFindBindingForString name bindings
+findExpressionForString :: FunctionName -> [Binding] -> CoreExpr
+findExpressionForString name bindings = do
+  let foundBinding = tryFindExpressionForString name bindings
   fromMaybe (error ("binding not found : " ++ name)) foundBinding
 
 -- |tries to for the corresponding function-expression inside the list of bindings for a given function name
-tryFindBindingForString :: FunctionName -> [Binding] -> Maybe CoreExpr
-tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [(\binding -> varNameEqualsString (fst binding) key)] bindings
+tryFindExpressionForString :: FunctionName -> [Binding] -> Maybe CoreExpr
+tryFindExpressionForString key bindings = tryFindExpressionForCriteriaCascade [\binding -> varNameEqualsString (fst binding) key] bindings
+
+-- |tries to find a binding inside the list of bindings for a given function name
+tryFindBindingForString :: FunctionName -> [Binding] -> Maybe Binding
+tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [\binding -> varNameEqualsString (fst binding) key] bindings
+
+-- |tries to find a binding
+-- the caller provides criteria functions to decide if a binding matches the expectation.
+-- a criteria function returns "True" if a binding matches the search-criteria, otherwise "False"
+-- If there are multiple bindings that match a criteria, only the first "match" is used
+-- If multiple criteria functions are provided, only the first one is used. In no matching 
+-- binding was found, the second criteria gets used and so on
+tryFindBindingForCriteriaCascade :: [Binding -> Bool] -> [Binding] -> Maybe Binding
+tryFindBindingForCriteriaCascade [] bindings = Nothing
+tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
+  let foundBindings = filter criteria bindings
+  case length foundBindings of {
+    0 -> tryFindBindingForCriteriaCascade criterias bindings;
+    _ -> Just (head foundBindings);
+  }
 
 -- |tries to find function-expression inside the list of bindings.
 -- the caller provides criteria functions to decide if a binding matches the expectation.
@@ -56,14 +75,10 @@ tryFindBindingForString key bindings = tryFindBindingForCriteriaCascade [(\bindi
 -- If there are multiple bindings that match a criteria, only the first "match" is used
 -- If multiple criteria functions are provided, only the first one is used. In no matching 
 -- binding was found, the second criteria gets used and so on
-tryFindBindingForCriteriaCascade :: [Binding -> Bool] -> [Binding] -> Maybe CoreExpr
-tryFindBindingForCriteriaCascade [] bindings = Nothing
-tryFindBindingForCriteriaCascade (criteria:criterias) bindings = do
-  let foundBindings = filter criteria bindings
-  case length foundBindings of {
-    0 -> tryFindBindingForCriteriaCascade criterias bindings;
-    _ -> Just (snd (head foundBindings));
-  }
+tryFindExpressionForCriteriaCascade :: [Binding -> Bool] -> [Binding] -> Maybe CoreExpr
+tryFindExpressionForCriteriaCascade criteria bindings = do
+  let binding = tryFindBindingForCriteriaCascade criteria bindings
+  fmap snd binding
 
 -- |takes a list of pattern alternatives and decides which alternative
 -- matches a given expression. Only the underlying expression
