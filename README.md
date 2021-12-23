@@ -1,6 +1,8 @@
 # The Haskell Substitution Stepper (substep)
 
 [Project Web Page](http://haskell-substitution-stepper.pages.gitlab.ost.ch/product-docu/index.html)
+[hlint report](https://gitlab.ost.ch/haskell-substitution-stepper/code/-/jobs/artifacts/master/raw/report.html?job=lint)
+[haddock documentation](https://gitlab.ost.ch/haskell-substitution-stepper/code/-/jobs/artifacts/master/download?job=haddock)
 
 ## Quick Start
 
