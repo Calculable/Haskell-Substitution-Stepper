@@ -22,16 +22,16 @@ getBindingFinderWithCoreBindings :: String -> IO (String -> CoreExpr, [Binding])
 getBindingFinderWithCoreBindings filename = do
   finder <- bindingFinder
   bindings <- coreBindings
-  return ((`findBindingForString` bindings), bindings)
+  return ((`findExpressionForString` bindings), bindings)
 
   where
     findBinding :: FunctionName -> IO CoreExpr
-    findBinding name = do findBindingForString name <$> coreBindings
+    findBinding name = do findExpressionForString name <$> coreBindings
 
     bindingFinder :: IO (FunctionName -> CoreExpr)
     bindingFinder = do
       bindings <- coreBindings
-      return (`findBindingForString` bindings)    
+      return (`findExpressionForString` bindings)    
 
     -- |the list of bindings inside the file "IntegrationTestBindings".
     -- the list also contains bindings defined in the "Steppable Prelude"

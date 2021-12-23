@@ -110,9 +110,5 @@ stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
   spr <- compileToCore "src/SteppablePrelude.hs"
-  printCoreStepByStepReductionForEveryBinding nonVerboseOutputConfiguration (getCoreProgram cr) (getCoreProgram spr)
-
--- |standard configurations
--- todo: make output configurable by user
-nonVerboseOutputConfiguration = StepperOutputConfiguration {printingStyle = HaskellStyle, showDeltaReductionStep = False, showLamdaApplicationStep = False, showCaseExpressionStep = False, showReplaceLetStep = False, showRemoveCohersionStep = False, showApplicationExpressionStep = False, showClassDictionaryLookupStep = False}  
-verboseOutputConfiguration = StepperOutputConfiguration {printingStyle = CoreStyle, showDeltaReductionStep = True, showLamdaApplicationStep = True, showCaseExpressionStep = True, showReplaceLetStep = True, showRemoveCohersionStep = True, showApplicationExpressionStep = True, showClassDictionaryLookupStep = True}  
+  let shouldShowComments = True
+  printCoreStepByStepReductionForEveryBinding fn v shouldShowComments (getCoreProgram cr) (getCoreProgram spr)

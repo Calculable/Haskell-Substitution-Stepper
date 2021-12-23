@@ -23,14 +23,38 @@ import OriginalCoreAST.CorePrettyPrinter
 import OriginalCoreAST.CoreStepper
 import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
 import OriginalCoreAST.CoreTypeDefinitions
+import OriginalCoreAST.CoreStepperHelpers.CoreLookup
+
+type VerbosityLevel = Maybe Integer
 
 -- |takes a list of core bindings (from the user), a list of core bindings (from the prelude) and shows a step-by-step reduction for each binding
-printCoreStepByStepReductionForEveryBinding :: StepperOutputConfiguration -> [CoreBind] -> [CoreBind] -> IO ()
-printCoreStepByStepReductionForEveryBinding configuration userBindings preludeBindings = do
-  let userBindingsList = convertToBindingsList userBindings
-  let preludeBindingsList = convertToBindingsList preludeBindings
-  let allBindings = userBindingsList ++ preludeBindingsList
-  mapM_ (printCoreStepByStepReductionForBinding configuration allBindings) userBindingsList
+printCoreStepByStepReductionForEveryBinding :: Maybe FunctionName -> VerbosityLevel -> Bool -> [CoreBind] -> [CoreBind] -> IO ()
+printCoreStepByStepReductionForEveryBinding functionToStep verbosityLevel shouldShowComments userBindings preludeBindings = do
+  
+  if isJust functionToStep && isJust bindingToStep
+    then if isJust bindingToStep
+          then printCoreStepByStepReductionForBinding configuration allBindings (fromJust bindingToStep) 
+          else do
+            putStrLn ("No binding named ' " ++ fromJust functionToStep ++ "' was found. Showing all bindings instead...")
+            mapM_ (printCoreStepByStepReductionForBinding configuration allBindings) userBindingsList
+    else mapM_ (printCoreStepByStepReductionForBinding configuration allBindings) userBindingsList
+  
+  where
+    configuration = do
+      let level = fromMaybe 1 verbosityLevel --verbosity level 1 ist default
+      case level of {
+        1 -> StepperOutputConfiguration {printingStyle = HaskellStyle, showComments = shouldShowComments, showDeltaReductionStep = False, showLamdaApplicationStep = False, showCaseExpressionStep = False, showReplaceLetStep = False, showRemoveCohersionStep = False, showApplicationExpressionStep = False, showClassDictionaryLookupStep = False};
+        2 -> StepperOutputConfiguration {printingStyle = HaskellStyle, showComments = shouldShowComments, showDeltaReductionStep = True, showLamdaApplicationStep = True, showCaseExpressionStep = True, showReplaceLetStep = True, showRemoveCohersionStep = True, showApplicationExpressionStep = True, showClassDictionaryLookupStep = True};
+        3 -> StepperOutputConfiguration {printingStyle = CoreStyle, showComments = shouldShowComments, showDeltaReductionStep = False, showLamdaApplicationStep = False, showCaseExpressionStep = False, showReplaceLetStep = False, showRemoveCohersionStep = False, showApplicationExpressionStep = False, showClassDictionaryLookupStep = False};
+        4 -> StepperOutputConfiguration {printingStyle = CoreStyle, showComments = shouldShowComments, showDeltaReductionStep = True, showLamdaApplicationStep = True, showCaseExpressionStep = True, showReplaceLetStep = True, showRemoveCohersionStep = True, showApplicationExpressionStep = True, showClassDictionaryLookupStep = True};
+        _ -> error "unknown verbosity level. Choose a level between 1 (minimal verbosity) and 4 (very verbose)"
+      }
+
+    userBindingsList = convertToBindingsList userBindings
+    preludeBindingsList = convertToBindingsList preludeBindings
+    allBindings = userBindingsList ++ preludeBindingsList
+
+    bindingToStep = tryFindBindingForString (fromJust functionToStep) allBindings
 
 -- |takes a single core binding and shows a step-by-step reduction of the expression
 printCoreStepByStepReductionForBinding :: StepperOutputConfiguration -> [Binding] -> Binding -> IO ()
@@ -57,10 +81,14 @@ printStepResultList amountOfSkippedSteps configuration ((stepDescription, expres
   
   if shouldShowReductionStep configuration stepDescription || null xs
     then do
-      if amountOfSkippedSteps > 0
+      if amountOfSkippedSteps > 0 && showComments configuration
         then putStrLn ("\n{- skipping " ++ show amountOfSkippedSteps ++ " substeps -}")
         else putStr ""
-      putStrLn ("\n{- " ++ show stepDescription ++ " -}")
+
+      if showComments configuration || shouldAlwaysShow stepDescription
+        then putStrLn ("\n{- " ++ show stepDescription ++ " -}")
+        else putStrLn ""
+
       prettyPrint (printingStyle configuration) expression
       printStepResultList 0 configuration xs successFlat
     else
@@ -122,3 +150,8 @@ shouldShowReductionStep configuration RemoveCohersionStep = showRemoveCohersionS
 shouldShowReductionStep configuration ApplicationExpressionStep = showApplicationExpressionStep configuration
 shouldShowReductionStep configuration (ClassDictionaryLookupStep _ _) = showClassDictionaryLookupStep configuration
 shouldShowReductionStep configuration (NestedReduction nestedReductions) = shouldShowReductionStep configuration (head nestedReductions) && shouldShowReductionStep configuration (last nestedReductions)
+
+-- |decides if a reduction step description should be shown even if the user has disabled comments
+shouldAlwaysShow :: ReductionStepDescription -> Bool
+shouldAlwaysShow ConstructorArgumentReductionForVisualization = True
+shouldAlwaysShow _ = False

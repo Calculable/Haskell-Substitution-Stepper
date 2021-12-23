@@ -37,11 +37,12 @@ data ReductionStepDescription
 
 data StepperOutputConfiguration = StepperOutputConfiguration { 
     printingStyle :: PrintingStyle,
+    showComments :: Bool,
     showDeltaReductionStep :: Bool,
     showLamdaApplicationStep :: Bool,
     showCaseExpressionStep :: Bool,
     showReplaceLetStep :: Bool,
-    showRemoveCohersionStep :: Bool ,
+    showRemoveCohersionStep :: Bool,
     showApplicationExpressionStep :: Bool,
     showClassDictionaryLookupStep :: Bool
   }
