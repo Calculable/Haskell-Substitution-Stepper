@@ -15,10 +15,14 @@ type Argument = Expr Var
 type Function = Expr Var
 type FunctionReference = Var
 type FunctionName = String
-type ReductionSuccessfulFlag = Bool
 data PrintingStyle 
   = CoreStyle 
   | HaskellStyle deriving (Eq, Show)
+
+data ReductionSuccessfulFlag 
+  = Success
+  | NoReductionRule
+  | StoppedToPreventInfiniteLoop
 
 data ReductionStepDescription
   = DeltaReductionStep FunctionReference

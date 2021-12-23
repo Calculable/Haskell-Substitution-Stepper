@@ -66,17 +66,22 @@ printCoreStepByStepReductionForBinding configuration bindings (var, exp) = do
   prettyPrint (printingStyle configuration) exp
   printCoreStepByStepReductionForSingleExpression configuration bindings exp
 
+-- |maximum amount of steps before the reduction is canceled to prevent infinite loops with recursive data structures
+-- can be tested with the expression @  x + 1 where x = x + 1 @
+maximumAmountOfSteps = 1000
+
 -- |takes a core expression and shows a step-by-step reduction
 printCoreStepByStepReductionForSingleExpression :: StepperOutputConfiguration -> [Binding] -> CoreExpr -> IO ()
 printCoreStepByStepReductionForSingleExpression configuration bindings expression = do
-  let (stepResults, reductionSuccessfulFlag) = getAllSteps bindings expression
+  let (stepResults, reductionSuccessfulFlag) = getAllSteps maximumAmountOfSteps bindings expression
   let filteredStepResults = filter (\(stepDescription, _, _) -> not (shouldFilterOutReductionStepForPrintingStyle (printingStyle configuration) stepDescription)) stepResults
   printStepResultList 0 configuration filteredStepResults reductionSuccessfulFlag
 
 -- |takes a a list of substeps and prints the step-by-step reduction
 printStepResultList :: Int -> StepperOutputConfiguration -> [StepResult] -> ReductionSuccessfulFlag -> IO ()
-printStepResultList _ _ [] True = putStrLn "\n{- reduction completed successfully -}"
-printStepResultList _ _ [] False = putStrLn "\n{- reduction completed: no reduction rule implemented for this expression -}"
+printStepResultList _ _ [] Success = putStrLn "\n{- reduction completed successfully -}"
+printStepResultList _ _ [] NoReductionRule = putStrLn "\n{- reduction completed: no reduction rule implemented for this expression -}"
+printStepResultList _ _ _ StoppedToPreventInfiniteLoop = putStrLn "\n{- maximum amount of reductions reached. Reduction aborted to prevent infinite loop -}"
 printStepResultList amountOfSkippedSteps configuration ((stepDescription, expression, _):xs) successFlat = do
   
   if shouldShowReductionStep configuration stepDescription || null xs
@@ -95,29 +100,30 @@ printStepResultList amountOfSkippedSteps configuration ((stepDescription, expres
       printStepResultList (amountOfSkippedSteps + 1) configuration xs successFlat
 
 -- |reducdes an expression and makes a record of all sub-steps
-getAllSteps :: [Binding] -> CoreExpr -> ([StepResult], ReductionSuccessfulFlag)
-getAllSteps bindings expression = do
+getAllSteps :: Integer -> [Binding] -> CoreExpr -> ([StepResult], ReductionSuccessfulFlag)
+getAllSteps 0 bindings expression = ([], StoppedToPreventInfiniteLoop)
+getAllSteps maximumAmountOfSteps bindings expression = do
   if canBeReduced expression
     then do
       let maybeReduction = applyStep bindings expression
       case maybeReduction of
         Just (reductionStep, reducedExpression, newBindings) -> do
-          let (stepDescription, reductionSuccessfulFlat) = getAllSteps newBindings reducedExpression
+          let (stepDescription, reductionSuccessfulFlat) = getAllSteps (maximumAmountOfSteps - 1) newBindings reducedExpression
           ((reductionStep, reducedExpression, newBindings) : stepDescription, reductionSuccessfulFlat)
-        Nothing -> ([], False)
+        Nothing -> ([], NoReductionRule)
     else do --try to reduce even more (only for visualization)
        if canBeReducedToNormalForm expression
         then do
           let (function, arguments) = convertToMultiArgumentFunction expression
           let maybeArgumentsInNormalForm = map (safeReduceToNormalForm bindings) arguments
           if any isNothing maybeArgumentsInNormalForm
-            then  ([], True) 
+            then  ([], NoReductionRule) 
             else do
               let argumentsInNormalForm = map fromJust maybeArgumentsInNormalForm
               let result = convertFunctionApplicationWithArgumentListToNestedFunctionApplication function argumentsInNormalForm
-              ([(ConstructorArgumentReductionForVisualization, result, [])], True)
-        else ([], True)
-           
+              ([(ConstructorArgumentReductionForVisualization, result, [])], Success)
+        else ([], Success)
+
 
 -- |converts a list of (nested/recursive) CoreBinds into one single flat list of bindings
 convertToBindingsList :: [CoreBind] -> [Binding]
