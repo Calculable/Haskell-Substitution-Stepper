@@ -18,7 +18,7 @@ type FunctionName = String
 type ReductionSuccessfulFlag = Bool
 data PrintingStyle 
   = CoreStyle 
-  | HaskellStyle
+  | HaskellStyle deriving (Eq, Show)
 
 data ReductionStepDescription
   = DeltaReductionStep FunctionReference
@@ -32,7 +32,8 @@ data ReductionStepDescription
   | ClassDictionaryLookupStep FunctionReference FunctionReference
   | StrictApplicationArgumentStep --not real Core behaviour but used for unsteppable functions
   | ConstructorArgumentReductionForVisualization --not real Core behaviour but used for Visualization, for example to reduce expressions like (Maybe (1 + 1))
-  | NestedReduction [ReductionStepDescription]
+  | NestedReduction [ReductionStepDescription] 
+
 
 data StepperOutputConfiguration = StepperOutputConfiguration { 
     printingStyle :: PrintingStyle,

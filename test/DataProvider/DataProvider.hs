@@ -18,8 +18,8 @@ import OriginalCoreAST.CoreTypeDefinitions
 -- |Provides a function that returns a CoreExpression for a given (function) name
 -- this function is used inside test cases to easily optain individual
 -- Core expressions defined in the File "IntegrationTestBindings"
-getBindingFinderWithCoreBindings :: IO (String -> CoreExpr, [Binding])
-getBindingFinderWithCoreBindings = do
+getBindingFinderWithCoreBindings :: String -> IO (String -> CoreExpr, [Binding])
+getBindingFinderWithCoreBindings filename = do
   finder <- bindingFinder
   bindings <- coreBindings
   return ((`findBindingForString` bindings), bindings)
@@ -33,20 +33,20 @@ getBindingFinderWithCoreBindings = do
       bindings <- coreBindings
       return (`findBindingForString` bindings)    
 
--- |the list of bindings inside the file "IntegrationTestBindings".
--- the list also contains bindings defined in the "Steppable Prelude"
--- (represented as Core Bindings)
-coreBindings = do
-  program <- coreProgram
-  prelude <- corePrelude
-  return (convertToBindingsList program ++ convertToBindingsList prelude)      
+    -- |the list of bindings inside the file "IntegrationTestBindings".
+    -- the list also contains bindings defined in the "Steppable Prelude"
+    -- (represented as Core Bindings)
+    coreBindings = do
+      program <- coreProgram
+      prelude <- corePrelude
+      return (convertToBindingsList program ++ convertToBindingsList prelude)      
 
-  where
-    coreProgram :: IO CoreProgram
-    coreProgram = do getCoreProgram <$> compiledCore
+      where
+        coreProgram :: IO CoreProgram
+        coreProgram = do getCoreProgram <$> compiledCore
 
-    corePrelude :: IO CoreProgram
-    corePrelude = do getCoreProgram <$> compiledPrelude
+        corePrelude :: IO CoreProgram
+        corePrelude = do getCoreProgram <$> compiledPrelude
 
-    compiledCore = compileToCore "src/IntegrationTestBindings.hs"
-    compiledPrelude = compileToCore "src/SteppablePrelude.hs"
+        compiledCore = compileToCore filename
+        compiledPrelude = compileToCore "src/SteppablePrelude.hs"

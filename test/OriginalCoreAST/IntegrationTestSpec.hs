@@ -32,7 +32,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll getBindingFinderWithCoreBindings $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindings.hs") $ do
   describe "Arithmetic Operators" $ do
     it "can reduce addition" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "addition" bindingFinder coreBindings
@@ -212,7 +212,7 @@ spec = beforeAll getBindingFinderWithCoreBindings $ do
       expectationForExpression "fmapOnNothing" bindingFinder coreBindings
     it "fmap on List works" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "fmapOnList" bindingFinder coreBindings
-  describe "Some Monads are supported" $ do
+  describe "Monads are supported" $ do
     it "maybe monad works (success case)" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "monadMaybe" bindingFinder coreBindings
     it "list monad works (success case)" $ \(bindingFinder, coreBindings) -> do
@@ -291,6 +291,10 @@ spec = beforeAll getBindingFinderWithCoreBindings $ do
       expectationForExpression "enumFromThenToInt" bindingFinder coreBindings
     it "succ on double" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "succOnDouble" bindingFinder coreBindings
+  describe "Imports" $ do
+    it "other modules can be imported" $ \(bindingFinder, coreBindings) -> do
+      pendingWith "import is not yet supported"
+
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
