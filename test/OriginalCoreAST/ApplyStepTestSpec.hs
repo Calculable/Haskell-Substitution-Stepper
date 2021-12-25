@@ -93,7 +93,7 @@ spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsF
       let (reductionStepDescription, reducedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
       reducedExpression `shouldSatisfy` isApp
       reductionStepDescription `shouldSatisfy` isClassDictionaryLookupStep    
-    it "does not apply step to full reduced expression" $ \(bindingFinder, coreBindings) -> do
+    it "does not apply step to fully reduced expression" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "fullyReducedExpression"
       let result = applyStep coreBindings originalExpression
       isNothing result `shouldBe` True  
