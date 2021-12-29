@@ -57,10 +57,10 @@ instance Show ReductionStepDescription where
   show (EvaluationStep var) = "Evaluate unsteppable function/operator " ++ showOutputable var
   show CaseExpressionStep = "Reduce Case Expression"
   show PatternMatchStep = "Replace with matching pattern"
-  show (ReplaceLetStep var) = "Replace binding '" ++ showOutputable var ++ "' with definition"
+  show (ReplaceLetStep var) = "Replace '" ++ showOutputable var ++ "' with definition"
   show RemoveCohersionStep = "Remove Cohersion part from expression"
   show ApplicationExpressionStep = "Reduce function of application"
   show (ClassDictionaryLookupStep function classDictionary) = "Replace '" ++ showOutputable function ++ "' with definition from class dictionary '" ++ showOutputable classDictionary ++ "'"
   show StrictApplicationArgumentStep = "(Strict) reduce application argument"
   show (NestedReduction descriptions) = intercalate " -> " (map show descriptions)
-  show (ConstructorArgumentReductionForVisualization) = "reduction complete - reduce constructor arguments for better visualization"
+  show (ConstructorArgumentReductionForVisualization) = "Reduction complete - reduce constructor arguments for better visualization"
