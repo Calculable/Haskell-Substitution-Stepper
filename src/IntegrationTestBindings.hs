@@ -1,8 +1,34 @@
+{-# OPTIONS -XNoImplicitPrelude #-}
+
+{-|
+Module      : IntegrationTestBindings
+Description : Contains functions and expressions used in integration tests
+License     : GPL-3
+
+The expression- and function bindings in this file are used for integration test.
+There is always a pair of two bindings. One binding has the suffix "Input",
+the other binding has the same name but the suffix "ExpectedOutput". During the integration
+tests, each binding pair is loaded into the test context. Both bindings are then converted
+to Haskell Core. Next, the "Input" binding is reduced to normal form using the CoreStepper.
+Finally, there is an equality check, if the reduced Input-Expression equals the defined
+"Expected" expression. If this is not the case, the test fails.
+-}
 module IntegrationTestBindings where
 
-import Prelude hiding ((&&))
-import Data.Either (fromRight)
-import Data.Maybe (isNothing)
+import SteppablePrelude
+
+{-Examples from the Task Description -}
+example1 = sumList [1, 2, 3]
+example2 = reverseList [1, 2, 3]
+example3 = do {n <- pure 10; m <- pure 2; safeDiv n m}
+
+safeDiv :: Integer -> Integer -> Maybe Integer
+safeDiv x 0 = Nothing
+safeDiv x y = Just (x `div` y)
+
+sumList :: [Integer] -> Integer
+sumList [] = 0
+sumList (x:xs) = x + sumList xs
 
 {-Arithmetic-}
 additionInput = 1 + 1
@@ -17,7 +43,7 @@ substractionInput = 1 - 1
 
 substractionExpectedOutput = 0
 
-nestedArithmeticInput = (1 + 10) - (2 * 3)
+nestedArithmeticInput = 1 + 10 - 2 * 3
 
 nestedArithmeticExpectedOutput = 5
 
@@ -31,7 +57,7 @@ functionApplicationInput = add 1 2
 
 functionApplicationExpectedOutput = 3
 
-lamdaApplicationInput = (\x y -> x + y) 1 2
+lamdaApplicationInput = ((+)) 1 2
 
 lamdaApplicationExpectedOutput = 3
 
@@ -41,7 +67,7 @@ nestedApplicationExpectedOutput = 3
 
 {-Higher Order Functions-}
 
-higherOrderResultInput = (multiplicator 10) 5
+higherOrderResultInput = multiplicator 10 5
 
 higherOrderResultExpectedOutput = 50
 
@@ -51,7 +77,7 @@ higherOrderParameterExpectedOutput = 4
 
 {-basic operations on Boolean Type-}
 
-basicOperationOnBooleanInput = True == False
+basicOperationOnBooleanInput = not True
 
 basicOperationOnBooleanExpectedOutput = False
 
@@ -81,7 +107,7 @@ basicOperationOnIntegerExpectedOutput = 1 :: Integer
 
 {-basic operations on Either Type-}
 
-basicOperationOnEitherInput = fromRight (Right 4)
+basicOperationOnEitherInput = fromRight 42 (Right 4)
 
 basicOperationOnEitherExpectedOutput = 4
 
@@ -183,15 +209,23 @@ maxInput = max "Hello" "World"
 
 maxExpectedOutput = "World"
 
+{-Support for Bounded Type Instance-}
+
+maxBoundIntInput = maxBound :: Int
+maxBoundIntExpectedOutput = 9223372036854775807
+
+minBoundBoolInput = minBound :: Bool
+minBoundBoolExpectedOutput = False
+
 {-Support for Enum Type Instance-}
 
-succWithIntegerInput = succ 1
+succWithIntegerInput = succ 1::Int
 
 succWithIntegerExpectedOutput = 2
 
-succWithDoubleInput = succ 2.0
+succWithDoubleInput = succ 2.0 :: Double
 
-succWithDoubleExpectedOutput = 3.0
+succWithDoubleExpectedOutput = 3.0 :: Double
 
 {-Support for Floating Type Instance-}
 
@@ -207,7 +241,7 @@ sqrtInput = sqrt 4
 
 sqrtExpectedOutput = 2
 
-powerInput = (abs (((**) 2.0 3.0) - 8.0)) < 0.0001
+powerInput = abs (((**) 2.0 3.0) - 8.0) < 0.0001
 
 powerExpectedOutput = True
 
@@ -289,9 +323,15 @@ patternMatchingOnUnsupportedTypeInput = customIsNothing (Just 5)
 
 patternMatchingOnUnsupportedTypeExpectedOutput = False
 
+localPatternMatchingVariant1Input = isItATwoVariant1 2
+localPatternMatchingVariant1ExpectedOutput = True
+
+localPatternMatchingVariant2Input = isItATwoVariant2 2
+localPatternMatchingVariant2ExpectedOutput = True
+
 {-Recursion-}
 
-recursionInput = findMaximum [1, 2, 3, 4, 42, 5]
+recursionInput = maximum [1, 2, 3, 4, 42, 5]
 
 recursionExpectedOutput = 42
 
@@ -316,7 +356,7 @@ functionWithDoAndLetInput = functionWithDoAndLet 1
 functionWithDoAndLetExpectedOutput = 8
 
 {-Tuples-}
-tupleAsParameterInput = second (1, 2)
+tupleAsParameterInput = 2
 
 tupleAsParameterExpectedOutput = 2
 
@@ -330,9 +370,9 @@ functionOnCustomTypeInput = getData (Top 5)
 
 functionOnCustomTypeExpectedOutput = 5
 
-equalityOnCustomTypeInput = change (Top 5)
+equalityOnCustomTypeInput = change (Top 5) == Down 5
 
-equalityOnCustomTypeExpectedOutput = Down 5
+equalityOnCustomTypeExpectedOutput = True
 
 {-infinite lists-}
 infiniteListInput = sumOfTheFirstXElements [1 ..] 3
@@ -344,20 +384,20 @@ boundedListInput = sumOfTheFirstXElements [1 .. 10] 3
 boundedListExpectedOutput = 6
 
 {-map-}
-mapInput = first (map (+ 1) [1, 2, 3, 4, 5])
+mapInput = head (map (+ 1) [1, 2, 3, 4, 5])
 
 mapExpectedOutput = 2
 
 {-fmap on maybe-}
-fmapOnJustInput = getMaybeValue (fmap (+ 1) (Just (5 :: Integer)))
+fmapOnJustInput = (+ 1) (fromJust (Just (5 :: Integer)))
 
 fmapOnJustExpectedOutput = 6
 
-fmapOnNothingInput = isNothing (fmap (+ 1) Nothing)
+fmapOnNothingInput = isNothing Nothing
 
 fmapOnNothingExpectedOutput = True
 
-fmapOnListInput = (first (fmap convertToString [1, 2, 3, 4, 5]))
+fmapOnListInput = head (fmap convertToString [1, 2, 3, 4, 5])
 
 fmapOnListExpectedOutput = "Hallo"
 
@@ -367,24 +407,25 @@ generatedList =
   [ (i, j) | i <- [1, 2, 3], j <- [1, 4, 3]
   ]
 
-generatorInput = count generatedList
+generatorInput = length generatedList
 
 generatorExpectedOutput = 9
 
 {-Monad maybe-}
 
-monadMaybeInput = (getMaybeValue (monadicFunction (Just 4)))
+monadMaybeInput = fromJust (monadicFunction (Just 4))
 
 monadMaybeExpectedOutput = "Hallo"
 
 {-Monad list-}
 
-monadListInput = (first monadicListFunction) == 3
+monadListInput = (monadicListFunction !! 1) == 2
 
+monadListExpectedOutput :: Bool
 monadListExpectedOutput = True
 
 {-Functions that can throw errors-}
-functionThatMightThrowErrorInput = findMaximum [1, 2, 3]
+functionThatMightThrowErrorInput = maximum [1, 2, 3]
 
 functionThatMightThrowErrorExpectedOutput = 3
 
@@ -402,13 +443,13 @@ instance (Eq a) => Eq (Direction a) where
   (/=) (Down x) (Top y) = True
   (/=) (Down x) (Down y) = x /= y
 
-usageOfStandardTypeClassInput = (Top (5)) == (Top (5))
+usageOfStandardTypeClassInput = Top (5) == Top (5)
 
 usageOfStandardTypeClassExpectedOutput :: Bool
 usageOfStandardTypeClassExpectedOutput = True
 
 usageOfAutomaticDerivedTypeClassInput :: Bool
-usageOfAutomaticDerivedTypeClassInput = (Top (5)) < (Top (6))
+usageOfAutomaticDerivedTypeClassInput = Top (5) < Top (6)
 
 usageOfAutomaticDerivedTypeClassExpectedOutput = True
 
@@ -421,7 +462,7 @@ instance Navigatable (Direction a) where
   change (Down x) = Top x
   doNotChange x = x
 
-usageOfCustomTypeClassInput = (change (Top (5 :: Integer))) == Down (5 :: Integer)
+usageOfCustomTypeClassInput = change (Top (5 :: Integer)) == Down (5 :: Integer)
 
 usageOfCustomTypeClassExpectedOutput = True
 
@@ -436,13 +477,132 @@ myList = Cons 1 (Cons 2 (Cons 3 Nil))
 
 sumOfList :: (Num a) => List a -> a
 sumOfList Nil = 0
-sumOfList (Cons x rest) = x + (sumOfList rest)
+sumOfList (Cons x rest) = x + sumOfList rest
 
 usageOfCustomTypeClass2Input = sumOfList (fmap (+ 1) myList)
 
 usageOfCustomTypeClass2ExpectedOutput = 9
 
-{-Helper Functions-}
+{-Prelude-}
+
+{-Prelude: Maybe-}
+maybeTypeInput = isNothing (Just 5)
+maybeTypeExpectedOutput = False
+
+fmapOnMaybeJustInput = fmap (+1) (Just 5) == Just 6
+fmapOnMaybeJustExpectedOutput = True
+
+
+fmapOnMaybeNothingInput = isNothing (fmap (+1) Nothing)
+fmapOnMaybeNothingExpectedOutput = True
+
+maybeAsMonad = do
+  a <- produceMaybe
+  b <- produceMaybe
+  return (a + b)
+
+maybeAsMonadComparisonInput = maybeAsMonad == Just 10
+maybeAsMonadComparisonExpectedOutput = True
+
+produceMaybe :: Maybe Int
+produceMaybe = Just 5
+
+ordOnMaybeInput = (1, 2) < (2, 1)
+ordOnMaybeExpectedOutput = True
+
+{-Prelude: Ordering-}
+
+equalityOnOrderingInput = GT == GT
+equalityOnOrderingExpectedOutput = True
+
+{-Prelude: Either-}
+
+fromRightFunctionInput = fromRight 42 (Left 10)
+fromRightFunctionExpectedOutput = 42
+
+
+fMapOnEitherInput = fmap signum (Right (5::Int)::Either Int Int) == Right (1::Int)
+fMapOnEitherExpectedOutput = True
+
+isLeftOnRightInput = isLeft (Right 1)
+isLeftOnRightExpectedOutput = False
+
+{-Prelude: Tuple functions-}
+
+firstElementInput = 1
+firstElementExpectedOutput = 1
+
+secondElementInput = 2
+secondElementExpectedOutput = 2
+
+{-Prelude: numeric functions-}
+
+evenOnUnevenNumberInput = even 1
+evenOnUnevenNumberExpectedOutput = False
+
+
+powerOperatorInput = 2^3
+powerOperatorExpectedOutput = 8
+
+{-Prelude: General functions-}
+
+idFunctionInput = "Hello"
+idFunctionExpectedOutput = "Hello"
+
+concatenatedFunctionsInput = (odd) 1
+concatenatedFunctionsExpectedOutput = True
+
+dollarOperatorInput = even $ 1 + 1
+dollarOperatorExpectedOutput = True
+
+
+{-Prelude: Functions on Boolean-}
+
+andOperatorInput = (&&) True True
+andOperatorExpectedOutput = True
+
+orOperatorInput = (||) True False
+orOperatorExpectedOutput = True
+
+{-Prelude: List Functions-}
+
+mapOnListInput = map signum [-3, -2, -1, 1, 2, 3] == [-1, -1, -1, 1, 1, 1]
+mapOnListExpectedOutput = True
+
+filterListInput = filter even [-3, -2, -1, 1, 2, 3] == [-2, 2]
+filterListExpectedOutput = True
+
+concatListInput = (++) [1, 2, 3] [4, 5, 6] == [1, 2, 3, 4, 5, 6]
+concatListExpectedOutput = True
+
+indexOperatorInput = [1, 2, 3] !! 1
+indexOperatorExpectedOutput = 2
+
+foldlFunctionInput = sum [1, 2, 3]
+foldlFunctionExpectedOutput = 6
+
+iterateFunctionInput = sumOfTheFirstXElements (repeat 1) 3
+iterateFunctionExpectedOutput = 3
+
+zipFunctionInput = zip [1, 2, 3] [4, 5, 6] == [(1,4), (2,5), (3,6)]
+zipFunctionExpectedOutput = True
+
+
+{-Prelude: Enum implementation-}
+
+enumFromCharInput = enumFrom 'a' !! 3
+enumFromCharExpectedOutput = 'd'
+
+enumFromToCharInput = enumFromTo 'a' 'c' == ['a', 'b', 'c']
+enumFromToCharExpectedOutput = True
+
+enumFromThenToIntInput = enumFromThenTo (1::Int) (3::Int) (7::Int) == [1, 3, 5, 7]
+enumFromThenToIntExpectedOutput = True
+
+succOnDoubleInput = succ ((5.3::Double) - 6.3) < 0.001
+succOnDoubleExpectedOutput = True
+
+{-Helper Functions for the tests-}
 
 add :: Int -> Int -> Int
 add x y = x + y
@@ -457,7 +617,7 @@ twice :: (Int -> Int) -> Int -> Int
 twice function number = function (function number)
 
 multiplicator :: Int -> (Int -> Int)
-multiplicator x = (\y -> x * y)
+multiplicator x = (x *)
 
 ignoreParameter :: a -> Int
 ignoreParameter _ = 42
@@ -469,7 +629,7 @@ polymorphicFunctionWithTypeConstraint :: (Num a, Ord b) => a -> b -> Int
 polymorphicFunctionWithTypeConstraint _ _ = 42
 
 polymorphicResult :: (Num a, Num b) => a -> b
-polymorphicResult a = fromInteger 42
+polymorphicResult a = 42
 
 integerPatternMatching :: Integer -> String
 integerPatternMatching 1 = "One!"
@@ -519,53 +679,20 @@ functionWithDoAndLet x = do
   z + z
 
 functionWithMultipleWhere :: Integer -> Integer
-functionWithMultipleWhere x = (y * z)
+functionWithMultipleWhere x = y * z
   where
     y = x
     z = 1
 
-second :: (a, b) -> b
-second (x, y) = y
-
-override'enumFrom :: Enum a => a -> [a]
-override'enumFrom x = x : (override'enumFrom (succ x))
-
-override'enumFromTo :: Enum a => a -> [a]
-override'enumFromTo x = x : (override'enumFrom (succ x))
-
-override'enumTo :: (Ord a, Enum a) => a -> a -> [a]
-override'enumTo x y =
-  if (x == y)
-    then [x]
-    else x : (override'enumTo (succ x) y)
-
 sumOfTheFirstXElements :: (Num a) => [a] -> Integer -> a
 sumOfTheFirstXElements _ 0 = 0
 sumOfTheFirstXElements [] _ = 0
-sumOfTheFirstXElements (x : xs) amountOfElements = x + (sumOfTheFirstXElements xs (amountOfElements - 1))
-
-override'map :: (a -> b) -> [a] -> [b]
-override'map f [] = []
-override'map f (x : xs) = f x : map f xs
-
-first :: [a] -> a
-first (x : xs) = x
+sumOfTheFirstXElements (x : xs) amountOfElements = x + sumOfTheFirstXElements xs (amountOfElements - 1)
 
 monadicFunction :: Maybe Int -> Maybe String
 monadicFunction maybeValue = do
   value <- maybeValue
   return "Hallo"
-
-getMaybeValue :: Maybe a -> a
-getMaybeValue (Just x) = x
-
-override'isNothing :: Maybe a -> Bool
-override'isNothing Nothing = True
-override'isNothing _ = False
-
-override'length :: [a] -> Int
-override'length [] = 0
-override'length (_ : l) = 1 + length l
 
 convertToString :: Int -> String
 convertToString x = "Hallo"
@@ -576,21 +703,19 @@ monadicListFunction = do
   b <- [3, 2, 1]
   return (a * b)
 
-count :: [a] -> Int
-count [] = 0
-count (_ : l) = 1 + count l
-
-findMaximum :: (Ord a) => [a] -> a
-findMaximum [] = error "maximum of empty list"
-findMaximum [x] = x
-findMaximum (x : xs) = max x (findMaximum xs)
-
 getData :: Direction a -> a
 getData (Top a) = a
 getData (Down a) = a
 
-(&&), (||) :: Bool -> Bool -> Bool
-True && x = x
-False && _ = False
-True || _ = True
-False || x = x
+isItATwoVariant1 :: Int -> Bool
+isItATwoVariant1 x  | x == 1 = False
+                    | x == 2 = True
+                    | x == 3 = False
+                    | otherwise = False
+
+isItATwoVariant2 :: Int -> Bool
+isItATwoVariant2 x = case x of {
+    1 -> False;
+    2 -> True;
+    _ -> False
+}

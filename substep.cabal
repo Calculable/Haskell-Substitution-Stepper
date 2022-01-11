@@ -27,17 +27,22 @@ library
       Cli
       Compiler
       DynFlags
-      FlatCoreASTPrinter
       IntegrationTestBindings
+      IntegrationTestBindingsForApplyStepTest
+      IntegrationTestBindingsForPrettyPrinterTest
       OriginalCoreAST.CoreInformationExtractorFunctions
       OriginalCoreAST.CoreMakerFunctions
       OriginalCoreAST.CorePrettyPrinter
       OriginalCoreAST.CoreStepper
       OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
+      OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
       OriginalCoreAST.CoreStepperHelpers.CoreLookup
-      OriginalCoreAST.CoreStepperHelpers.CoreTransformator
+      OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
+      OriginalCoreAST.CoreStepperHelpers.CoreTransformer
       OriginalCoreAST.CoreStepperPrinter
       OriginalCoreAST.CoreTypeClassInstances
+      OriginalCoreAST.CoreTypeDefinitions
+      SteppablePrelude
       TraverseAST
       Utils
   other-modules:
@@ -97,6 +102,8 @@ test-suite substep-test
   main-is: Spec.hs
   other-modules:
       DataProvider.DataProvider
+      OriginalCoreAST.ApplyStepTestSpec
+      OriginalCoreAST.CorePrettyPrinterTestSpec
       OriginalCoreAST.IntegrationTestSpec
       Paths_substep
   hs-source-dirs:

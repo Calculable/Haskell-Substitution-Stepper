@@ -5,8 +5,11 @@
 {-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
+{-# OPTIONS -XNoImplicitPrelude #-}
 
 module TypeFamilySourceExample where
+
+import SteppablePrelude
 
 type Append :: forall a. [a] -> [a] -> [a]
 type family Append xs ys where

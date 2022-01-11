@@ -52,5 +52,4 @@ haddock:
     - stack --no-terminal haddock
   artifacts:
     paths:
-      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/index.html
-      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/substep.txt
+      - .stack-work/dist/x86_64-linux/Cabal-3.4.0.0/doc/html/substep/
