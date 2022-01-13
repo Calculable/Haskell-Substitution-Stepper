@@ -1,24 +1,23 @@
-{-|
-Module      : IntegrationTestSpec
-Description : Hspec integration tests
-License     : GPL-3
-
-Each tests loads two expressions defined in "IntegrationTestBindings.hs", an
-Input-Expression and an Exprected-Output-Expression.
-The "Input" binding is reduced to normal form using the CoreStepper.
-Finally, there is an equality check, if the reduced Input-Expression equals the defined
-"ExpectedOutput" expression. If this is not the case, the test fails.
--}
+-- |
+-- Module      : IntegrationTestSpec
+-- Description : Hspec integration tests
+-- License     : GPL-3
+--
+-- Each tests loads two expressions defined in "IntegrationTestBindings.hs", an
+-- Input-Expression and an Exprected-Output-Expression.
+-- The "Input" binding is reduced to normal form using the CoreStepper.
+-- Finally, there is an equality check, if the reduced Input-Expression equals the defined
+-- "ExpectedOutput" expression. If this is not the case, the test fails.
 module CoreAST.IntegrationTestSpec where
 
+import CoreAST.Helpers.Transformer
+  ( prepareExpressionArgumentForEvaluation,
+  )
+import CoreAST.Stepper (reduceToNormalForm)
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins (Expr, Var)
-import CoreAST.Stepper (reduceToNormalForm)
-import CoreAST.Helpers.Transformer
-  ( prepareExpressionArgumentForEvaluation,
-  )
 import Test.Hspec
   ( Expectation,
     Spec,
@@ -294,7 +293,6 @@ spec = beforeAll (getBindingFinderWithCoreBindings "test/TestBindings.hs") $ do
   describe "Imports" $ do
     it "other modules can be imported" $ \(bindingFinder, coreBindings) -> do
       pendingWith "import is not yet supported"
-
 
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do

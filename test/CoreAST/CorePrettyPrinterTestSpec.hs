@@ -1,19 +1,17 @@
-{-|
-Module      : CorePrettyPrinterTestSpec
-Description : Hspec tests for the pretty printer
-License     : GPL-3
-
-Each tests loads an expressions defined in "IntegrationTestBindingsForPrettyPrinterTest.hs".
-The "Input" expression is then shown as a string and compared with the expected result.
--}
+-- |
+-- Module      : CorePrettyPrinterTestSpec
+-- Description : Hspec tests for the pretty printer
+-- License     : GPL-3
+--
+-- Each tests loads an expressions defined in "IntegrationTestBindingsForPrettyPrinterTest.hs".
+-- The "Input" expression is then shown as a string and compared with the expected result.
 module CoreAST.CorePrettyPrinterTestSpec where
 
+import CoreAST.PrettyPrinter (prettyPrintToOriginalHaskellCoreString, toHaskellLikeString)
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins (Expr, Var)
-import CoreAST.PrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
-
 import Test.Hspec
   ( Expectation,
     Spec,

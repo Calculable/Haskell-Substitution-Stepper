@@ -1,26 +1,72 @@
 {-# OPTIONS -XNoImplicitPrelude #-}
 
-{-|
-Module      : IntegrationTestBindings
-Description : Contains functions and expressions used in integration tests
-License     : GPL-3
-
-The expression- and function bindings in this file are used for integration test.
-There is always a pair of two bindings. One binding has the suffix "Input",
-the other binding has the same name but the suffix "ExpectedOutput". During the integration
-tests, each binding pair is loaded into the test context. Both bindings are then converted
-to Haskell Core. Next, the "Input" binding is reduced to normal form using the CoreStepper.
-Finally, there is an equality check, if the reduced Input-Expression equals the defined
-"Expected" expression. If this is not the case, the test fails.
--}
+-- |
+-- Module      : IntegrationTestBindings
+-- Description : Contains functions and expressions used in integration tests
+-- License     : GPL-3
+--
+-- The expression- and function bindings in this file are used for integration test.
+-- There is always a pair of two bindings. One binding has the suffix "Input",
+-- the other binding has the same name but the suffix "ExpectedOutput". During the integration
+-- tests, each binding pair is loaded into the test context. Both bindings are then converted
+-- to Haskell Core. Next, the "Input" binding is reduced to normal form using the CoreStepper.
+-- Finally, there is an equality check, if the reduced Input-Expression equals the defined
+-- "Expected" expression. If this is not the case, the test fails.
 module TestBindings where
 
 import SteppablePrelude
+  ( Applicative (pure),
+    Bool (..),
+    Bounded (maxBound, minBound),
+    Char,
+    Double,
+    Either (..),
+    Enum (enumFrom, enumFromThenTo, enumFromTo, succ),
+    Eq (..),
+    Floating (cos, exp, log, sqrt, (**)),
+    Fractional (recip, (/)),
+    Functor (fmap),
+    Int,
+    Integer,
+    Integral (div, mod),
+    Maybe (..),
+    Monad (return),
+    Num (abs, signum, (*), (+), (-)),
+    Ord (max, (<), (<=), (>), (>=)),
+    Ordering (GT),
+    Rational,
+    RealFrac (floor),
+    String,
+    even,
+    filter,
+    fromJust,
+    fromRight,
+    head,
+    isLeft,
+    isNothing,
+    length,
+    map,
+    maximum,
+    not,
+    odd,
+    otherwise,
+    repeat,
+    sum,
+    zip,
+    (!!),
+    ($),
+    (&&),
+    (++),
+    (^),
+    (||),
+  )
 
 {-Examples from the Task Description -}
 example1 = sumList [1, 2, 3]
+
 example2 = reverseList [1, 2, 3]
-example3 = do {n <- pure 10; m <- pure 2; safeDiv n m}
+
+example3 = do n <- pure 10; m <- pure 2; safeDiv n m
 
 safeDiv :: Integer -> Integer -> Maybe Integer
 safeDiv x 0 = Nothing
@@ -28,7 +74,7 @@ safeDiv x y = Just (x `div` y)
 
 sumList :: [Integer] -> Integer
 sumList [] = 0
-sumList (x:xs) = x + sumList xs
+sumList (x : xs) = x + sumList xs
 
 {-Arithmetic-}
 additionInput = 1 + 1
@@ -212,14 +258,16 @@ maxExpectedOutput = "World"
 {-Support for Bounded Type Instance-}
 
 maxBoundIntInput = maxBound :: Int
+
 maxBoundIntExpectedOutput = 9223372036854775807
 
 minBoundBoolInput = minBound :: Bool
+
 minBoundBoolExpectedOutput = False
 
 {-Support for Enum Type Instance-}
 
-succWithIntegerInput = succ 1::Int
+succWithIntegerInput = succ 1 :: Int
 
 succWithIntegerExpectedOutput = 2
 
@@ -324,9 +372,11 @@ patternMatchingOnUnsupportedTypeInput = customIsNothing (Just 5)
 patternMatchingOnUnsupportedTypeExpectedOutput = False
 
 localPatternMatchingVariant1Input = isItATwoVariant1 2
+
 localPatternMatchingVariant1ExpectedOutput = True
 
 localPatternMatchingVariant2Input = isItATwoVariant2 2
+
 localPatternMatchingVariant2ExpectedOutput = True
 
 {-Recursion-}
@@ -487,13 +537,15 @@ usageOfCustomTypeClass2ExpectedOutput = 9
 
 {-Prelude: Maybe-}
 maybeTypeInput = isNothing (Just 5)
+
 maybeTypeExpectedOutput = False
 
-fmapOnMaybeJustInput = fmap (+1) (Just 5) == Just 6
+fmapOnMaybeJustInput = fmap (+ 1) (Just 5) == Just 6
+
 fmapOnMaybeJustExpectedOutput = True
 
+fmapOnMaybeNothingInput = isNothing (fmap (+ 1) Nothing)
 
-fmapOnMaybeNothingInput = isNothing (fmap (+1) Nothing)
 fmapOnMaybeNothingExpectedOutput = True
 
 maybeAsMonad = do
@@ -502,104 +554,126 @@ maybeAsMonad = do
   return (a + b)
 
 maybeAsMonadComparisonInput = maybeAsMonad == Just 10
+
 maybeAsMonadComparisonExpectedOutput = True
 
 produceMaybe :: Maybe Int
 produceMaybe = Just 5
 
 ordOnMaybeInput = (1, 2) < (2, 1)
+
 ordOnMaybeExpectedOutput = True
 
 {-Prelude: Ordering-}
 
 equalityOnOrderingInput = GT == GT
+
 equalityOnOrderingExpectedOutput = True
 
 {-Prelude: Either-}
 
 fromRightFunctionInput = fromRight 42 (Left 10)
+
 fromRightFunctionExpectedOutput = 42
 
+fMapOnEitherInput = fmap signum (Right (5 :: Int) :: Either Int Int) == Right (1 :: Int)
 
-fMapOnEitherInput = fmap signum (Right (5::Int)::Either Int Int) == Right (1::Int)
 fMapOnEitherExpectedOutput = True
 
 isLeftOnRightInput = isLeft (Right 1)
+
 isLeftOnRightExpectedOutput = False
 
 {-Prelude: Tuple functions-}
 
 firstElementInput = 1
+
 firstElementExpectedOutput = 1
 
 secondElementInput = 2
+
 secondElementExpectedOutput = 2
 
 {-Prelude: numeric functions-}
 
 evenOnUnevenNumberInput = even 1
+
 evenOnUnevenNumberExpectedOutput = False
 
+powerOperatorInput = 2 ^ 3
 
-powerOperatorInput = 2^3
 powerOperatorExpectedOutput = 8
 
 {-Prelude: General functions-}
 
 idFunctionInput = "Hello"
+
 idFunctionExpectedOutput = "Hello"
 
 concatenatedFunctionsInput = (odd) 1
+
 concatenatedFunctionsExpectedOutput = True
 
 dollarOperatorInput = even $ 1 + 1
-dollarOperatorExpectedOutput = True
 
+dollarOperatorExpectedOutput = True
 
 {-Prelude: Functions on Boolean-}
 
 andOperatorInput = (&&) True True
+
 andOperatorExpectedOutput = True
 
 orOperatorInput = (||) True False
+
 orOperatorExpectedOutput = True
 
 {-Prelude: List Functions-}
 
 mapOnListInput = map signum [-3, -2, -1, 1, 2, 3] == [-1, -1, -1, 1, 1, 1]
+
 mapOnListExpectedOutput = True
 
 filterListInput = filter even [-3, -2, -1, 1, 2, 3] == [-2, 2]
+
 filterListExpectedOutput = True
 
 concatListInput = (++) [1, 2, 3] [4, 5, 6] == [1, 2, 3, 4, 5, 6]
+
 concatListExpectedOutput = True
 
 indexOperatorInput = [1, 2, 3] !! 1
+
 indexOperatorExpectedOutput = 2
 
 foldlFunctionInput = sum [1, 2, 3]
+
 foldlFunctionExpectedOutput = 6
 
 iterateFunctionInput = sumOfTheFirstXElements (repeat 1) 3
+
 iterateFunctionExpectedOutput = 3
 
-zipFunctionInput = zip [1, 2, 3] [4, 5, 6] == [(1,4), (2,5), (3,6)]
-zipFunctionExpectedOutput = True
+zipFunctionInput = zip [1, 2, 3] [4, 5, 6] == [(1, 4), (2, 5), (3, 6)]
 
+zipFunctionExpectedOutput = True
 
 {-Prelude: Enum implementation-}
 
 enumFromCharInput = enumFrom 'a' !! 3
+
 enumFromCharExpectedOutput = 'd'
 
 enumFromToCharInput = enumFromTo 'a' 'c' == ['a', 'b', 'c']
+
 enumFromToCharExpectedOutput = True
 
-enumFromThenToIntInput = enumFromThenTo (1::Int) (3::Int) (7::Int) == [1, 3, 5, 7]
+enumFromThenToIntInput = enumFromThenTo (1 :: Int) (3 :: Int) (7 :: Int) == [1, 3, 5, 7]
+
 enumFromThenToIntExpectedOutput = True
 
-succOnDoubleInput = succ ((5.3::Double) - 6.3) < 0.001
+succOnDoubleInput = succ ((5.3 :: Double) - 6.3) < 0.001
+
 succOnDoubleExpectedOutput = True
 
 {-Helper Functions for the tests-}
@@ -708,14 +782,14 @@ getData (Top a) = a
 getData (Down a) = a
 
 isItATwoVariant1 :: Int -> Bool
-isItATwoVariant1 x  | x == 1 = False
-                    | x == 2 = True
-                    | x == 3 = False
-                    | otherwise = False
+isItATwoVariant1 x
+  | x == 1 = False
+  | x == 2 = True
+  | x == 3 = False
+  | otherwise = False
 
 isItATwoVariant2 :: Int -> Bool
-isItATwoVariant2 x = case x of {
-    1 -> False;
-    2 -> True;
-    _ -> False
-}
+isItATwoVariant2 x = case x of
+  1 -> False
+  2 -> True
+  _ -> False
