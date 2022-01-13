@@ -17,7 +17,7 @@ import GHC.Plugins
 import CoreAST.PrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
 import CoreAST.Stepper (applyStep)
 import CoreAST.Helpers.TraceHelper
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 import Data.Maybe
 

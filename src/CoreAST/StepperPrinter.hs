@@ -22,7 +22,7 @@ import CoreAST.InformationExtractor
 import CoreAST.PrettyPrinter
 import CoreAST.Stepper
 import CoreAST.Helpers.Transformer
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 import CoreAST.Helpers.Lookup
 
 type VerbosityLevel = Maybe Integer

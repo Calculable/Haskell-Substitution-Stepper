@@ -12,7 +12,7 @@ import Data.List
 import GHC.Plugins
 import Utils
 import GHC.Core.TyCo.Rep
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 unsteppableFunctionPrefix = "unsteppableFunction'"
 

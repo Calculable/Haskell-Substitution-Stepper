@@ -35,7 +35,7 @@ import CoreAST.StepperPrinter
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 

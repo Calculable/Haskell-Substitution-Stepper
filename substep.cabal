@@ -37,7 +37,7 @@ library
       CoreAST.Stepper
       CoreAST.StepperPrinter
       CoreAST.TypeClassInstances
-      CoreAST.TypeDefs
+      CoreAST.TypeDefinitions
       DynFlags
       SteppablePrelude
       TraverseAST

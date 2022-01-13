@@ -13,7 +13,7 @@ import Compiler
 import GHC.Plugins
 import CoreAST.Helpers.Lookup
 import CoreAST.StepperPrinter
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 -- |Provides a function that returns a CoreExpression for a given (function) name
 -- this function is used inside test cases to easily optain individual

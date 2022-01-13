@@ -3,7 +3,7 @@ Module      : CoreTypeDefinitions
 Description : Contains Type aliases
 License     : GPL-3
 -}
-module CoreAST.TypeDefs where
+module CoreAST.TypeDefinitions where
 import GHC.Plugins
 import Utils
 import Data.List

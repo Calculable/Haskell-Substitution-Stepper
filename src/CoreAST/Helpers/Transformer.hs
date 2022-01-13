@@ -10,7 +10,7 @@ module CoreAST.Helpers.Transformer (convertFunctionApplicationWithArgumentListTo
 import GHC.Plugins
 
 import CoreAST.InformationExtractor
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 import Utils
 

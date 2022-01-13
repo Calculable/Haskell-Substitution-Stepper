@@ -19,7 +19,7 @@ import CoreAST.Helpers.EvaluatorHelper
 import CoreAST.TypeClassInstances
 import CoreAST.MakerFunctions
 import CoreAST.Helpers.Transformer
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 import Data.Char
 import Utils

@@ -18,7 +18,7 @@ import CoreAST.Helpers.Lookup
 import CoreAST.Helpers.Transformer
 import Utils
 import Data.List
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 -- |the maximum amount of reductions to make for the conversion from head normal form to normal form until an error is shown (infinite-loop prevention) 
 

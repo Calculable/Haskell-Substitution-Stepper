@@ -18,7 +18,7 @@ import Utils
 import CoreAST.Helpers.Transformer
 
 import CoreAST.TypeClassInstances
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 overrideFunctionPrefix = "override'"
 

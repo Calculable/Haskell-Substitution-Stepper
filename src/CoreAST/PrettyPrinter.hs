@@ -12,7 +12,7 @@ import Data.List
 import CoreAST.InformationExtractor
 import CoreAST.TypeClassInstances
 import CoreAST.Helpers.Transformer
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 import GHC.Core.DataCon
 import CoreAST.Helpers.TraceHelper
 

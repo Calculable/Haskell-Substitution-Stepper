@@ -15,7 +15,7 @@ import Debug.Trace
 import CoreAST.Helpers.Transformer
 import Data.Maybe
 import CoreAST.InformationExtractor
-import CoreAST.TypeDefs
+import CoreAST.TypeDefinitions
 
 {-Functor and Maybe for List-}
 
