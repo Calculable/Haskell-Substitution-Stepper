@@ -1,27 +1,40 @@
-{-|
-Module      : ApplyStepTestSpec
-Description : Hspec tests for the stepper
-License     : GPL-3
+-- |
+-- Module      : ApplyStepTestSpec
+-- Description : Hspec tests for the stepper
+-- License     : GPL-3
+--
+-- Each tests loads an expressions defined in "IntegrationTestBindingsForApplyStepTest.hs".
+-- For each expression, the function "apply step" is applied. Then
+-- it is checked if the resulting "reduced expression" is as expected. Also
+-- each reduction reduces a "step description" which is checked too
+module CoreAST.ApplyStepTestSpec where
 
-Each tests loads an expressions defined in "IntegrationTestBindingsForApplyStepTest.hs".
-For each expression, the function "apply step" is applied. Then
-it is checked if the resulting "reduced expression" is as expected. Also 
-each reduction reduces a "step description" which is checked too
--}
-module OriginalCoreAST.ApplyStepTestSpec where
-
+import CoreAST.Helpers.TraceHelper ()
+import CoreAST.PrettyPrinter (prettyPrintToOriginalHaskellCoreString, toHaskellLikeString)
+import CoreAST.Stepper (applyStep)
+import CoreAST.TypeDefinitions
+  ( ReductionStepDescription
+      ( ApplicationExpressionStep,
+        ApplicationStep,
+        CaseExpressionStep,
+        ClassDictionaryLookupStep,
+        DeltaReductionStep,
+        EvaluationStep,
+        NestedReduction,
+        PatternMatchStep,
+        ReplaceLetStep,
+        StrictApplicationArgumentStep
+      ),
+  )
+import Data.Maybe (fromJust, isNothing)
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins
-import OriginalCoreAST.CorePrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
-import OriginalCoreAST.CoreStepper (applyStep)
-import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
-import OriginalCoreAST.CoreTypeDefinitions
-
-import Data.Maybe
-
-
+  ( CoreExpr,
+    Expr (App, Case, Lam, Lit, Var),
+    Var,
+  )
 import Test.Hspec
   ( Expectation,
     Spec,
@@ -30,13 +43,13 @@ import Test.Hspec
     it,
     pendingWith,
     shouldBe,
-    shouldSatisfy
+    shouldSatisfy,
   )
 
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForApplyStepTest.hs") $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "test/ApplyStepBindings.hs") $ do
   describe "Apply Step" $ do
     it "apply step to function reference var" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "functionReference"
@@ -49,57 +62,55 @@ spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsF
       let (_, twoTimesreducedExpression, _) = fromJust (applyStep coreBindings reducedExpression)
       let (thirdReductionStepDescription, threeTimesreducedExpression, _) = fromJust (applyStep coreBindings twoTimesreducedExpression)
       threeTimesreducedExpression `shouldSatisfy` isLiteral
-      thirdReductionStepDescription `shouldSatisfy` isApplicationStep      
+      thirdReductionStepDescription `shouldSatisfy` isApplicationStep
     it "apply step to case" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "caseWithNonReducedExpression"
       let (_, reducedExpression, _) = fromJust (applyStep coreBindings originalExpression)
       let (secondReductionStepDescription, reducedTwiceExpression, _) = fromJust (applyStep coreBindings reducedExpression)
       reducedTwiceExpression `shouldSatisfy` isCase
-      secondReductionStepDescription `shouldSatisfy` isCaseExpressionStep   
+      secondReductionStepDescription `shouldSatisfy` isCaseExpressionStep
       let (thirdReductionStepDescription, reducedThreeTimesExpression, _) = fromJust (applyStep coreBindings reducedTwiceExpression)
       reducedThreeTimesExpression `shouldSatisfy` isVar
-      thirdReductionStepDescription `shouldSatisfy` isPatternMatchStep   
+      thirdReductionStepDescription `shouldSatisfy` isPatternMatchStep
     it "apply step to non-recursive let" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "nonRecursiveLetExpression"
       let (firstReductionStepDescription, reducedExpression, _) = fromJust (applyStep coreBindings originalExpression)
       let (secondReductionStepDescription, secondreducedExpression, _) = fromJust (applyStep coreBindings reducedExpression)
       reducedExpression `shouldSatisfy` isApp
       secondreducedExpression `shouldSatisfy` isLiteral
-      firstReductionStepDescription `shouldSatisfy` isStrictApplicationArgumentStep  
-      secondReductionStepDescription `shouldSatisfy` isEvaluationStep   
+      firstReductionStepDescription `shouldSatisfy` isStrictApplicationArgumentStep
+      secondReductionStepDescription `shouldSatisfy` isEvaluationStep
     it "apply step to recursive let" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "recursiveLetExpression"
       let (reductionStepDescription, reducedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
       reducedExpression `shouldSatisfy` isApp
-      reductionStepDescription `shouldSatisfy` isReplaceLetStep         
+      reductionStepDescription `shouldSatisfy` isReplaceLetStep
       length coreBindings + 1 `shouldBe` length newBindings
     it "apply step to nested unsteppable expression" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "nestedUnsteppableExpression"
       let (reductionStepDescription, reducedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
       reducedExpression `shouldSatisfy` isApp
-      reductionStepDescription `shouldSatisfy` isStrictApplicationArgumentStep         
+      reductionStepDescription `shouldSatisfy` isStrictApplicationArgumentStep
     it "evaluate unsteppable expression" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "unsteppableExpression"
       let (reductionStepDescription, reducedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
       reducedExpression `shouldSatisfy` isLiteral
-      reductionStepDescription `shouldSatisfy` isEvaluationStep      
+      reductionStepDescription `shouldSatisfy` isEvaluationStep
     it "apply step to expression with reducable function" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "expressionWithReducableFunction"
       let (reductionStepDescription, reducedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
       reducedExpression `shouldSatisfy` isApp
-      reductionStepDescription `shouldSatisfy` isApplicationExpressionStep    
+      reductionStepDescription `shouldSatisfy` isApplicationExpressionStep
     it "apply step to expression with function from class dictionary" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "applicationWithFunctionFromClassDictionary"
       let (reductionStepDescription, reducedExpression, newBindings) = fromJust (applyStep coreBindings originalExpression)
       reducedExpression `shouldSatisfy` isApp
-      reductionStepDescription `shouldSatisfy` isClassDictionaryLookupStep    
+      reductionStepDescription `shouldSatisfy` isClassDictionaryLookupStep
     it "does not apply step to fully reduced expression" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "fullyReducedExpression"
       let result = applyStep coreBindings originalExpression
-      isNothing result `shouldBe` True  
-
-  where      
-
+      isNothing result `shouldBe` True
+  where
     {-Helper predicate functions -}
 
     isALamda :: CoreExpr -> Bool

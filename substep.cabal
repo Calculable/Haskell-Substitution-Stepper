@@ -6,42 +6,33 @@ cabal-version: 1.12
 
 name:           substep
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/substep#readme>
-homepage:       https://github.com/githubuser/substep#readme
-bug-reports:    https://github.com/githubuser/substep/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2021 Author name here
-license:        BSD3
+description:    Please see the manual on <http://haskell-substitution-stepper.pages.gitlab.ost.ch/product-docu/index.html>
+author:         haskell-substitution-stepper
+maintainer:     haskell-substitution-stepper
+copyright:      2021 haskell-substitution-stepper
+license:        GPL-3
 build-type:     Simple
 extra-source-files:
     README.md
     ChangeLog.md
 
-source-repository head
-  type: git
-  location: https://github.com/githubuser/substep
-
 library
   exposed-modules:
       Cli
       Compiler
+      CoreAST.Helpers.Evaluator
+      CoreAST.Helpers.EvaluatorHelper
+      CoreAST.Helpers.Lookup
+      CoreAST.Helpers.TraceHelper
+      CoreAST.Helpers.Transformer
+      CoreAST.InformationExtractor
+      CoreAST.MakerFunctions
+      CoreAST.PrettyPrinter
+      CoreAST.Stepper
+      CoreAST.StepperPrinter
+      CoreAST.TypeClassInstances
+      CoreAST.TypeDefinitions
       DynFlags
-      IntegrationTestBindings
-      IntegrationTestBindingsForApplyStepTest
-      IntegrationTestBindingsForPrettyPrinterTest
-      OriginalCoreAST.CoreInformationExtractorFunctions
-      OriginalCoreAST.CoreMakerFunctions
-      OriginalCoreAST.CorePrettyPrinter
-      OriginalCoreAST.CoreStepper
-      OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
-      OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
-      OriginalCoreAST.CoreStepperHelpers.CoreLookup
-      OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
-      OriginalCoreAST.CoreStepperHelpers.CoreTransformer
-      OriginalCoreAST.CoreStepperPrinter
-      OriginalCoreAST.CoreTypeClassInstances
-      OriginalCoreAST.CoreTypeDefinitions
       SteppablePrelude
       TraverseAST
       Utils
@@ -69,7 +60,7 @@ library
     , text
   default-language: Haskell2010
 
-executable substep-exe
+executable substep
   main-is: Main.hs
   other-modules:
       Paths_substep
@@ -101,10 +92,13 @@ test-suite substep-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ApplyStepBindings
+      CoreAST.ApplyStepTestSpec
+      CoreAST.CorePrettyPrinterTestSpec
+      CoreAST.IntegrationTestSpec
       DataProvider.DataProvider
-      OriginalCoreAST.ApplyStepTestSpec
-      OriginalCoreAST.CorePrettyPrinterTestSpec
-      OriginalCoreAST.IntegrationTestSpec
+      PrettyPrinterBindings
+      TestBindings
       Paths_substep
   hs-source-dirs:
       test

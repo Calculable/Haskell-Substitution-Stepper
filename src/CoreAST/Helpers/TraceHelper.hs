@@ -10,12 +10,22 @@ Note: Tracing statements should not be used in the final version.
 Tracing statements have side-effects (printing) but do not have the 
 "IO" type signature and are thus not pure
 -}
-module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper where
+module CoreAST.Helpers.TraceHelper where
 
 import GHC.Plugins
+    ( trace,
+      Var(varName, varType),
+      CoreExpr,
+      Type,
+      Expr(..),
+      isId,
+      isTcTyVar,
+      isTyVar )
 import GHC.Core.TyCo.Rep
-import Utils
-import Debug.Trace
+    ( Type(CoercionTy, TyVarTy, AppTy, TyConApp, ForAllTy, FunTy,
+           LitTy, CastTy) )
+import Utils ( showOutputable )
+import Debug.Trace ( trace )
 
 -- |traces an expression together with a comment string
 traceExpression :: String -> CoreExpr -> CoreExpr

@@ -1,19 +1,17 @@
-{-|
-Module      : CorePrettyPrinterTestSpec
-Description : Hspec tests for the pretty printer
-License     : GPL-3
+-- |
+-- Module      : CorePrettyPrinterTestSpec
+-- Description : Hspec tests for the pretty printer
+-- License     : GPL-3
+--
+-- Each tests loads an expressions defined in "IntegrationTestBindingsForPrettyPrinterTest.hs".
+-- The "Input" expression is then shown as a string and compared with the expected result.
+module CoreAST.CorePrettyPrinterTestSpec where
 
-Each tests loads an expressions defined in "IntegrationTestBindingsForPrettyPrinterTest.hs".
-The "Input" expression is then shown as a string and compared with the expected result.
--}
-module OriginalCoreAST.CorePrettyPrinterTestSpec where
-
+import CoreAST.PrettyPrinter (prettyPrintToOriginalHaskellCoreString, toHaskellLikeString)
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins (Expr, Var)
-import OriginalCoreAST.CorePrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
-
 import Test.Hspec
   ( Expectation,
     Spec,
@@ -27,7 +25,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForPrettyPrinterTest.hs") $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "test/PrettyPrinterBindings.hs") $ do
   describe "Pretty Print like Haskell" $ do
     it "pretty-prints multi argument lamda" $ \(bindingFinder, coreBindings) -> do
       let expressionString = toHaskellLikeString False (bindingFinder "multiArgumentLamda")

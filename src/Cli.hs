@@ -6,15 +6,17 @@
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 
-{-|
-Module      : Cli
-Description : Methods for the Cli-Frontend of the stepper
-License     : GPL-3
--}
+-- |
+-- Module      : Cli
+-- Description : Methods for the Cli-Frontend of the stepper
+-- License     : GPL-3
 module Cli (runCli, dispatch) where
 
 import Compiler (compileToCore, getCoreProgram, writeDump)
-
+import CoreAST.StepperPrinter
+  ( printCoreStepByStepReductionForEveryBinding,
+  )
+import CoreAST.TypeDefinitions ()
 import Options.Generic
   ( Generic,
     Modifiers (shortNameModifier),
@@ -29,13 +31,9 @@ import Options.Generic
     type (:::),
     type (<?>),
   )
-import OriginalCoreAST.CoreStepperPrinter
-  ( printCoreStepByStepReductionForEveryBinding,
-  )
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
-import OriginalCoreAST.CoreTypeDefinitions
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
@@ -74,38 +72,38 @@ modifiers = defaultModifiers {shortNameModifier = firstLetter}
 
 type Invocation = SubStep Unwrapped
 
--- |runs the CLI frontend
+-- | runs the CLI frontend
 runCli :: IO Invocation
 runCli = unwrapRecord subStepDescription
 
--- |dispatches the action chosen by the user
+-- | dispatches the action chosen by the user
 dispatch :: Invocation -> IO ()
 dispatch (Step p f v) = stepF p f v
 dispatch (Print p f) = printF p f
 dispatch (List p) = listF p
 dispatch (Dump p) = dumpF p
 
--- |dumps the different representations of the GHC pipeline from the users Haskell input file into textfiles
--- (see folder /dump)
+-- | dumps the different representations of the GHC pipeline from the users Haskell input file into textfiles
+--  (see folder /dump)
 dumpF :: [Char] -> IO ()
 dumpF fp = do
   cr <- compileToCore fp
   writeDump cr
 
--- |lists all the bindings from the Haskell input file provided by the user
+-- | lists all the bindings from the Haskell input file provided by the user
 listF :: [Char] -> IO ()
 listF fp = do
   cr <- compileToCore fp
   listTopLevelFunctions $ getCoreProgram cr
 
--- |prints the Core representation the Haskell input file provided by the user
+-- | prints the Core representation the Haskell input file provided by the user
 printF :: [Char] -> Maybe [Char] -> IO ()
 printF fp fn = do
   cr <- compileToCore fp
   printCore $ getCoreProgram cr
 
--- |prints the step by step reduction until head normal form and normal form
--- for every binding provided by the user in the Haskell input file
+-- | prints the step by step reduction until head normal form and normal form
+--  for every binding provided by the user in the Haskell input file
 stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
 stepF fp fn v = do
   cr <- compileToCore fp
