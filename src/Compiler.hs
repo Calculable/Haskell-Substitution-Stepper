@@ -1,10 +1,9 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-{-|
-Module      : Compiler
-Description : To compile the users Haskell input file into different GHC stages and finally into Haskell Core
-License     : GPL-3
--}
+-- |
+-- Module      : Compiler
+-- Description : To compile the users Haskell input file into different GHC stages and finally into Haskell Core
+-- License     : GPL-3
 module Compiler (compileToCore, writeDump, getCoreProgram) where
 
 import Control.Monad.IO.Class (MonadIO (liftIO))
@@ -56,11 +55,11 @@ data CompilationResult = CompilationResult
     debugInfo :: Map Text Text
   }
 
--- |extracts the Core program from the compilation result
+-- | extracts the Core program from the compilation result
 getCoreProgram :: CompilationResult -> CoreProgram
 getCoreProgram = coreProgram
 
--- |takes a file and compiles it to Core
+-- | takes a file and compiles it to Core
 compileToCore :: FilePath -> IO CompilationResult
 compileToCore filePath = runGhc (Just libdir) $ do
   dFlags <- getSessionDynFlags
@@ -106,7 +105,7 @@ compileToCore filePath = runGhc (Just libdir) $ do
 debugDirectoryPath :: String
 debugDirectoryPath = "dump"
 
--- |writes a cuompilation result into a file
+-- | writes a cuompilation result into a file
 writeDump :: CompilationResult -> IO ()
 writeDump cr = do
   debugDirExists <- doesDirectoryExist debugDirectoryPath

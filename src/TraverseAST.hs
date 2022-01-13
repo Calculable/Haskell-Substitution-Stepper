@@ -1,11 +1,10 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-{-|
-Module      : TraverseAST
-Description : Traverses a generic abstract syntax tree
-License     : GPL-3
--}
+-- |
+-- Module      : TraverseAST
+-- Description : Traverses a generic abstract syntax tree
+-- License     : GPL-3
 module TraverseAST
   ( traverseAst,
   )
