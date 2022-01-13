@@ -1,25 +1,33 @@
-{-|
-Module      : CoreTypeDefinitions
-Description : Contains Type aliases
-License     : GPL-3
--}
+-- |
+-- Module      : CoreTypeDefinitions
+-- Description : Contains Type aliases
+-- License     : GPL-3
 module CoreAST.TypeDefinitions where
-import GHC.Plugins
-import Utils
-import Data.List
+
+import Data.List (intercalate)
+import GHC.Plugins (CoreExpr, Expr, Var)
+import Utils (showOutputable)
 
 type Binding = (Var, Expr Var)
-type Reducer = (Expr Var -> Maybe (Expr Var))
-type StepResult = (ReductionStepDescription, Expr Var, [Binding])
-type Argument = Expr Var
-type Function = Expr Var
-type FunctionReference = Var
-type FunctionName = String
-data PrintingStyle 
-  = CoreStyle 
-  | HaskellStyle deriving (Eq, Show)
 
-data ReductionSuccessfulFlag 
+type Reducer = (Expr Var -> Maybe (Expr Var))
+
+type StepResult = (ReductionStepDescription, Expr Var, [Binding])
+
+type Argument = Expr Var
+
+type Function = Expr Var
+
+type FunctionReference = Var
+
+type FunctionName = String
+
+data PrintingStyle
+  = CoreStyle
+  | HaskellStyle
+  deriving (Eq, Show)
+
+data ReductionSuccessfulFlag
   = Success
   | NoReductionRule
   | StoppedToPreventInfiniteLoop
@@ -36,11 +44,10 @@ data ReductionStepDescription
   | ClassDictionaryLookupStep FunctionReference FunctionReference
   | StrictApplicationArgumentStep --not real Core behaviour but used for unsteppable functions
   | ConstructorArgumentReductionForVisualization --not real Core behaviour but used for Visualization, for example to reduce expressions like (Maybe (1 + 1))
-  | NestedReduction [ReductionStepDescription] 
+  | NestedReduction [ReductionStepDescription]
 
-
-data StepperOutputConfiguration = StepperOutputConfiguration { 
-    printingStyle :: PrintingStyle,
+data StepperOutputConfiguration = StepperOutputConfiguration
+  { printingStyle :: PrintingStyle,
     showComments :: Bool,
     showDeltaReductionStep :: Bool,
     showLamdaApplicationStep :: Bool,
