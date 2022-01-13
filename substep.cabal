@@ -6,21 +6,15 @@ cabal-version: 1.12
 
 name:           substep
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/substep#readme>
-homepage:       https://github.com/githubuser/substep#readme
-bug-reports:    https://github.com/githubuser/substep/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2021 Author name here
-license:        BSD3
+description:    Please see the manual on <http://haskell-substitution-stepper.pages.gitlab.ost.ch/product-docu/index.html>
+author:         haskell-substitution-stepper
+maintainer:     haskell-substitution-stepper
+copyright:      2021 haskell-substitution-stepper
+license:        GPL-3
 build-type:     Simple
 extra-source-files:
     README.md
     ChangeLog.md
-
-source-repository head
-  type: git
-  location: https://github.com/githubuser/substep
 
 library
   exposed-modules:
