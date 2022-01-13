@@ -11,9 +11,9 @@ module DataProvider.DataProvider (getBindingFinderWithCoreBindings) where
 
 import Compiler
 import GHC.Plugins
-import OriginalCoreAST.CoreStepperHelpers.CoreLookup
-import OriginalCoreAST.CoreStepperPrinter
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.Helpers.Lookup
+import CoreAST.StepperPrinter
+import CoreAST.TypeDefs
 
 -- |Provides a function that returns a CoreExpression for a given (function) name
 -- this function is used inside test cases to easily optain individual

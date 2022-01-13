@@ -10,7 +10,7 @@ Note: Tracing statements should not be used in the final version.
 Tracing statements have side-effects (printing) but do not have the 
 "IO" type signature and are thus not pure
 -}
-module OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper where
+module CoreAST.Helpers.TraceHelper where
 
 import GHC.Plugins
 import GHC.Core.TyCo.Rep

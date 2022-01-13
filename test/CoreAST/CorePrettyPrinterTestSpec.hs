@@ -6,13 +6,13 @@ License     : GPL-3
 Each tests loads an expressions defined in "IntegrationTestBindingsForPrettyPrinterTest.hs".
 The "Input" expression is then shown as a string and compared with the expected result.
 -}
-module OriginalCoreAST.CorePrettyPrinterTestSpec where
+module CoreAST.CorePrettyPrinterTestSpec where
 
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins (Expr, Var)
-import OriginalCoreAST.CorePrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
+import CoreAST.PrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
 
 import Test.Hspec
   ( Expectation,
@@ -27,7 +27,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForPrettyPrinterTest.hs") $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "test/PrettyPrinterBindings.hs") $ do
   describe "Pretty Print like Haskell" $ do
     it "pretty-prints multi argument lamda" $ \(bindingFinder, coreBindings) -> do
       let expressionString = toHaskellLikeString False (bindingFinder "multiArgumentLamda")

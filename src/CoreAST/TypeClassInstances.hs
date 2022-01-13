@@ -8,12 +8,12 @@ from the prelude: EQ, Fractional, Num, Ord, Enum, Float, Integral, Real, RealFra
 Other typeclasses are supported as well but their implementation is either integrated in the
 steppable prelude or in the CoreEvaluator module.
 -}
-module OriginalCoreAST.CoreTypeClassInstances () where
+module CoreAST.TypeClassInstances () where
 
 import GHC.Plugins
-import OriginalCoreAST.CoreInformationExtractorFunctions
-import OriginalCoreAST.CoreMakerFunctions
-import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
+import CoreAST.InformationExtractor
+import CoreAST.MakerFunctions
+import CoreAST.Helpers.TraceHelper
 import Utils
 import Data.Maybe
 import Data.Bifunctor

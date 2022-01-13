@@ -8,17 +8,17 @@ or even more until normal form. For each reduction, a description of the reducti
 which can be useful for printing.
 -}
 
-module OriginalCoreAST.CoreStepper (applyStep, reduceToNormalForm, canBeReducedToNormalForm, safeReduceToNormalForm) where
+module CoreAST.Stepper (applyStep, reduceToNormalForm, canBeReducedToNormalForm, safeReduceToNormalForm) where
 
 import Data.Maybe
 import GHC.Plugins
-import OriginalCoreAST.CoreInformationExtractorFunctions
-import OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
-import OriginalCoreAST.CoreStepperHelpers.CoreLookup
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
+import CoreAST.InformationExtractor
+import CoreAST.Helpers.Evaluator
+import CoreAST.Helpers.Lookup
+import CoreAST.Helpers.Transformer
 import Utils
 import Data.List
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.TypeDefs
 
 -- |the maximum amount of reductions to make for the conversion from head normal form to normal form until an error is shown (infinite-loop prevention) 
 

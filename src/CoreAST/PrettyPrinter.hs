@@ -4,17 +4,17 @@ Description : Printing Core expressions
 License     : GPL-3
 
 -}
-module OriginalCoreAST.CorePrettyPrinter (prettyPrint, toHaskellLikeString, prettyPrintToOriginalHaskellCoreString) where
+module CoreAST.PrettyPrinter (prettyPrint, toHaskellLikeString, prettyPrintToOriginalHaskellCoreString) where
 
 import GHC.Plugins
 import Utils
 import Data.List
-import OriginalCoreAST.CoreInformationExtractorFunctions
-import OriginalCoreAST.CoreTypeClassInstances
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.InformationExtractor
+import CoreAST.TypeClassInstances
+import CoreAST.Helpers.Transformer
+import CoreAST.TypeDefs
 import GHC.Core.DataCon
-import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
+import CoreAST.Helpers.TraceHelper
 
 -- |pretty-prints a Core Expression
 prettyPrint :: PrintingStyle -> CoreExpr -> IO ()

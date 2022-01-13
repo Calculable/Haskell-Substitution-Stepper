@@ -13,7 +13,7 @@ to Haskell Core. Next, the "Input" binding is reduced to normal form using the C
 Finally, there is an equality check, if the reduced Input-Expression equals the defined
 "Expected" expression. If this is not the case, the test fails.
 -}
-module IntegrationTestBindings where
+module TestBindings where
 
 import SteppablePrelude
 

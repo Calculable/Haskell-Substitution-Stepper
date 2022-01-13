@@ -42,7 +42,7 @@ library:
   source-dirs: src
 
 executables:
-  substep-exe:
+  substep:
     main:                Main.hs
     source-dirs:         app
     ghc-options:

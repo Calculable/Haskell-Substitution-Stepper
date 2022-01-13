@@ -9,16 +9,16 @@ expression of the binding. This module provides functions to find specific
 bindings.
 -}
 
-module OriginalCoreAST.CoreStepperHelpers.CoreLookup (tryFindExpression, findMatchingPattern, findExpressionForString, tryFindBindingForString) where
+module CoreAST.Helpers.Lookup (tryFindExpression, findMatchingPattern, findExpressionForString, tryFindBindingForString) where
 import GHC.Plugins
 import Data.List
-import OriginalCoreAST.CoreInformationExtractorFunctions
+import CoreAST.InformationExtractor
 import Data.Maybe
 import Utils
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
+import CoreAST.Helpers.Transformer
 
-import OriginalCoreAST.CoreTypeClassInstances
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.TypeClassInstances
+import CoreAST.TypeDefs
 
 overrideFunctionPrefix = "override'"
 

@@ -29,13 +29,13 @@ import Options.Generic
     type (:::),
     type (<?>),
   )
-import OriginalCoreAST.CoreStepperPrinter
+import CoreAST.StepperPrinter
   ( printCoreStepByStepReductionForEveryBinding,
   )
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.TypeDefs
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 

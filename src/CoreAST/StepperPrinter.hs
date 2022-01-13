@@ -8,7 +8,7 @@ a core expression. The intermediate-expressions as well as the substep expressio
 are then printed 
 -}
 
-module OriginalCoreAST.CoreStepperPrinter
+module CoreAST.StepperPrinter
   ( printCoreStepByStepReductionForBinding,
     printCoreStepByStepReductionForEveryBinding,
     convertToBindingsList,
@@ -18,12 +18,12 @@ where
 
 import Data.Maybe
 import GHC.Plugins
-import OriginalCoreAST.CoreInformationExtractorFunctions
-import OriginalCoreAST.CorePrettyPrinter
-import OriginalCoreAST.CoreStepper
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
-import OriginalCoreAST.CoreTypeDefinitions
-import OriginalCoreAST.CoreStepperHelpers.CoreLookup
+import CoreAST.InformationExtractor
+import CoreAST.PrettyPrinter
+import CoreAST.Stepper
+import CoreAST.Helpers.Transformer
+import CoreAST.TypeDefs
+import CoreAST.Helpers.Lookup
 
 type VerbosityLevel = Maybe Integer
 

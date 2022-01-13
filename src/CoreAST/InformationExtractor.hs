@@ -6,13 +6,13 @@ License     : GPL-3
 This module contains helper functions to extract information inside Core expressions and to 
 check Core expressions for properties and conditions.
 -}
-module OriginalCoreAST.CoreInformationExtractorFunctions (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet, removeTypeVars, showOperatorWithoutBrackets, isOperator, varToSimpleString, getClassDictionaryVar) where
+module CoreAST.InformationExtractor (varToString, nameToString, isTypeInformation, canBeReduced, isList, isListType, isEmptyList, isTuple, isVarExpression, isClassDictionary, getFunctionOfNestedApplication, isIntType, isBoolType, isCharType, boolValueFromVar, isBoolVar, removeTypeInformation, getIndividualElementsOfList, getIndividualElementsOfTuple, isPrimitiveTypeConstructorApp, isPrimitiveTypeConstructorName, getLiteralArgument, isTypeWrapperFunctionName, canBeReducedToNormalForm, varRefersToUnsteppableFunction, varsHaveTheSameName, varNameEqualsString, varsHaveTheSameType, isApplicationWithClassDictionary, functionNameMatchesFunctionFromDictionary, convertToMultiArgumentLamda, convertToMultiLet, removeTypeVars, showOperatorWithoutBrackets, isOperator, varToSimpleString, getClassDictionaryVar) where
 
 import Data.List
 import GHC.Plugins
 import Utils
 import GHC.Core.TyCo.Rep
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.TypeDefs
 
 unsteppableFunctionPrefix = "unsteppableFunction'"
 

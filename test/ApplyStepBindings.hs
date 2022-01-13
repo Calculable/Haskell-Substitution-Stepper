@@ -6,7 +6,7 @@ Description : Contains functions and expressions used in integration tests for t
 License     : GPL-3
 
 -}
-module IntegrationTestBindingsForApplyStepTest where
+module ApplyStepBindings where
 
 import SteppablePrelude
     ( Num((+)), Bool(False, True), Int, Enum(succ), id, reverse )

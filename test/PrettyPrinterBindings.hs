@@ -7,7 +7,7 @@ Description : Contains functions and expressions used in integration tests for t
 License     : GPL-3
 
 -}
-module IntegrationTestBindingsForPrettyPrinterTest where
+module PrettyPrinterBindings where
 
 import SteppablePrelude
 

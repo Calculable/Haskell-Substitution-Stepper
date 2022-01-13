@@ -8,16 +8,16 @@ For each expression, the function "apply step" is applied. Then
 it is checked if the resulting "reduced expression" is as expected. Also 
 each reduction reduces a "step description" which is checked too
 -}
-module OriginalCoreAST.ApplyStepTestSpec where
+module CoreAST.ApplyStepTestSpec where
 
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins
-import OriginalCoreAST.CorePrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
-import OriginalCoreAST.CoreStepper (applyStep)
-import OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.PrettyPrinter(toHaskellLikeString, prettyPrintToOriginalHaskellCoreString)
+import CoreAST.Stepper (applyStep)
+import CoreAST.Helpers.TraceHelper
+import CoreAST.TypeDefs
 
 import Data.Maybe
 
@@ -36,7 +36,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindingsForApplyStepTest.hs") $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "test/ApplyStepBindings.hs") $ do
   describe "Apply Step" $ do
     it "apply step to function reference var" $ \(bindingFinder, coreBindings) -> do
       let originalExpression = bindingFinder "functionReference"

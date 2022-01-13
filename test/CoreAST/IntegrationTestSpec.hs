@@ -9,14 +9,14 @@ The "Input" binding is reduced to normal form using the CoreStepper.
 Finally, there is an equality check, if the reduced Input-Expression equals the defined
 "ExpectedOutput" expression. If this is not the case, the test fails.
 -}
-module OriginalCoreAST.IntegrationTestSpec where
+module CoreAST.IntegrationTestSpec where
 
 import DataProvider.DataProvider
   ( getBindingFinderWithCoreBindings,
   )
 import GHC.Plugins (Expr, Var)
-import OriginalCoreAST.CoreStepper (reduceToNormalForm)
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
+import CoreAST.Stepper (reduceToNormalForm)
+import CoreAST.Helpers.Transformer
   ( prepareExpressionArgumentForEvaluation,
   )
 import Test.Hspec
@@ -32,7 +32,7 @@ import Test.Hspec
 type Binding = (Var, Expr Var)
 
 spec :: Spec
-spec = beforeAll (getBindingFinderWithCoreBindings "src/IntegrationTestBindings.hs") $ do
+spec = beforeAll (getBindingFinderWithCoreBindings "test/TestBindings.hs") $ do
   describe "Arithmetic Operators" $ do
     it "can reduce addition" $ \(bindingFinder, coreBindings) -> do
       expectationForExpression "addition" bindingFinder coreBindings

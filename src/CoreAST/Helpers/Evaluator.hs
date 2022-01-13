@@ -9,17 +9,17 @@ Haskell and thus can not be stepped. Instead this module contains a function
 to directly evalute such unsteppable expressions. To built this code
 in a safe manner and not using IO, only defined functions are supported (no native 'eval').
 -}
-module OriginalCoreAST.CoreStepperHelpers.CoreEvaluator (evaluateFunctionWithArguments) where
+module CoreAST.Helpers.Evaluator (evaluateFunctionWithArguments) where
 import GHC.Plugins
-import OriginalCoreAST.CoreInformationExtractorFunctions
+import CoreAST.InformationExtractor
 import Data.Maybe
 import Data.Bifunctor
 import Control.Monad
-import OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
-import OriginalCoreAST.CoreTypeClassInstances
-import OriginalCoreAST.CoreMakerFunctions
-import OriginalCoreAST.CoreStepperHelpers.CoreTransformer
-import OriginalCoreAST.CoreTypeDefinitions
+import CoreAST.Helpers.EvaluatorHelper
+import CoreAST.TypeClassInstances
+import CoreAST.MakerFunctions
+import CoreAST.Helpers.Transformer
+import CoreAST.TypeDefs
 
 import Data.Char
 import Utils

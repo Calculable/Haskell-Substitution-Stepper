@@ -26,22 +26,19 @@ library
   exposed-modules:
       Cli
       Compiler
+      CoreAST.Helpers.Evaluator
+      CoreAST.Helpers.EvaluatorHelper
+      CoreAST.Helpers.Lookup
+      CoreAST.Helpers.TraceHelper
+      CoreAST.Helpers.Transformer
+      CoreAST.InformationExtractor
+      CoreAST.MakerFunctions
+      CoreAST.PrettyPrinter
+      CoreAST.Stepper
+      CoreAST.StepperPrinter
+      CoreAST.TypeClassInstances
+      CoreAST.TypeDefs
       DynFlags
-      IntegrationTestBindings
-      IntegrationTestBindingsForApplyStepTest
-      IntegrationTestBindingsForPrettyPrinterTest
-      OriginalCoreAST.CoreInformationExtractorFunctions
-      OriginalCoreAST.CoreMakerFunctions
-      OriginalCoreAST.CorePrettyPrinter
-      OriginalCoreAST.CoreStepper
-      OriginalCoreAST.CoreStepperHelpers.CoreEvaluator
-      OriginalCoreAST.CoreStepperHelpers.CoreEvaluatorHelper
-      OriginalCoreAST.CoreStepperHelpers.CoreLookup
-      OriginalCoreAST.CoreStepperHelpers.CoreTracerHelper
-      OriginalCoreAST.CoreStepperHelpers.CoreTransformer
-      OriginalCoreAST.CoreStepperPrinter
-      OriginalCoreAST.CoreTypeClassInstances
-      OriginalCoreAST.CoreTypeDefinitions
       SteppablePrelude
       TraverseAST
       Utils
@@ -69,7 +66,7 @@ library
     , text
   default-language: Haskell2010
 
-executable substep-exe
+executable substep
   main-is: Main.hs
   other-modules:
       Paths_substep
@@ -101,10 +98,13 @@ test-suite substep-test
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      ApplyStepBindings
+      CoreAST.ApplyStepTestSpec
+      CoreAST.CorePrettyPrinterTestSpec
+      CoreAST.IntegrationTestSpec
       DataProvider.DataProvider
-      OriginalCoreAST.ApplyStepTestSpec
-      OriginalCoreAST.CorePrettyPrinterTestSpec
-      OriginalCoreAST.IntegrationTestSpec
+      PrettyPrinterBindings
+      TestBindings
       Paths_substep
   hs-source-dirs:
       test
