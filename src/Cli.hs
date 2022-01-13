@@ -17,6 +17,7 @@ import CoreAST.StepperPrinter
   ( printCoreStepByStepReductionForEveryBinding,
   )
 import CoreAST.TypeDefinitions ()
+import Data.Maybe (fromMaybe)
 import Options.Generic
   ( Generic,
     Modifiers (shortNameModifier),
@@ -39,7 +40,9 @@ type FilePath = P.FilePath <?> "The Haskell source file used as input to substep
 
 type FunctionIdentifier = Maybe String <?> "Top level function to step through"
 
-type VerbosityLevel = Maybe Integer <?> "Verbosity level between 1 and 3"
+type VerbosityLevel = Maybe Integer <?> "Verbosity level between 1 and 4"
+
+type ShowComments = Maybe Bool <?> "Show text comments describing each reduction step"
 
 subStepDescription :: Text
 subStepDescription = "The Haskell Substitution Stepper"
@@ -48,7 +51,8 @@ data SubStep w
   = Step
       { path :: w ::: FilePath,
         function :: w ::: FunctionIdentifier,
-        verbose :: w ::: VerbosityLevel
+        verbose :: w ::: VerbosityLevel,
+        comments :: w ::: ShowComments
       }
   | Print
       { path :: w ::: FilePath,
@@ -78,7 +82,7 @@ runCli = unwrapRecord subStepDescription
 
 -- | dispatches the action chosen by the user
 dispatch :: Invocation -> IO ()
-dispatch (Step p f v) = stepF p f v
+dispatch (Step p f v c) = stepF p f v c
 dispatch (Print p f) = printF p f
 dispatch (List p) = listF p
 dispatch (Dump p) = dumpF p
@@ -104,9 +108,9 @@ printF fp fn = do
 
 -- | prints the step by step reduction until head normal form and normal form
 --  for every binding provided by the user in the Haskell input file
-stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> IO ()
-stepF fp fn v = do
+stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> Maybe Bool -> IO ()
+stepF fp fn v c = do
   cr <- compileToCore fp
   spr <- compileToCore "src/SteppablePrelude.hs"
-  let shouldShowComments = True
+  let shouldShowComments = fromMaybe False c
   printCoreStepByStepReductionForEveryBinding fn v shouldShowComments (getCoreProgram cr) (getCoreProgram spr)
