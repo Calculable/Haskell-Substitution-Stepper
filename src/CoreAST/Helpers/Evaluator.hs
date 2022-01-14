@@ -60,7 +60,7 @@ import Utils ()
 evaluateFunctionWithArguments :: FunctionReference -> [Argument] -> Reducer -> Maybe CoreExpr
 evaluateFunctionWithArguments functionOrOperatorName arguments reducer = do
   if any isNothing reducedMaybeArguments
-    then trace "cannot reduce argument of unsteppable function" Nothing
+    then {-trace "cannot reduce argument of unsteppable function"-} Nothing
     else do
       if isJust evaluationWithTypes
         then evaluationWithTypes
@@ -146,7 +146,7 @@ evaluateFunctionWithArguments functionOrOperatorName arguments reducer = do
     evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primIntToChar" [Lit (LitNumber _ input)] _ = Just (charToCoreExpression (toEnum (fromIntegral input)))
     evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Lit (LitChar input)] _ = Just (integerToCoreExpression (toInteger (fromEnum input)))
     evaluateUnsteppableFunctionWithArguments functionName [x] _ | isTypeWrapperFunctionName functionName = Just x
-    evaluateUnsteppableFunctionWithArguments name args _ = trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args)) Nothing --function not supported
+    evaluateUnsteppableFunctionWithArguments name args _ = {-trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args))-} Nothing --function not supported
     evaluateUnsteppableFunctionWithArgumentsAndTypes :: FunctionName -> [Argument] -> Reducer -> Maybe CoreExpr
     evaluateUnsteppableFunctionWithArgumentsAndTypes "return" [Type monadType, _, Type ty, value] _ = Just (returnForList monadType ty value)
     evaluateUnsteppableFunctionWithArgumentsAndTypes "fail" [Type monadType, _, Type ty, _] _ = Just (failForList monadType ty)

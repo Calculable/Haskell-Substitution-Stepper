@@ -142,6 +142,6 @@ findMatchingPattern expression patterns = do
     findMatchingPatternIgnoreDefault expression (x : xs) = findMatchingPatternIgnoreDefault expression xs
 
     findMatchingDefaultPattern :: CoreExpr -> [Alt Var] -> Maybe CoreExpr
-    findMatchingDefaultPattern expression [] = trace "no matching pattern found" Nothing
+    findMatchingDefaultPattern expression [] = {-trace "no matching pattern found"-} Nothing
     findMatchingDefaultPattern _ ((DEFAULT, _, expression) : _) = Just expression
     findMatchingDefaultPattern expression (x : xs) = findMatchingDefaultPattern expression xs

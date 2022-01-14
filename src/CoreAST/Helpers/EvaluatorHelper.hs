@@ -55,7 +55,7 @@ monadOperatorForList newType (App constructor argument) function reducer
   | isList (App constructor argument) = do
     fmappedList <- fmapForList newType function (App constructor argument)
     concatForList newType fmappedList reducer
-monadOperatorForList _ _ _ _ = trace ">>= not supported for this type" Nothing
+monadOperatorForList _ _ _ _ = {-trace ">>= not supported for this type"-} Nothing
 
 -- | applies the >> operator to a Core list
 monadOperator2ForList :: Type -> CoreExpr -> CoreExpr -> Reducer -> Maybe CoreExpr
@@ -72,7 +72,7 @@ monadOperator2ForList newType (App constructor argument) function reducer
         let mappedListItems = replicate (length listItemsWithoutTypes) function
         Just (expressionListToCoreListWithType newType mappedListItems)
       | otherwise = Nothing
-monadOperator2ForList _ _ _ _ = trace ">> not supported for this type" Nothing
+monadOperator2ForList _ _ _ _ = {-trace ">> not supported for this type"-} Nothing
 
 -- | wraps an expression inside a Core list
 returnForList :: Type -> Type -> CoreExpr -> CoreExpr
@@ -89,7 +89,7 @@ concatForList newType nestedListExpression reducer = do
   let reducedMaybeListArguments = map reducer listElements
 
   if any isNothing reducedMaybeListArguments
-    then trace "cannot reduce list argument" Nothing
+    then {-trace "cannot reduce list argument"-} Nothing
     else do
       let reducedListArguments = map fromJust reducedMaybeListArguments
       let concatenatedElements = concatMap getIndividualElementsOfList reducedListArguments

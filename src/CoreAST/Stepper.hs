@@ -81,10 +81,10 @@ applyStep bindings (Let (Rec [(b, expr)]) expression) = do
 applyStep bindings (Cast expression cohersion) = do
   Just (RemoveCohersionStep, expression, bindings)
 applyStep bindings (Tick _ _) = do
-  trace "no applicable step found: tick is not supported" Nothing
+  {-trace "no applicable step found: tick is not supported"-} Nothing
 applyStep bindings (Coercion _) = do
-  trace "no applicable step found: coercion is not supported" Nothing
-applyStep _ _ = trace "no applicable step found" Nothing
+  {-trace "no applicable step found: coercion is not supported"-} Nothing
+applyStep _ _ = {-trace "no applicable step found"-} Nothing
 
 -- | takes an expression containing a (nested) application and applies one single reduction rule.
 --  it is checked if the application makes use of a function which is defined in a class dictionary or not
@@ -201,7 +201,7 @@ safeReduceToNormalForm = reduceToNormalFormWithMaximumAmountOfReductions maximum
 --  the caller can define how many reduction-steps should be performed until redution is
 --  aborted (prevention of infinite loops)
 reduceToNormalFormWithMaximumAmountOfReductions :: Integer -> [Binding] -> CoreExpr -> Maybe CoreExpr
-reduceToNormalFormWithMaximumAmountOfReductions 0 _ _ = trace "infinite loop" Nothing
+reduceToNormalFormWithMaximumAmountOfReductions 0 _ _ = {-trace "infinite loop"-} Nothing
 reduceToNormalFormWithMaximumAmountOfReductions maximumAmountOfReductionsLeft bindings expression = do
   expressionInHeadNormalForm <- reduceToHeadNormalForm bindings expression
   if canBeReducedToNormalForm expressionInHeadNormalForm
@@ -220,7 +220,7 @@ reduceToHeadNormalForm bindings expression
     let reduction = applyStep bindings expression
     case reduction of
       Just (reductionStepDescription, reducedExpression, newBindings) -> reduceToHeadNormalForm newBindings reducedExpression
-      Nothing -> trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression) Nothing
+      Nothing -> {-trace ("Debug - Here is the expression for which no reduction rule is implemented: " ++ showOutputable expression)-} Nothing
   | otherwise = Just expression
 
 -- | takes an expression which representes a nested application and reduces it until head normal form without showing substeps

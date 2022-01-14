@@ -111,7 +111,7 @@ expressionListToCoreList (Lit (LitNumber x y) : xs) = Just $ expressionListToCor
 expressionListToCoreList (Lit (LitString x) : xs) = Just $ expressionListToCoreListWithType stringTy (Lit (LitString x) : xs)
 expressionListToCoreList (Lit (LitFloat x) : xs) = Just $ expressionListToCoreListWithType floatTy (Lit (LitFloat x) : xs)
 expressionListToCoreList (Lit (LitDouble x) : xs) = Just $ expressionListToCoreListWithType doubleTy (Lit (LitDouble x) : xs)
-expressionListToCoreList _ = trace "this type cannot be converted to list" Nothing
+expressionListToCoreList _ = {-trace "this type cannot be converted to list"-} Nothing
 
 -- | creates a Core Expression that represents arguments applied to a data constructor
 customConstructorapplicationToCoreExpression :: DataCon -> [CoreExpr] -> CoreExpr

@@ -68,7 +68,7 @@ instance Eq (Expr b) where
   (/=) x y = not ((==) x y)
   (==) (Lit x) (Lit y) = weakEquals x y
   (==) (Var x) (Var y) = (==) (varToString x) (varToString y)
-  (==) (App x1 y1) (App x2 y2) = trace "operator for collection called" operatorForCollection (App x1 y1) (App x2 y2) (==)
+  (==) (App x1 y1) (App x2 y2) = operatorForCollection (App x1 y1) (App x2 y2) (==)
   (==) x y = error ("== and /= not supported by this type: " ++ typeOfExpression y)
 
 instance Ord (Expr b) where
