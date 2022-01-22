@@ -35,6 +35,7 @@ import Options.Generic
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
+import System.FilePath (takeDirectory, combine)
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
@@ -111,6 +112,9 @@ printF fp fn = do
 stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> Maybe Bool -> IO ()
 stepF fp fn v c = do
   cr <- compileToCore fp
-  spr <- compileToCore "src/SteppablePrelude.hs"
+  print fp
+  let preludePath = (combine (takeDirectory fp) "SteppablePrelude.hs")
+  print preludePath
+  spr <- compileToCore preludePath
   let shouldShowComments = fromMaybe False c
   printCoreStepByStepReductionForEveryBinding fn v shouldShowComments (getCoreProgram cr) (getCoreProgram spr)
