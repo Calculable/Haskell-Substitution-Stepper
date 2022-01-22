@@ -35,7 +35,8 @@ import Options.Generic
 import Utils (listTopLevelFunctions, printCore)
 import Prelude hiding (FilePath)
 import qualified Prelude as P (FilePath)
-import System.FilePath (takeDirectory, combine)
+import System.FilePath (takeDirectory, combine, takeFileName)
+import System.Directory ( setCurrentDirectory, doesFileExist )
 
 type FilePath = P.FilePath <?> "The Haskell source file used as input to substep"
 
@@ -92,29 +93,51 @@ dispatch (Dump p) = dumpF p
 --  (see folder /dump)
 dumpF :: [Char] -> IO ()
 dumpF fp = do
-  cr <- compileToCore fp
-  writeDump cr
+  fileExists <- (doesFileExist fp)
+  if (not fileExists)
+    then putStrLn $ "File \"" ++ fp ++ "\" not found"
+    else do
+      setCurrentDirectory (takeDirectory fp)
+      let filePath = takeFileName fp
+      cr <- compileToCore filePath
+      writeDump cr
 
 -- | lists all the bindings from the Haskell input file provided by the user
 listF :: [Char] -> IO ()
 listF fp = do
-  cr <- compileToCore fp
-  listTopLevelFunctions $ getCoreProgram cr
+  fileExists <- (doesFileExist fp)
+  if (not fileExists)
+    then putStrLn $ "File \"" ++ fp ++ "\" not found"
+    else do
+      setCurrentDirectory (takeDirectory fp)
+      let filePath = takeFileName fp
+      cr <- compileToCore filePath
+      listTopLevelFunctions $ getCoreProgram cr
 
 -- | prints the Core representation the Haskell input file provided by the user
 printF :: [Char] -> Maybe [Char] -> IO ()
 printF fp fn = do
-  cr <- compileToCore fp
-  printCore $ getCoreProgram cr
+  fileExists <- (doesFileExist fp)
+  if (not fileExists)
+    then putStrLn $ "File \"" ++ fp ++ "\" not found"
+    else do
+      setCurrentDirectory (takeDirectory fp)
+      let filePath = takeFileName fp
+      cr <- compileToCore filePath
+      printCore $ getCoreProgram cr
 
 -- | prints the step by step reduction until head normal form and normal form
 --  for every binding provided by the user in the Haskell input file
 stepF :: [Char] -> Maybe [Char] -> Maybe Integer -> Maybe Bool -> IO ()
 stepF fp fn v c = do
-  cr <- compileToCore fp
-  print fp
-  let preludePath = (combine (takeDirectory fp) "SteppablePrelude.hs")
-  print preludePath
-  spr <- compileToCore preludePath
-  let shouldShowComments = fromMaybe False c
-  printCoreStepByStepReductionForEveryBinding fn v shouldShowComments (getCoreProgram cr) (getCoreProgram spr)
+  fileExists <- (doesFileExist fp)
+  if (not fileExists)
+    then putStrLn $ "File \"" ++ fp ++ "\" not found"
+    else do
+      setCurrentDirectory (takeDirectory fp)
+      let filePath = takeFileName fp
+          preludePath = "SteppablePrelude.hs"
+      cr <- compileToCore filePath
+      spr <- compileToCore preludePath
+      let shouldShowComments = fromMaybe False c
+      printCoreStepByStepReductionForEveryBinding fn v shouldShowComments (getCoreProgram cr) (getCoreProgram spr)
