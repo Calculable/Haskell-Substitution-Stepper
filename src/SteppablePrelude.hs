@@ -77,6 +77,7 @@ import Prelude
     min,
     mod,
     negate,
+    otherwise,
     properFraction,
     quot,
     quotRem,
@@ -324,9 +325,6 @@ False || x = x
 not :: Bool -> Bool
 not True = False
 not False = True
-
-otherwise :: Bool
-otherwise = True
 
 {-Functions: Misc-}
 until :: (a -> Bool) -> (a -> a) -> a -> a

@@ -76,6 +76,19 @@ sumList :: [Integer] -> Integer
 sumList [] = 0
 sumList (x : xs) = x + sumList xs
 
+
+{-lower (test suggested fix from Jasper) --}
+
+lower :: Int -> Int -> Int
+lower x y
+      | x > y     = y
+      | otherwise = x
+
+otherwiseInput = lower 4 3
+
+otherwiseExpectedOutput = 3
+
+
 {-Arithmetic-}
 additionInput = 1 + 1
 

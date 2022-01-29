@@ -145,6 +145,7 @@ evaluateFunctionWithArguments functionOrOperatorName arguments reducer = do
     evaluateUnsteppableFunctionWithArguments "isSpace" [Lit (LitChar input)] _ = Just (boolToCoreExpression (isSpace input))
     evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primIntToChar" [Lit (LitNumber _ input)] _ = Just (charToCoreExpression (toEnum (fromIntegral input)))
     evaluateUnsteppableFunctionWithArguments "unsteppableFunction'primCharToInt" [Lit (LitChar input)] _ = Just (integerToCoreExpression (toInteger (fromEnum input)))
+    evaluateUnsteppableFunctionWithArguments "otherwise" [] _ = Just (boolToCoreExpression True)
     evaluateUnsteppableFunctionWithArguments functionName [x] _ | isTypeWrapperFunctionName functionName = Just x
     evaluateUnsteppableFunctionWithArguments name args _ = {-trace (((("function not supported: '" ++ name) ++ "' ") ++ "with argument-lenght: ") ++ show (length args))-} Nothing --function not supported
     evaluateUnsteppableFunctionWithArgumentsAndTypes :: FunctionName -> [Argument] -> Reducer -> Maybe CoreExpr

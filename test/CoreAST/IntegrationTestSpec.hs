@@ -293,7 +293,9 @@ spec = beforeAll (getBindingFinderWithCoreBindings "test/TestBindings.hs") $ do
   describe "Imports" $ do
     it "other modules can be imported" $ \(bindingFinder, coreBindings) -> do
       pendingWith "import is not yet supported"
-
+  describe "Otherwise" $ do
+    it "otherwise works" $ \(bindingFinder, coreBindings) -> do
+      expectationForExpression "otherwise" bindingFinder coreBindings
 expectationForExpression :: String -> (String -> Expr Var) -> [Binding] -> Expectation
 expectationForExpression expressionBindingName bindingFinder coreBindings = do
   let input = bindingFinder (expressionBindingName ++ "Input")
